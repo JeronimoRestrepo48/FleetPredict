@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Delete Vehicle - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Delete Vehicle</h2>
+                <p>Are you sure you want to delete <strong>{{ vehicle.display_name }}</strong> ({{ vehicle.license_plate }})?</p>
+                <p class="text-muted">This will mark the vehicle as retired. Historical data will be preserved.</p>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

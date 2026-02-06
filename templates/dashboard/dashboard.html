@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - FleetPredict Pro{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Total Vehicles</h6>
+                <h3 class="card-title">{{ total_vehicles }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Fleet Availability</h6>
+                <h3 class="card-title">{{ fleet_availability }}%</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Tasks Requiring Attention</h6>
+                <h3 class="card-title">{{ tasks_requiring_attention }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">Monthly Costs</h6>
+                <h3 class="card-title">${{ monthly_total|floatformat:2 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Vehicles by Status</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">Active <span class="badge bg-success">{{ vehicle_status_dict.active }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Inactive <span class="badge bg-secondary">{{ vehicle_status_dict.inactive }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Under Maintenance <span class="badge bg-warning">{{ vehicle_status_dict.under_maintenance }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Retired <span class="badge bg-dark">{{ vehicle_status_dict.retired }}</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Maintenance Tasks by Status</div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between">Scheduled <span class="badge bg-primary">{{ task_status_dict.scheduled }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">In Progress <span class="badge bg-info">{{ task_status_dict.in_progress }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Completed <span class="badge bg-success">{{ task_status_dict.completed }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between">Overdue <span class="badge bg-danger">{{ task_status_dict.overdue }}</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-2">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Upcoming Maintenance (Next 7 Days)</div>
+            <div class="card-body">
+                {% if upcoming_maintenance %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Task</th>
+                                <th>Date</th>
+                                <th>Priority</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in upcoming_maintenance %}
+                            <tr>
+                                <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}">{{ task.vehicle.display_name }}</a></td>
+                                <td><a href="{% url 'maintenance:task_detail' task.id %}">{{ task.title }}</a></td>
+                                <td>{{ task.scheduled_date }}</td>
+                                <td><span class="badge bg-{% if task.priority == 'critical' %}danger{% elif task.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ task.priority }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No upcoming maintenance.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Recent Completed Tasks</div>
+            <div class="card-body">
+                {% if recent_completed %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Task</th>
+                                <th>Completed</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in recent_completed %}
+                            <tr>
+                                <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}">{{ task.vehicle.display_name }}</a></td>
+                                <td><a href="{% url 'maintenance:task_detail' task.id %}">{{ task.title }}</a></td>
+                                <td>{{ task.completion_date|default:"-" }}</td>
+                                <td>{% if task.actual_cost %}${{ task.actual_cost|floatformat:2 }}{% else %}-{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent completed tasks.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

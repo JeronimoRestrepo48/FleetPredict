@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ user_obj.get_full_name }} - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>User: {{ user_obj.get_full_name }}</h2>
+    <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">Back to list</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ user_obj.email }}</dd>
+            <dt class="col-sm-3">First name</dt>
+            <dd class="col-sm-9">{{ user_obj.first_name }}</dd>
+            <dt class="col-sm-3">Last name</dt>
+            <dd class="col-sm-9">{{ user_obj.last_name }}</dd>
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9">{{ user_obj.get_role_display }}</dd>
+            <dt class="col-sm-3">Active</dt>
+            <dd class="col-sm-9">{% if user_obj.is_active %}Yes{% else %}No{% endif %}</dd>
+            <dt class="col-sm-3">Date joined</dt>
+            <dd class="col-sm-9">{{ user_obj.date_joined }}</dd>
+        </dl>
+    </div>
+</div>
+{% endblock %}

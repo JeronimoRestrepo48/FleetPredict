@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Vehicles - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Vehicles</h2>
+    {% if can_manage %}
+    <a href="{% url 'vehicles:vehicle_create' %}" class="btn btn-primary">Add Vehicle</a>
+    {% endif %}
+</div>
+<div class="card">
+    <div class="card-body">
+        <form method="get" class="row g-3 mb-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search (plate, VIN, make, model)"
+                       value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <label for="id_status_filter" class="form-label visually-hidden">Filter by status</label>
+                <select name="status" id="id_status_filter" class="form-select" aria-label="Filter by status">
+                    <option value="">All statuses</option>
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>License Plate</th>
+                        <th>Vehicle</th>
+                        <th>Status</th>
+                        <th>Mileage</th>
+                        <th>Driver</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vehicles %}
+                    <tr>
+                        <td>{{ v.license_plate }}</td>
+                        <td>{{ v.display_name }}</td>
+                        <td><span class="badge bg-{% if v.status == 'active' %}success{% elif v.status == 'under_maintenance' %}warning{% elif v.status == 'retired' %}secondary{% else %}secondary{% endif %}">{{ v.get_status_display }}</span></td>
+                        <td>{{ v.current_mileage|default:"-" }} km</td>
+                        <td>{% if v.assigned_driver %}{{ v.assigned_driver.get_full_name }}{% else %}-{% endif %}</td>
+                        <td>
+                            <a href="{% url 'vehicles:vehicle_detail' v.pk %}">View</a>
+                            {% if can_manage %}
+                            | <a href="{% url 'vehicles:vehicle_update' v.pk %}">Edit</a>
+                            | <a href="{% url 'vehicles:vehicle_history' v.pk %}">History</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">No vehicles found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if is_paginated %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

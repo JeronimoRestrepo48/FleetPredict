@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Maintenance Task - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{% if object %}Edit Maintenance Task{% else %}Add Maintenance Task{% endif %}</h2>
+    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_vehicle" class="form-label">Vehicle</label>
+                    {{ form.vehicle }}
+                    {% if form.vehicle.errors %}<div class="invalid-feedback d-block">{{ form.vehicle.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_assignee" class="form-label">Assignee</label>
+                    {{ form.assignee }}
+                    {% if form.assignee.errors %}<div class="invalid-feedback d-block">{{ form.assignee.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="id_title" class="form-label">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="invalid-feedback d-block">{{ form.title.errors }}</div>{% endif %}
+            </div>
+            <div class="mb-3">
+                <label for="id_description" class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<div class="invalid-feedback d-block">{{ form.description.errors }}</div>{% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_maintenance_type" class="form-label">Type</label>
+                    {{ form.maintenance_type }}
+                    {% if form.maintenance_type.errors %}<div class="invalid-feedback d-block">{{ form.maintenance_type.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_scheduled_date" class="form-label">Scheduled Date</label>
+                    {{ form.scheduled_date }}
+                    {% if form.scheduled_date.errors %}<div class="invalid-feedback d-block">{{ form.scheduled_date.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_estimated_duration" class="form-label">Duration (min)</label>
+                    {{ form.estimated_duration }}
+                    {% if form.estimated_duration.errors %}<div class="invalid-feedback d-block">{{ form.estimated_duration.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_status" class="form-label">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="invalid-feedback d-block">{{ form.status.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_priority" class="form-label">Priority</label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}<div class="invalid-feedback d-block">{{ form.priority.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_estimated_cost" class="form-label">Estimated Cost</label>
+                    {{ form.estimated_cost }}
+                    {% if form.estimated_cost.errors %}<div class="invalid-feedback d-block">{{ form.estimated_cost.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

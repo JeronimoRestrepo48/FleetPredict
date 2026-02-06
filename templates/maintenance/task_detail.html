@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ task.title }} - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ task.title }}</h2>
+    <div>
+        <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+        {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
+        <a href="{% url 'maintenance:task_update' task.pk %}" class="btn btn-primary ms-2">Edit</a>
+        <a href="{% url 'maintenance:task_complete' task.pk %}" class="btn btn-success ms-2">Complete</a>
+        <a href="{% url 'maintenance:task_delete' task.pk %}" class="btn btn-outline-danger ms-2">Delete</a>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">Task Details</div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Vehicle</dt>
+                    <dd class="col-sm-9"><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}">{{ task.vehicle.display_name }}</a></dd>
+                    <dt class="col-sm-3">Type</dt>
+                    <dd class="col-sm-9">{{ task.get_maintenance_type_display }}</dd>
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9"><span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'overdue' %}danger{% elif task.status == 'in_progress' %}info{% else %}secondary{% endif %}">{{ task.get_status_display }}</span></dd>
+                    <dt class="col-sm-3">Priority</dt>
+                    <dd class="col-sm-9"><span class="badge bg-{% if task.priority == 'critical' %}danger{% elif task.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ task.get_priority_display }}</span></dd>
+                    <dt class="col-sm-3">Scheduled Date</dt>
+                    <dd class="col-sm-9">{{ task.scheduled_date }}</dd>
+                    <dt class="col-sm-3">Assignee</dt>
+                    <dd class="col-sm-9">{% if task.assignee %}{{ task.assignee.get_full_name }}{% else %}-{% endif %}</dd>
+                    {% if task.completion_date %}
+                    <dt class="col-sm-3">Completed</dt>
+                    <dd class="col-sm-9">{{ task.completion_date }}</dd>
+                    <dt class="col-sm-3">Actual Cost</dt>
+                    <dd class="col-sm-9">{% if task.actual_cost %}${{ task.actual_cost|floatformat:2 }}{% else %}-{% endif %}</dd>
+                    {% if task.completion_notes %}
+                    <dt class="col-sm-3">Completion Notes</dt>
+                    <dd class="col-sm-9">{{ task.completion_notes }}</dd>
+                    {% endif %}
+                    {% endif %}
+                    {% if task.description %}
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">{{ task.description }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header">Documents</div>
+            <div class="card-body">
+                {% if can_manage and task.status != 'completed' %}
+                <form method="post" action="{% url 'maintenance:task_documents' task.pk %}" enctype="multipart/form-data" class="mb-3">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <label for="id_document_file" class="form-label">Document</label>
+                        <input type="file" name="file" id="id_document_file" class="form-control" required
+                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" aria-label="Choose document file to upload">
+                    </div>
+                    <div class="mb-2">
+                        <label for="id_document_description" class="form-label">Description</label>
+                        <input type="text" name="description" id="id_document_description" class="form-control"
+                               placeholder="Description (optional)" aria-label="Optional description for the document">
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+                </form>
+                {% endif %}
+                {% if documents %}
+                <ul class="list-group list-group-flush">
+                    {% for doc in documents %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <a href="{{ doc.file.url }}" target="_blank">{{ doc.filename }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">No documents attached.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

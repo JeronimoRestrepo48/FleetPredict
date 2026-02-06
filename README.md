@@ -6,25 +6,17 @@ Predictive Fleet Maintenance System for transportation fleets.
 
 ```
 dev/
-├── backend/                    # Django REST Framework API
-│   ├── fleetpredict/          # Main Django project
-│   ├── apps/
-│   │   ├── users/             # Authentication & Profiles (FR1, FR21)
-│   │   ├── vehicles/          # Vehicle Registry (FR2)
-│   │   ├── maintenance/       # Maintenance Management (FR4, FR5)
-│   │   └── dashboard/         # Dashboard API (FR3)
-│   ├── requirements.txt
-│   └── manage.py
-├── frontend/                   # React + Vite Application
-│   ├── src/
-│   │   ├── components/        # Reusable components
-│   │   ├── pages/             # Page components
-│   │   ├── services/          # API services
-│   │   ├── context/           # React context
-│   │   └── App.jsx
-│   ├── package.json
-│   └── vite.config.js
-└── README.md
+├── fleetpredict/          # Django project
+├── apps/
+│   ├── users/             # Authentication & Profiles (FR1, FR21)
+│   ├── vehicles/          # Vehicle Registry (FR2)
+│   ├── maintenance/       # Maintenance Management (FR4, FR5)
+│   └── dashboard/         # Dashboard (FR3)
+├── templates/             # HTML templates (base, registration, app-specific)
+├── static/                # CSS, JS, Bootstrap assets
+├── media/                 # User uploads
+├── requirements.txt
+└── manage.py
 ```
 
 ## Sprint 1 Requirements Implemented
@@ -38,7 +30,7 @@ dev/
 | FR5 | Maintenance history per vehicle | ✅ |
 | FR21 | User profile management | ✅ |
 
-## Backend Setup
+## Setup
 
 ### Prerequisites
 - Python 3.10+
@@ -47,8 +39,8 @@ dev/
 ### Installation
 
 ```bash
-# Navigate to backend folder
-cd dev/backend
+# Navigate to dev folder
+cd dev
 
 # Create virtual environment
 python -m venv venv
@@ -96,9 +88,6 @@ DB_PORT=5432
 
 # Or use SQLite
 USE_SQLITE=True
-
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 ### Run Migrations
@@ -120,87 +109,49 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Backend will be available at: http://localhost:8000
+Application will be available at: http://localhost:8000
 
-## Frontend Setup
-
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-
-### Installation
-
-```bash
-# Navigate to frontend folder
-cd dev/frontend
-
-# Install dependencies
-npm install
-```
-
-### Environment Variables
-
-Create a `.env` file:
-
-```bash
-VITE_API_URL=http://localhost:8000/api
-```
-
-### Run Development Server
-
-```bash
-npm run dev
-```
-
-Frontend will be available at: http://localhost:5173
-
-## API Endpoints
+## Routes (MVT)
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register/` | User registration |
-| POST | `/api/auth/login/` | User login (JWT) |
-| POST | `/api/auth/logout/` | User logout |
-| POST | `/api/auth/token/refresh/` | Refresh JWT token |
-
-### Users
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users/profile/` | Get current user profile |
-| PUT | `/api/users/profile/` | Update profile |
-| POST | `/api/users/profile/change-password/` | Change password |
-| GET | `/api/users/` | List users (admin only) |
-| GET | `/api/users/{id}/` | Get user details (admin only) |
-
-### Vehicles
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/vehicles/` | List vehicles |
-| POST | `/api/vehicles/` | Create vehicle |
-| GET | `/api/vehicles/{id}/` | Get vehicle details |
-| PUT | `/api/vehicles/{id}/` | Update vehicle |
-| DELETE | `/api/vehicles/{id}/` | Delete vehicle |
-| GET | `/api/vehicles/{id}/history/` | Get maintenance history |
-
-### Maintenance
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/maintenance/` | List maintenance tasks |
-| POST | `/api/maintenance/` | Create task |
-| GET | `/api/maintenance/{id}/` | Get task details |
-| PUT | `/api/maintenance/{id}/` | Update task |
-| DELETE | `/api/maintenance/{id}/` | Delete task |
-| POST | `/api/maintenance/{id}/complete/` | Mark as complete |
-| POST | `/api/maintenance/{id}/status/` | Change status |
-| POST | `/api/maintenance/{id}/documents/` | Upload document |
-| POST | `/api/maintenance/{id}/comments/` | Add comment |
+| Path | Description |
+|------|-------------|
+| `/login/` | Login |
+| `/logout/` | Logout |
+| `/register/` | User registration |
+| `/profile/` | Profile edit |
+| `/profile/password/` | Change password |
 
 ### Dashboard
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/dashboard/summary/` | Get dashboard data |
-| GET | `/api/dashboard/stats/` | Get quick stats |
+| Path | Description |
+|------|-------------|
+| `/` | Dashboard (fleet status, metrics) |
+
+### Vehicles
+| Path | Description |
+|------|-------------|
+| `/vehicles/` | List vehicles |
+| `/vehicles/create/` | Create vehicle |
+| `/vehicles/<id>/` | Vehicle detail |
+| `/vehicles/<id>/edit/` | Edit vehicle |
+| `/vehicles/<id>/delete/` | Delete vehicle (soft) |
+| `/vehicles/<id>/history/` | Maintenance history |
+
+### Maintenance
+| Path | Description |
+|------|-------------|
+| `/maintenance/` | List tasks |
+| `/maintenance/create/` | Create task |
+| `/maintenance/<id>/` | Task detail |
+| `/maintenance/<id>/edit/` | Edit task |
+| `/maintenance/<id>/complete/` | Mark complete |
+| `/maintenance/<id>/documents/` | Upload document |
+
+### Users (Admin only)
+| Path | Description |
+|------|-------------|
+| `/users/` | List users |
+| `/users/<id>/` | User detail |
 
 ## User Roles
 
@@ -215,16 +166,13 @@ Frontend will be available at: http://localhost:5173
 
 ### Backend
 - Django 5.0+
-- Django REST Framework
-- djangorestframework-simplejwt (JWT Auth)
 - PostgreSQL / SQLite
+- Bootstrap 5 (CDN)
 
-### Frontend
-- React 18
-- Vite
-- TailwindCSS
-- Axios
-- React Router DOM
+### Architecture
+- Monolithic Django MVT (Models, Views, Templates)
+- Session-based authentication
+- Server-rendered HTML templates
 
 ## Development Notes
 

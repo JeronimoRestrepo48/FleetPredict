@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}Add{% endif %} Vehicle - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{% if object %}Edit Vehicle{% else %}Add Vehicle{% endif %}</h2>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to list</a>
+</div>
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="id_license_plate" class="form-label">License Plate</label>
+                    {{ form.license_plate }}
+                    {% if form.license_plate.errors %}<div class="invalid-feedback d-block">{{ form.license_plate.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="id_vin" class="form-label">VIN</label>
+                    {{ form.vin }}
+                    {% if form.vin.errors %}<div class="invalid-feedback d-block">{{ form.vin.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_make" class="form-label">Make</label>
+                    {{ form.make }}
+                    {% if form.make.errors %}<div class="invalid-feedback d-block">{{ form.make.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_model" class="form-label">Model</label>
+                    {{ form.model }}
+                    {% if form.model.errors %}<div class="invalid-feedback d-block">{{ form.model.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="id_year" class="form-label">Year</label>
+                    {{ form.year }}
+                    {% if form.year.errors %}<div class="invalid-feedback d-block">{{ form.year.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="id_color" class="form-label">Color</label>
+                    {{ form.color }}
+                    {% if form.color.errors %}<div class="invalid-feedback d-block">{{ form.color.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_vehicle_type" class="form-label">Vehicle Type</label>
+                    {{ form.vehicle_type }}
+                    {% if form.vehicle_type.errors %}<div class="invalid-feedback d-block">{{ form.vehicle_type.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_status" class="form-label">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}<div class="invalid-feedback d-block">{{ form.status.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_assigned_driver" class="form-label">Assigned Driver</label>
+                    {{ form.assigned_driver }}
+                    {% if form.assigned_driver.errors %}<div class="invalid-feedback d-block">{{ form.assigned_driver.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="id_current_mileage" class="form-label">Current Mileage (km)</label>
+                    {{ form.current_mileage }}
+                    {% if form.current_mileage.errors %}<div class="invalid-feedback d-block">{{ form.current_mileage.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_fuel_type" class="form-label">Fuel Type</label>
+                    {{ form.fuel_type }}
+                    {% if form.fuel_type.errors %}<div class="invalid-feedback d-block">{{ form.fuel_type.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="id_fuel_capacity" class="form-label">Fuel Capacity (L)</label>
+                    {{ form.fuel_capacity }}
+                    {% if form.fuel_capacity.errors %}<div class="invalid-feedback d-block">{{ form.fuel_capacity.errors }}</div>{% endif %}
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="id_notes" class="form-label">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="invalid-feedback d-block">{{ form.notes.errors }}</div>{% endif %}
+            </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

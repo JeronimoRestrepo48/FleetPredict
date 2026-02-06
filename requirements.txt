@@ -1,0 +1,12 @@
+# Django
+Django>=5.0,<6.0
+
+# Database
+psycopg2-binary>=2.9.9
+
+# Utilities
+python-decouple>=3.8
+Pillow>=10.0.0
+
+# Development
+django-extensions>=3.2.3

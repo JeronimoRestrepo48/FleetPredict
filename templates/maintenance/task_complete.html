@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Complete Task - {{ task.title }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title mb-4">Complete Task: {{ task.title }}</h2>
+                <p>Vehicle: {{ task.vehicle.display_name }}</p>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="id_completion_notes" class="form-label">Completion Notes</label>
+                        {{ form.completion_notes }}
+                        {% if form.completion_notes.errors %}<div class="invalid-feedback d-block">{{ form.completion_notes.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_actual_cost" class="form-label">Actual Cost</label>
+                        {{ form.actual_cost }}
+                        {% if form.actual_cost.errors %}<div class="invalid-feedback d-block">{{ form.actual_cost.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_mileage_at_maintenance" class="form-label">Mileage at Maintenance</label>
+                        {{ form.mileage_at_maintenance }}
+                        {% if form.mileage_at_maintenance.errors %}<div class="invalid-feedback d-block">{{ form.mileage_at_maintenance.errors }}</div>{% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-success">Mark Complete</button>
+                    <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
