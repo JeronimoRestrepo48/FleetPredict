@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Predicción de fallas - FleetPredict Pro{% endblock %}
+{% block meta_description %}Recomendaciones de posibles fallas por vehículo (FR9).{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Predicción de fallas</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+</div>
+<p class="text-muted">Vehículo, tipo, mensaje, confianza y plazo. Acciones disponibles con runbooks.</p>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    {% if alerts %}
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Severidad</th>
+            <th>Mensaje</th>
+            <th>Confianza</th>
+            <th>Plazo</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for alert in alerts %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' alert.vehicle_id %}">{{ alert.vehicle.display_name }}</a></td>
+            <td>{{ alert.get_alert_type_display }}</td>
+            <td><span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ alert.get_severity_display }}</span></td>
+            <td>{{ alert.message|truncatewords:12 }}</td>
+            <td>{% if alert.confidence %}{{ alert.confidence }}{% else %}—{% endif %}</td>
+            <td>{{ alert.timeframe_text|default:"—" }}</td>
+            <td>{{ alert.created_at|date:"M d, H:i" }}</td>
+            <td>
+              {% for runbook in runbooks_list %}
+                {% if not runbook.alert_type or runbook.alert_type == alert.alert_type %}
+                <form method="post" action="{% url 'dashboard:execute_runbook' %}" class="d-inline">
+                  {% csrf_token %}
+                  <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                  <input type="hidden" name="runbook_id" value="{{ runbook.id }}">
+                  <input type="hidden" name="next" value="predictions">
+                  <button type="submit" class="btn btn-sm btn-outline-primary me-1">{{ runbook.name }}</button>
+                </form>
+                {% endif %}
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="p-3">
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Pág. {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="p-4 text-muted text-center">No hay alertas de predicción.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

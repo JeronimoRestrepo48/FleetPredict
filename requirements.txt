@@ -1,8 +1,11 @@
 # Django
 Django>=5.0,<6.0
 
-# Database
-psycopg2-binary>=2.9.9
+# WebSockets / ASGI
+channels>=4.0,<5.0
+channels-redis>=4.2,<5.0
+daphne>=4.1,<5.0
+websockets>=12.0,<15.0
 
 # Utilities
 python-decouple>=3.8

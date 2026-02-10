@@ -17,7 +17,7 @@ from django.views.generic import (
 )
 from django.db.models import Q
 
-from .models import Vehicle, VehicleType
+from .models import Vehicle, VehicleType, VehicleTelemetry
 from .forms import VehicleForm, VehicleTypeForm
 
 
@@ -37,6 +37,12 @@ class VehicleListView(LoginRequiredMixin, ListView):
     template_name = 'vehicles/vehicle_list.html'
     context_object_name = 'vehicles'
     paginate_by = 20
+
+    def get_paginate_by(self, queryset):
+        per = self.request.GET.get('per_page', '20')
+        if per in ('10', '20', '50'):
+            return int(per)
+        return 20
 
     def get_queryset(self):
         user = self.request.user
@@ -78,8 +84,23 @@ class VehicleDetailView(LoginRequiredMixin, DetailView):
         return queryset
 
     def get_context_data(self, **kwargs):
+        from django.utils import timezone
         context = super().get_context_data(**kwargs)
         context['can_manage'] = self.request.user.can_manage_vehicles()
+        last = (
+            VehicleTelemetry.objects.filter(vehicle=self.object)
+            .order_by('-timestamp')
+            .first()
+        )
+        context['last_telemetry'] = last
+        # Initial engine on/off: telemetry in last 90s and (speed>0 or rpm>0)
+        if last and last.timestamp:
+            delta_sec = (timezone.now() - last.timestamp).total_seconds()
+            speed = float(last.speed_kmh or 0)
+            rpm = int(last.rpm or 0)
+            context['vehicle_engine_on_initial'] = delta_sec < 90 and (speed > 0 or rpm > 0)
+        else:
+            context['vehicle_engine_on_initial'] = False
         return context
 
 

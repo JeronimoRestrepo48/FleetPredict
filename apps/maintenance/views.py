@@ -40,6 +40,12 @@ class MaintenanceTaskListView(LoginRequiredMixin, ListView):
     context_object_name = 'tasks'
     paginate_by = 20
 
+    def get_paginate_by(self, queryset):
+        per = self.request.GET.get('per_page', '20')
+        if per in ('10', '20', '50'):
+            return int(per)
+        return 20
+
     def get_queryset(self):
         user = self.request.user
         queryset = MaintenanceTask.objects.select_related('vehicle', 'assignee')
@@ -179,6 +185,10 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
 
 class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixin, View):
     """Upload document to maintenance task (FR5)."""
+
+    def get(self, request, pk):
+        """Redirect GET to task detail (upload is via POST form)."""
+        return redirect('maintenance:task_detail', pk=pk)
 
     def post(self, request, pk):
         task = get_object_or_404(MaintenanceTask, pk=pk)

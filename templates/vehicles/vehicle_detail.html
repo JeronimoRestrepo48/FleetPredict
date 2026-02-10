@@ -1,20 +1,56 @@
 {% extends "base.html" %}
 {% block title %}{{ vehicle.display_name }} - FleetPredict Pro{% endblock %}
+{% block meta_description %}Vehicle details and maintenance history.{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ vehicle.display_name }}</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>{{ vehicle.display_name }}</h2>
-    <div>
-        <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to list</a>
-        {% if can_manage %}
-        <a href="{% url 'vehicles:vehicle_update' vehicle.pk %}" class="btn btn-primary ms-2">Edit</a>
-        <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary ms-2">Maintenance History</a>
-        <a href="{% url 'vehicles:vehicle_delete' vehicle.pk %}" class="btn btn-outline-danger ms-2">Delete</a>
-        {% endif %}
-    </div>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">{{ vehicle.display_name }}</h2>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    {% if can_manage %}
+    <a href="{% url 'vehicles:vehicle_update' vehicle.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">History</a>
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal">Delete</button>
+    {% endif %}
+    {% if user.can_view_reports %}
+    <a href="{% url 'reports:vehicle_pdf' vehicle.pk %}" class="btn btn-outline-success" target="_blank" rel="noopener">Exportar reporte PDF</a>
+    {% endif %}
+  </div>
 </div>
-<div class="row">
-    <div class="col-md-6">
-        <div class="card mb-3">
+{% if can_manage %}
+<div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-labelledby="deleteVehicleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteVehicleModalLabel">Delete vehicle</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ vehicle.display_name }}</strong> ({{ vehicle.license_plate }})?</p>
+        <p class="text-muted small mb-0">This will mark the vehicle as retired. Historical data will be preserved.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'vehicles:vehicle_delete' vehicle.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card card-fp mb-0">
             <div class="card-header">Vehicle Information</div>
             <div class="card-body">
                 <dl class="row mb-0">
@@ -32,6 +68,8 @@
                     <dd class="col-sm-8">{{ vehicle.vehicle_type|default:"-" }}</dd>
                     <dt class="col-sm-4">Status</dt>
                     <dd class="col-sm-8"><span class="badge bg-{% if vehicle.status == 'active' %}success{% elif vehicle.status == 'under_maintenance' %}warning{% elif vehicle.status == 'retired' %}secondary{% else %}secondary{% endif %}">{{ vehicle.get_status_display }}</span></dd>
+                    <dt class="col-sm-4">Salud</dt>
+                    <dd class="col-sm-8"><span class="badge bg-{% if vehicle.health_status == 'green' %}success{% elif vehicle.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if vehicle.health_status == 'green' %}Buena{% elif vehicle.health_status == 'yellow' %}Precaución{% else %}Crítica{% endif %}</span></dd>
                     <dt class="col-sm-4">Current Mileage</dt>
                     <dd class="col-sm-8">{{ vehicle.current_mileage|default:"-" }} km</dd>
                     <dt class="col-sm-4">Fuel Type</dt>
@@ -45,10 +83,10 @@
                 </dl>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card mb-3">
-            <div class="card-header">Maintenance</div>
+  </div>
+  <div class="col-md-6">
+    <div class="card card-fp mb-0">
+      <div class="card-header">Maintenance</div>
             <div class="card-body">
                 <p><strong>Total maintenance tasks:</strong> {{ vehicle.maintenance_tasks.count }}</p>
                 <p><strong>Last maintenance:</strong> {{ vehicle.get_last_maintenance_date|default:"Never" }}</p>
@@ -57,4 +95,120 @@
         </div>
     </div>
 </div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12">
+    <div class="card card-fp">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span>Telemetría en vivo</span>
+        <span id="telemetry-engine-status" class="badge fs-6 {% if vehicle_engine_on_initial %}bg-success{% else %}bg-danger{% endif %}">
+          {% if vehicle_engine_on_initial %}Encendido{% else %}Apagado{% endif %}
+        </span>
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Datos recibidos por WebSocket. Conectando…</p>
+        <div class="row g-2 g-md-3">
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Velocidad</div>
+              <div id="telem-speed" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Combustible %</div>
+              <div id="telem-fuel" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Temp. motor °C</div>
+              <div id="telem-temp" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">RPM</div>
+              <div id="telem-rpm" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Odómetro km</div>
+              <div id="telem-mileage" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Voltaje</div>
+              <div id="telem-voltage" class="fw-semibold">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Posición</div>
+              <div id="telem-position" class="fw-semibold small">—</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-4">
+            <div class="border rounded p-2">
+              <div class="small text-muted">Última lectura</div>
+              <div id="telem-timestamp" class="fw-semibold small">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  const vehicleId = {{ vehicle.pk }};
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = protocol + '//' + window.location.host + '/ws/telemetry/subscribe/' + vehicleId + '/';
+  const ENGINE_IDLE_SEC = 90;
+
+  function formatVal(v) { return v != null && v !== '' ? String(v) : '—'; }
+  function setEngineStatus(on) {
+    const el = document.getElementById('telemetry-engine-status');
+    if (!el) return;
+    el.textContent = on ? 'Encendido' : 'Apagado';
+    el.className = 'badge fs-6 ' + (on ? 'bg-success' : 'bg-danger');
+  }
+  function applyPayload(p) {
+    document.getElementById('telem-speed').textContent = formatVal(p.speed_kmh != null ? p.speed_kmh + ' km/h' : null);
+    document.getElementById('telem-fuel').textContent = formatVal(p.fuel_level_pct != null ? p.fuel_level_pct + '%' : null);
+    document.getElementById('telem-temp').textContent = formatVal(p.engine_temperature_c != null ? p.engine_temperature_c + ' °C' : null);
+    document.getElementById('telem-rpm').textContent = formatVal(p.rpm);
+    document.getElementById('telem-mileage').textContent = formatVal(p.mileage);
+    document.getElementById('telem-voltage').textContent = formatVal(p.voltage != null ? p.voltage + ' V' : null);
+    const lat = p.latitude, lng = p.longitude;
+    document.getElementById('telem-position').textContent = (lat != null && lng != null) ? (lat.toFixed(4) + ', ' + lng.toFixed(4)) : '—';
+    document.getElementById('telem-timestamp').textContent = p.timestamp ? new Date(p.timestamp).toLocaleString() : '—';
+    const on = (p.speed_kmh > 0 || (p.rpm || 0) > 0) || (p.timestamp && (Date.now() - new Date(p.timestamp).getTime()) / 1000 < ENGINE_IDLE_SEC);
+    setEngineStatus(!!on);
+  }
+  function connect() {
+    const ws = new WebSocket(wsUrl);
+    ws.onopen = function() {
+      document.querySelector('.card-fp .text-muted.small.mb-3').textContent = 'Conectado. Esperando datos en tiempo real…';
+    };
+    ws.onmessage = function(e) {
+      try {
+        const p = JSON.parse(e.data);
+        applyPayload(p);
+      } catch (err) {}
+    };
+    ws.onclose = function() {
+      document.querySelector('.card-fp .text-muted.small.mb-3').textContent = 'Desconectado. Reconectando en 3 s…';
+      setTimeout(connect, 3000);
+    };
+    ws.onerror = function() {};
+  }
+  connect();
+})();
+</script>
 {% endblock %}

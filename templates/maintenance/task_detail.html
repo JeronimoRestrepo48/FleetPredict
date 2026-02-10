@@ -1,20 +1,52 @@
 {% extends "base.html" %}
 {% block title %}{{ task.title }} - FleetPredict Pro{% endblock %}
+{% block meta_description %}Maintenance task details and documents.{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ task.title }}</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>{{ task.title }}</h2>
-    <div>
-        <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
-        {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
-        <a href="{% url 'maintenance:task_update' task.pk %}" class="btn btn-primary ms-2">Edit</a>
-        <a href="{% url 'maintenance:task_complete' task.pk %}" class="btn btn-success ms-2">Complete</a>
-        <a href="{% url 'maintenance:task_delete' task.pk %}" class="btn btn-outline-danger ms-2">Delete</a>
-        {% endif %}
-    </div>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">{{ task.title }}</h2>
+  <div class="d-flex flex-wrap gap-2">
+    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
+    <a href="{% url 'maintenance:task_update' task.pk %}" class="btn btn-primary">Edit</a>
+    <a href="{% url 'maintenance:task_complete' task.pk %}" class="btn btn-success">Complete</a>
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTaskModal">Delete</button>
+    {% endif %}
+  </div>
 </div>
+{% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-labelledby="deleteTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteTaskModalLabel">Delete task</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong>{{ task.title }}</strong> for {{ task.vehicle.display_name }}?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'maintenance:task_delete' task.pk %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 <div class="row">
     <div class="col-md-8">
-        <div class="card mb-3">
+        <div class="card card-fp mb-3">
             <div class="card-header">Task Details</div>
             <div class="card-body">
                 <dl class="row mb-0">
@@ -49,7 +81,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card mb-3">
+        <div class="card card-fp mb-3">
             <div class="card-header">Documents</div>
             <div class="card-body">
                 {% if can_manage and task.status != 'completed' %}

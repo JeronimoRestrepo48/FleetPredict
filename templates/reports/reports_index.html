@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Reportes - FleetPredict Pro{% endblock %}
+{% block meta_description %}Exportar reportes PDF por vehículo o flota.{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Reportes</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <h5 class="card-title">Reporte de flota</h5>
+    <p class="card-text text-muted">Descargue un PDF con resumen de todos los vehículos visibles (salud, última alerta, próximo mantenimiento, kilometraje).</p>
+    <a href="{% url 'reports:fleet_pdf' %}" class="btn btn-primary">Descargar reporte flota (PDF)</a>
+  </div>
+</div>
+<div class="card card-fp mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Reporte por vehículo</h5>
+    <p class="card-text text-muted">Para un reporte detallado de un vehículo (historial de mantenimiento, alertas recientes, telemetría), abra el detalle del vehículo y use el botón &quot;Exportar reporte PDF&quot;.</p>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-primary">Ir a lista de vehículos</a>
+  </div>
+</div>
+{% endblock %}

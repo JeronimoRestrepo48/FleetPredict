@@ -1,0 +1,26 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\geometry{a4paper, margin=2cm}
+
+\title{Reporte de flota}
+\date{\today}
+\author{FleetPredict Pro}
+
+\begin{document}
+\maketitle
+
+\section*{Resumen por vehículo}
+\begin{tabular}{p{4cm}p{1.8cm}p{2.2cm}p{3.2cm}p{1.8cm}}
+\toprule
+Vehículo & Salud & Última alerta & Próx. mantenimiento & Km \\
+\midrule
+{% for r in rows %}
+{{ r.vehicle_name }} & {{ r.health }} & {{ escape((r.last_alert.get_severity_display() + ' ' + r.last_alert.message)[:50]) if r.last_alert else '---' }} & {{ escape(r.next_maintenance.title) if r.next_maintenance else '---' }} & {{ r.current_mileage }} \\
+{% endfor %}
+\bottomrule
+\end{tabular}
+
+\end{document}

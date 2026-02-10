@@ -105,6 +105,12 @@ class UserListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     context_object_name = 'users'
     paginate_by = 20
 
+    def get_paginate_by(self, queryset):
+        per = self.request.GET.get('per_page', '20')
+        if per in ('10', '20', '50'):
+            return int(per)
+        return 20
+
     def get_queryset(self):
         queryset = User.objects.all()
         role = self.request.GET.get('role')

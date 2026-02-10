@@ -116,6 +116,9 @@ class Vehicle(models.Model):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
+    # Last telemetry timestamp (updated when telemetry is received)
+    last_telemetry_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         verbose_name = 'Vehicle'
         verbose_name_plural = 'Vehicles'
@@ -157,6 +160,292 @@ class Vehicle(models.Model):
             status='completed'
         ).order_by('-completion_date').first()
         return last_task.completion_date if last_task else None
+
+    def is_engine_on(self, threshold_seconds=90):
+        """True if last telemetry was within threshold_seconds (vehicle considered on)."""
+        from django.utils import timezone
+        if not self.last_telemetry_at:
+            return False
+        delta = (timezone.now() - self.last_telemetry_at).total_seconds()
+        return delta < threshold_seconds
+
+    def get_health_status(self, alert_days=7):
+        """
+        Return 'red' | 'yellow' | 'green' for FR6 health indicator.
+        Red: critical unread alert in last alert_days, or overdue maintenance.
+        Yellow: high unread alert, or maintenance due soon, or recent anomalous telemetry.
+        Green: otherwise.
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+        now = timezone.now()
+        since = now - timedelta(days=alert_days)
+
+        # Red: critical unread alert or overdue maintenance
+        if self.alerts.filter(
+            severity=VehicleAlert.Severity.CRITICAL,
+            read_at__isnull=True,
+            created_at__gte=since,
+        ).exists():
+            return 'red'
+        overdue = self.maintenance_tasks.filter(
+            status__in=['scheduled', 'overdue'],
+            scheduled_date__lt=now.date(),
+        ).exists()
+        if overdue:
+            return 'red'
+
+        # Yellow: high unread alert
+        if self.alerts.filter(
+            severity=VehicleAlert.Severity.HIGH,
+            read_at__isnull=True,
+            created_at__gte=since,
+        ).exists():
+            return 'yellow'
+        # Maintenance due soon (within VehicleType buffer or next 14 days)
+        next_due = now.date() + timedelta(days=14)
+        if self.maintenance_tasks.filter(
+            status__in=['scheduled', 'overdue'],
+            scheduled_date__lte=next_due,
+        ).exists():
+            return 'yellow'
+        # Recent anomalous telemetry (high temp in last 24h, threshold 105 C)
+        from django.conf import settings
+        day_ago = now - timedelta(hours=24)
+        thresh = getattr(settings, 'TELEMETRY_PATTERNS_ENGINE_TEMP_HIGH_C', 105)
+        if self.telemetry_readings.filter(
+            timestamp__gte=day_ago,
+            engine_temperature_c__gte=thresh,
+        ).exists():
+            return 'yellow'
+
+        return 'green'
+
+    @property
+    def health_status(self):
+        """FR6: expose get_health_status() as property for templates."""
+        return self.get_health_status()
+
+
+class VehicleTelemetry(models.Model):
+    """
+    Time-series telemetry readings from vehicle sensors.
+    Used for real-time monitoring and pattern/AI evaluation.
+    """
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='telemetry_readings'
+    )
+    timestamp = models.DateTimeField(db_index=True)
+
+    # Core telemetry
+    speed_kmh = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Speed in km/h'
+    )
+    fuel_level_pct = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Fuel level percentage 0-100'
+    )
+    engine_temperature_c = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Engine temperature in Celsius'
+    )
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True
+    )
+    rpm = models.PositiveIntegerField(null=True, blank=True, help_text='Engine RPM')
+    mileage = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Odometer reading in km'
+    )
+
+    # Optional for driving patterns
+    voltage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Battery voltage'
+    )
+    throttle_pct = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='Throttle position percentage'
+    )
+    brake_status = models.BooleanField(null=True, blank=True, help_text='Brake pedal pressed')
+
+    class Meta:
+        verbose_name = 'Vehicle Telemetry'
+        verbose_name_plural = 'Vehicle Telemetry'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['vehicle', 'timestamp'], name='veh_telem_vehicle_ts_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.vehicle_id} @ {self.timestamp}'
+
+
+class VehicleAlert(models.Model):
+    """
+    Alerts and prediction events from pattern/AI evaluation.
+    Feeds FR6 (health), FR7 (notifications), FR9 (failure prediction).
+    """
+    class AlertType(models.TextChoices):
+        HIGH_ENGINE_TEMP = 'high_engine_temp', 'High engine temperature'
+        ANOMALOUS_FUEL = 'anomalous_fuel', 'Anomalous fuel consumption'
+        HARSH_DRIVING = 'harsh_driving', 'Harsh driving'
+        PROLONGED_IDLE = 'prolonged_idle', 'Prolonged idling'
+        MAINTENANCE_MILEAGE = 'maintenance_mileage', 'Maintenance due by mileage'
+        MAINTENANCE_TIME = 'maintenance_time', 'Maintenance due by time'
+        STATISTICAL_ANOMALY = 'statistical_anomaly', 'Statistical anomaly'
+
+    class Severity(models.TextChoices):
+        LOW = 'low', 'Low'
+        MEDIUM = 'medium', 'Medium'
+        HIGH = 'high', 'High'
+        CRITICAL = 'critical', 'Critical'
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='alerts'
+    )
+    alert_type = models.CharField(max_length=32, choices=AlertType.choices)
+    severity = models.CharField(max_length=16, choices=Severity.choices, default=Severity.MEDIUM)
+    message = models.TextField()
+    confidence = models.DecimalField(
+        max_digits=4,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text='0-1 confidence score'
+    )
+    timeframe_text = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text='e.g. "Próximos 7 días", "En 500 km" (FR9)',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Vehicle Alert'
+        verbose_name_plural = 'Vehicle Alerts'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['vehicle', 'created_at'], name='veh_alert_vehicle_ts_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.vehicle_id} {self.alert_type} @ {self.created_at}'
+
+
+class Playbook(models.Model):
+    """Suggested steps for an alert type (SOC playbook)."""
+    alert_type = models.CharField(
+        max_length=32,
+        choices=VehicleAlert.AlertType.choices,
+        unique=True,
+        help_text='Alert type this playbook applies to',
+    )
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    steps = models.JSONField(
+        default=list,
+        help_text='List of step strings (e.g. ["Check coolant", "Schedule inspection"])',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Playbook'
+        verbose_name_plural = 'Playbooks'
+        ordering = ['alert_type']
+
+    def __str__(self):
+        return f'{self.name} ({self.get_alert_type_display()})'
+
+
+class Runbook(models.Model):
+    """Executable action for alerts (SOC runbook)."""
+    class ActionType(models.TextChoices):
+        MARK_ALERT_READ = 'mark_alert_read', 'Mark alert as read'
+        CREATE_MAINTENANCE_TASK = 'create_maintenance_task', 'Create maintenance task'
+        DISMISS_ALERT = 'dismiss_alert', 'Dismiss alert'
+
+    name = models.CharField(max_length=200)
+    alert_type = models.CharField(
+        max_length=32,
+        choices=VehicleAlert.AlertType.choices,
+        null=True,
+        blank=True,
+        help_text='Optional: only for this alert type',
+    )
+    action_type = models.CharField(max_length=32, choices=ActionType.choices)
+    params = models.JSONField(default=dict, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Runbook'
+        verbose_name_plural = 'Runbooks'
+        ordering = ['name']
+
+    def __str__(self):
+        return f'{self.name} ({self.get_action_type_display()})'
+
+    def execute(self, alert, user):
+        """Execute this runbook for the given alert. Returns (success: bool, message: str)."""
+        from django.utils import timezone
+        if self.action_type == self.ActionType.MARK_ALERT_READ:
+            alert.read_at = timezone.now()
+            alert.save(update_fields=['read_at'])
+            return True, 'Alert marked as read.'
+        if self.action_type == self.ActionType.DISMISS_ALERT:
+            alert.read_at = timezone.now()
+            alert.save(update_fields=['read_at'])
+            return True, 'Alert dismissed.'
+        if self.action_type == self.ActionType.CREATE_MAINTENANCE_TASK:
+            from apps.maintenance.models import MaintenanceTask
+            from datetime import timedelta
+            task = MaintenanceTask(
+                vehicle=alert.vehicle,
+                title=self.params.get('title', f'Follow-up: {alert.get_alert_type_display()}'),
+                description=self.params.get('description', alert.message),
+                maintenance_type=self.params.get('maintenance_type', 'preventive'),
+                scheduled_date=(timezone.now() + timedelta(days=self.params.get('days_ahead', 1))).date(),
+                status=MaintenanceTask.Status.SCHEDULED,
+                priority=self.params.get('priority', 'medium'),
+                created_by=user,
+            )
+            task.save()
+            return True, f'Maintenance task created: {task.title}'
+        return False, 'Unknown action type.'
 
 
 class VehicleManager(models.Manager):

@@ -1,0 +1,59 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{booktabs}
+\geometry{a4paper, margin=2cm}
+
+\title{Reporte de Mantenimiento\\{{ vehicle_name }}}
+\date{\today}
+\author{FleetPredict Pro}
+
+\begin{document}
+\maketitle
+
+\section*{Datos del vehículo}
+\begin{tabular}{ll}
+Placa: & {{ license_plate }} \\
+VIN: & {{ vin }} \\
+Tipo: & {{ vehicle_type }} \\
+Kilometraje actual: & {{ current_mileage }} km \\
+\end{tabular}
+
+\section*{Historial de mantenimiento}
+\begin{tabular}{p{3.5cm}p{1.8cm}p{1.6cm}p{1.6cm}p{1.4cm}p{1.8cm}}
+\toprule
+Tarea & Tipo & F. programada & F. realización & Costo & Estado \\
+\midrule
+{% for t in tasks %}
+{{ escape(t.title) }} & {{ escape(t.get_maintenance_type_display()) }} & {{ t.scheduled_date.strftime('%Y-%m-%d') }} & {{ t.completion_date.strftime('%Y-%m-%d') if t.completion_date else '---' }} & {{ t.actual_cost if t.actual_cost is not none else '---' }} & {{ escape(t.get_status_display()) }} \\
+{% endfor %}
+\bottomrule
+\end{tabular}
+
+\section*{Alertas recientes}
+{% if alerts %}
+\begin{tabular}{p{2.2cm}p{1.5cm}p{6cm}p{2cm}}
+\toprule
+Severidad & Tipo & Mensaje & Fecha \\
+\midrule
+{% for a in alerts %}
+{{ escape(a.get_severity_display()) }} & {{ escape(a.get_alert_type_display()) }} & {{ escape(a.message) }} & {{ a.created_at.strftime('%Y-%m-%d %H:%M') if a.created_at else '---' }} \\
+{% endfor %}
+\bottomrule
+\end{tabular}
+{% else %}
+No hay alertas recientes.
+{% endif %}
+
+\section*{Última telemetría}
+{% if last_telemetry %}
+Última lectura: {{ last_telemetry.timestamp.strftime('%Y-%m-%d %H:%M') if last_telemetry and last_telemetry.timestamp else '---' }}\\
+Motor: {{ 'Encendido' if last_telemetry and last_telemetry.engine_temperature_c is not none else 'Apagado/N/A' }}\\
+Temperatura: {{ last_telemetry.engine_temperature_c if last_telemetry and last_telemetry.engine_temperature_c is not none else '---' }} °C\\
+Combustible: {{ last_telemetry.fuel_level_pct if last_telemetry and last_telemetry.fuel_level_pct is not none else '---' }} \%
+{% else %}
+Sin datos de telemetría recientes.
+{% endif %}
+
+\end{document}

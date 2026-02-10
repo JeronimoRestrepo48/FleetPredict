@@ -1,75 +1,117 @@
 {% extends "base.html" %}
+{% load fp_extras %}
 {% block title %}Maintenance - FleetPredict Pro{% endblock %}
+{% block meta_description %}List and manage maintenance tasks. Filter by status.{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Maintenance Tasks</h2>
-    {% if can_manage %}
-    <a href="{% url 'maintenance:task_create' %}" class="btn btn-primary">Add Task</a>
-    {% endif %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Maintenance Tasks</h2>
+  {% if can_manage %}
+  <a href="{% url 'maintenance:task_create' %}" class="btn btn-primary btn-fp-primary"><i class="bi bi-plus-lg me-1"></i> Add Task</a>
+  {% endif %}
 </div>
-<div class="card">
-    <div class="card-body">
-        <form method="get" class="row g-3 mb-3">
-            <div class="col-md-3">
-                <label for="id_status_filter" class="form-label visually-hidden">Filter by status</label>
-                <select name="status" id="id_status_filter" class="form-select" aria-label="Filter by status">
-                    <option value="">All statuses</option>
-                    {% for value, label in status_choices %}
-                    <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
-        </form>
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Vehicle</th>
-                        <th>Task</th>
-                        <th>Scheduled</th>
-                        <th>Status</th>
-                        <th>Priority</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for task in tasks %}
-                    <tr>
-                        <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}">{{ task.vehicle.display_name }}</a></td>
-                        <td>{{ task.title }}</td>
-                        <td>{{ task.scheduled_date }}</td>
-                        <td><span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'overdue' %}danger{% elif task.status == 'in_progress' %}info{% else %}secondary{% endif %}">{{ task.get_status_display }}</span></td>
-                        <td><span class="badge bg-{% if task.priority == 'critical' %}danger{% elif task.priority == 'high' %}warning{% else %}secondary{% endif %}">{{ task.get_priority_display }}</span></td>
-                        <td>
-                            <a href="{% url 'maintenance:task_detail' task.pk %}">View</a>
-                            {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
-                            | <a href="{% url 'maintenance:task_update' task.pk %}">Edit</a>
-                            | <a href="{% url 'maintenance:task_complete' task.pk %}">Complete</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="6">No maintenance tasks found.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% if is_paginated %}
-        <nav>
-            <ul class="pagination justify-content-center">
-                {% if page_obj.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a></li>
-                {% endif %}
-                <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
-                {% if page_obj.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a></li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="get" class="row g-3 mb-3">
+      <div class="col-md-3">
+        <label for="id_status_filter" class="form-label visually-hidden">Filter by status</label>
+        <select name="status" id="id_status_filter" class="form-select" aria-label="Filter by status">
+          <option value="">All statuses</option>
+          {% for value, label in status_choices %}
+          <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="id_per_page" class="form-label visually-hidden">Per page</label>
+        <select name="per_page" id="id_per_page" class="form-select" aria-label="Results per page">
+          <option value="10" {% if request.GET.per_page == '10' %}selected{% endif %}>10</option>
+          <option value="20" {% if request.GET.per_page == '20' or not request.GET.per_page %}selected{% endif %}>20</option>
+          <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+    <div class="fp-table-wrap table-responsive">
+      <table class="table table-fp table-hover">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Task</th>
+            <th>Scheduled</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}" class="text-decoration-none fw-medium">{{ task.vehicle.display_name }}</a></td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.scheduled_date }}</td>
+            <td><span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'overdue' %}danger{% elif task.status == 'in_progress' %}info{% else %}secondary{% endif %}">{{ task.get_status_display }}</span></td>
+            <td><span class="badge bg-{% if task.priority == 'critical' %}danger{% elif task.priority == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ task.get_priority_display }}</span></td>
+            <td>
+              <a href="{% url 'maintenance:task_detail' task.pk %}"><i class="bi bi-eye me-1"></i>View</a>
+              {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
+              <a href="{% url 'maintenance:task_update' task.pk %}" class="ms-2"><i class="bi bi-pencil me-1"></i>Edit</a>
+              <a href="{% url 'maintenance:task_complete' task.pk %}" class="ms-2"><i class="bi bi-check-lg me-1"></i>Complete</a>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6">No maintenance tasks found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+    <div class="fp-list-cards">
+      {% for task in tasks %}
+      <div class="fp-list-card">
+        <div class="fp-list-card-title">{{ task.title }} · {{ task.vehicle.display_name }}</div>
+        <div class="fp-list-card-meta">
+          <span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'overdue' %}danger{% elif task.status == 'in_progress' %}info{% else %}secondary{% endif %}">{{ task.get_status_display }}</span>
+          {{ task.scheduled_date }} · {{ task.get_priority_display }}
+        </div>
+        <div class="fp-list-card-actions">
+          <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+          {% if can_manage and task.status != 'completed' and task.status != 'cancelled' %}
+          <a href="{% url 'maintenance:task_update' task.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+          <a href="{% url 'maintenance:task_complete' task.pk %}" class="btn btn-sm btn-outline-success">Complete</a>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted mb-0">No maintenance tasks found.</p>
+      {% endfor %}
+    </div>
+    {% if is_paginated %}
+    <nav class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
+      <div class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} total)</div>
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">Previous</a></li>
+        {% endif %}
+        {% for p in page_obj|pagination_window:5 %}
+        {% if p %}
+        {% if p == page_obj.number %}
+        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+        {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ p }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{{ p }}</a></li>
+        {% endif %}
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
 </div>
 {% endblock %}
