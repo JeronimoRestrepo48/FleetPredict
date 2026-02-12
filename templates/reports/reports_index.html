@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Reports - FleetPredict Pro{% endblock %}
 {% block meta_description %}Export PDF reports per vehicle or fleet.{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reports</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Reports</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">

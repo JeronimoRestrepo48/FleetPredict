@@ -1,10 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Failure predictions - FleetPredict Pro{% endblock %}
 {% block meta_description %}Failure recommendations per vehicle (FR9).{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Failure predictions</li>
+  </ol>
+</nav>
+{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Failure predictions</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
 </div>
 <p class="text-muted">Vehicle, type, message, confidence and timeframe. Runbook actions available. FR10: filter by severity.</p>
 <form method="get" class="row g-2 mb-3">

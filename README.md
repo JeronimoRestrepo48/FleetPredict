@@ -49,6 +49,7 @@ dev/
 │   ├── users/                  # Auth, profiles, roles (FR1, FR21)
 │   ├── vehicles/               # Registry, telemetry, alerts, runbooks (FR2, FR6, FR7, FR9)
 │   │   ├── services/           # Telemetry patterns and alert evaluation
+│   │   ├── ml/                 # ML failure prediction (features, predictor)
 │   │   ├── notifications.py   # Email for high/critical alerts
 │   │   └── management/commands/
 │   │       ├── seed_simulated_fleet.py
@@ -209,6 +210,8 @@ Use email and password. This user has full access.
 | `python manage.py seed_simulated_fleet` | Creates vehicle types, 10 vehicles SIM-001…SIM-010 and 10 drivers. Use `--clear` to remove only SIM-* vehicles and recreate. |
 | `python manage.py seed_playbooks_runbooks` | Creates playbooks and runbooks per alert type (mark read, create maintenance task, etc.) for the dashboard SOC. |
 | `python manage.py seed_maintenance_tasks` | Creates sample maintenance tasks (completed and scheduled) for each SIM-* vehicle. Use `--clear` to remove only seed-created tasks (title prefix `[Seed] `). |
+| `python manage.py build_ml_dataset` | Build ML dataset CSV from telemetry and alerts (`--output`, `--days`, `--window-size`). |
+| `python manage.py train_failure_predictor` | Train Scikit-learn failure predictor from CSV and save joblib to `ML_FAILURE_PREDICTOR_PATH`. |
 
 ---
 
@@ -307,6 +310,19 @@ Use email and password. This user has full access.
 - **Patterns:** After each reading is saved, patterns (high temperature, anomalous fuel, maintenance by km/time, etc.) are evaluated and `VehicleAlert` records are created with severity and, when applicable, `timeframe_text` (FR9).
 - **Email alerts (FR7):** For high or critical alerts, email is sent to users with report permission and notification preferences enabled (`email_enabled`, `critical_alerts` in profile).
 - **Browser subscription:** The vehicle detail page subscribes via WebSocket to that vehicle’s updates; only if the user is allowed to see it (drivers only their vehicle).
+
+### Optional ML failure prediction (Scikit-learn)
+
+Failure prediction can use an **optional** Scikit-learn model that classifies windows of recent telemetry into the same alert types as the rule-based patterns. The app runs with **rules only** if no model is present.
+
+- **Training (offline):** Build a dataset from historical telemetry and alert labels, then train a multiclass classifier:
+  ```bash
+  python manage.py build_ml_dataset --output dataset.csv --days 90 --window-size 20
+  python manage.py train_failure_predictor --input dataset.csv
+  ```
+  The pipeline (scaler + classifier) is saved to `media/models/failure_predictor.joblib` by default (configurable via `ML_FAILURE_PREDICTOR_PATH`).
+- **Inference:** When a model exists, after rule-based alerts are evaluated, the ML predictor runs on the same telemetry window and creates additional `VehicleAlert` records for predicted types above `ML_PREDICTION_CONFIDENCE_THRESHOLD` (default 0.5), respecting the same cooldown as rules.
+- **Settings:** `ML_FAILURE_PREDICTOR_PATH`, `ML_WINDOW_SIZE` (default 20), `ML_PREDICTION_CONFIDENCE_THRESHOLD` (default 0.5). With little or no historical data, the dataset may be small; run the telemetry simulator for a while, then build dataset and train, or document that the model improves as more data is collected.
 
 ---
 

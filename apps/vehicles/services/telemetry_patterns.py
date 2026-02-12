@@ -284,12 +284,16 @@ def evaluate_and_save_alerts(vehicle_id, readings=None):
     Evaluate patterns and persist new alerts to VehicleAlert.
     Returns list of created alert dicts. Does not create duplicate alerts for same type
     within a short cooldown (e.g. 1 hour) to avoid spam.
+    If an ML failure predictor model is loaded, runs ML prediction on the same readings
+    and creates alerts for predicted types above threshold (same cooldown).
     """
     cooldown_minutes = 60
     since = timezone.now() - timedelta(minutes=cooldown_minutes)
     existing_types = set(
         VehicleAlert.objects.filter(vehicle_id=vehicle_id, created_at__gte=since).values_list('alert_type', flat=True)
     )
+    if readings is None:
+        readings = get_recent_telemetry(vehicle_id)
     alerts = evaluate_patterns(vehicle_id, readings)
     created = []
     for a in alerts:
@@ -307,4 +311,31 @@ def evaluate_and_save_alerts(vehicle_id, readings=None):
         created.append(a)
         if a['severity'] in ('high', 'critical'):
             send_alert_notification_emails(alert)
+
+    # Optional ML predictor: same cooldown, same readings
+    from apps.vehicles.ml import load_model, predict_alert_types
+    model = load_model()
+    if model is not None and readings:
+        valid_types = {c for c, _ in VehicleAlert.AlertType.choices}
+        for alert_type, confidence in predict_alert_types(readings):
+            at = str(alert_type)
+            if at not in valid_types or at in existing_types:
+                continue
+            conf_decimal = Decimal(str(round(confidence, 2)))
+            alert = VehicleAlert.objects.create(
+                vehicle_id=vehicle_id,
+                alert_type=at,
+                severity=VehicleAlert.Severity.MEDIUM,
+                message=f'ML prediction: {at} (confidence {confidence:.2f}).',
+                confidence=conf_decimal,
+                timeframe_text='',
+            )
+            existing_types.add(at)
+            created.append({
+                'type': at,
+                'severity': VehicleAlert.Severity.MEDIUM,
+                'message': alert.message,
+                'confidence': conf_decimal,
+                'timeframe_text': '',
+            })
     return created

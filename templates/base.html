@@ -16,6 +16,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <a href="#main-content" class="fp-skip-link">Skip to main content</a>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-fp">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'dashboard:index' %}">
@@ -28,56 +29,58 @@
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:index' %}">Dashboard</a>
+                        <a class="nav-link {% if request.resolver_match.namespace == 'dashboard' and request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'dashboard:index' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link position-relative" href="{% url 'dashboard:alerts' %}">Alerts{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
+                        <a class="nav-link position-relative {% if request.resolver_match.url_name == 'alerts' %}active{% endif %}" href="{% url 'dashboard:alerts' %}">Alerts{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'maintenance:task_list' %}">Maintenance</a>
-                    </li>
-                    {% if user.can_manage_maintenance %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'maintenance:template_list' %}">Maintenance templates</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'maintenance:workorder_list' %}">Work orders</a>
-                    </li>
-                    {% endif %}
-                    {% if user.can_view_reports %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:predictions' %}">Failure predictions</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reports:index' %}">Reports</a>
-                    </li>
-                    {% endif %}
                     {% if user.can_manage_vehicles %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:alertrule_list' %}">Alert rules</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="#" id="navFleet" role="button" data-bs-toggle="dropdown" aria-expanded="false">Fleet</a>
+                        <ul class="dropdown-menu" aria-labelledby="navFleet">
+                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
+                        </ul>
                     </li>
+                    {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicles:compliance_list' %}">Compliance</a>
+                        <a class="nav-link {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a>
                     </li>
                     {% endif %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'maintenance' %}active{% endif %}" href="#" id="navMaintenance" role="button" data-bs-toggle="dropdown" aria-expanded="false">Maintenance</a>
+                        <ul class="dropdown-menu" aria-labelledby="navMaintenance">
+                            <li><a class="dropdown-item" href="{% url 'maintenance:task_list' %}">Tasks</a></li>
+                            {% if user.can_manage_maintenance %}
+                            <li><a class="dropdown-item" href="{% url 'maintenance:template_list' %}">Maintenance templates</a></li>
+                            <li><a class="dropdown-item" href="{% url 'maintenance:workorder_list' %}">Work orders</a></li>
+                            {% endif %}
+                        </ul>
                     </li>
-                    {% if user.role == 'administrator' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:user_list' %}">Users</a>
+                    {% if user.can_view_reports %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'reports' or request.resolver_match.url_name == 'predictions' or request.resolver_match.url_name == 'suggested_maintenance' %}active{% endif %}" href="#" id="navReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reports &amp; predictions</a>
+                        <ul class="dropdown-menu" aria-labelledby="navReports">
+                            <li><a class="dropdown-item" href="{% url 'dashboard:predictions' %}">Failure predictions</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reports:index' %}">Reports</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'vehicles:vehicletype_list' %}">Vehicle types</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:auditlog_list' %}">Audit log</a>
+                    {% endif %}
+                    {% if user.can_manage_vehicles or user.role == 'administrator' %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">Settings</a>
+                        <ul class="dropdown-menu" aria-labelledby="navSettings">
+                            {% if user.can_manage_vehicles %}
+                            <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}">Alert rules</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
+                            {% endif %}
+                            {% if user.role == 'administrator' %}
+                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}">Users</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}">Vehicle types</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:auditlog_list' %}">Audit log</a></li>
+                            {% endif %}
+                        </ul>
                     </li>
                     {% endif %}
                     {% endif %}
@@ -130,8 +133,56 @@
     </main>
 
     <footer class="fp-footer">
-        <div class="container-fluid" style="max-width: 1400px; margin: 0 auto;">
-            <span>FleetPredict Pro</span> · Predictive fleet maintenance · <a href="https://github.com" target="_blank" rel="noopener">Repository</a>
+        <div class="container-fluid">
+            <div class="fp-footer-inner">
+                <div class="fp-footer-col">
+                    <h6>Main</h6>
+                    <ul>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                        <li><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+                        <li><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
+                        <li><a href="{% url 'dashboard:alerts' %}">Alerts</a></li>
+                        {% else %}
+                        <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="fp-footer-col">
+                    <h6>Reports</h6>
+                    <ul>
+                        <li><a href="{% url 'reports:index' %}">Reports</a></li>
+                        <li><a href="{% url 'dashboard:predictions' %}">Failure predictions</a></li>
+                        <li><a href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a></li>
+                    </ul>
+                </div>
+                <div class="fp-footer-col">
+                    <h6>Account</h6>
+                    <ul>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'users:profile' %}">Profile</a></li>
+                        <li>
+                            <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link p-0 align-baseline text-primary">Logout</button>
+                            </form>
+                        </li>
+                        {% else %}
+                        <li><a href="{% url 'users:login' %}">Login</a></li>
+                        <li><a href="{% url 'users:register' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="fp-footer-col">
+                    <h6>FleetPredict Pro</h6>
+                    <ul>
+                        <li><a href="https://github.com" target="_blank" rel="noopener">Repository</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="fp-footer-bottom">
+                FleetPredict Pro &middot; Predictive fleet maintenance &middot; &copy; 2025
+            </div>
         </div>
     </footer>
 
