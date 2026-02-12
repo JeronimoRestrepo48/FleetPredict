@@ -4,3 +4,12 @@ package-lock.json
 package.json
 e2e/
 playwright.config.ts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyz

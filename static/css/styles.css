@@ -42,26 +42,6 @@ body {
   line-height: 1.5;
 }
 
-/* Skip to main content - visible on focus for accessibility */
-.fp-skip-link {
-  position: absolute;
-  top: -3rem;
-  left: var(--fp-spacing-md);
-  z-index: 1100;
-  padding: 0.5rem 1rem;
-  background: var(--fp-dark);
-  color: #fff;
-  font-weight: 600;
-  border-radius: var(--fp-radius);
-  text-decoration: none;
-  transition: top 0.2s;
-}
-.fp-skip-link:focus {
-  top: var(--fp-spacing-md);
-  outline: 2px solid var(--fp-primary);
-  outline-offset: 2px;
-}
-
 /* Navbar */
 .navbar-fp {
   background: var(--fp-navbar) !important;
@@ -363,82 +343,12 @@ textarea:focus-visible {
   to { transform: rotate(360deg); }
 }
 
-/* Footer - multi-column layout */
-.fp-footer {
-  margin-top: var(--fp-spacing-xl);
-  padding: var(--fp-spacing-xl) var(--fp-spacing-md);
-  background: #fff;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  font-size: var(--fp-text-sm);
-  color: var(--fp-secondary);
+/* Footer - hidden (removed from layout) */
+.fp-footer,
+footer.fp-footer {
+  display: none !important;
 }
 
-.fp-footer .fp-footer-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--fp-spacing-xl);
-}
-
-@media (min-width: 576px) {
-  .fp-footer .fp-footer-inner {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 992px) {
-  .fp-footer .fp-footer-inner {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.fp-footer .fp-footer-col h6 {
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--fp-dark);
-  margin-bottom: var(--fp-spacing-sm);
-}
-
-.fp-footer .fp-footer-col ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.fp-footer .fp-footer-col li {
-  margin-bottom: var(--fp-spacing-xs);
-}
-
-.fp-footer a {
-  color: var(--fp-primary);
-  text-decoration: none;
-}
-
-.fp-footer a:hover {
-  text-decoration: underline;
-}
-
-.fp-footer .fp-footer-bottom {
-  margin-top: var(--fp-spacing-xl);
-  padding-top: var(--fp-spacing-md);
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  text-align: center;
-}
-
-.fp-footer .fp-footer-col .btn-link {
-  font-size: inherit;
-  text-decoration: none;
-  padding: 0;
-  border: none;
-  vertical-align: baseline;
-}
-
-.fp-footer .fp-footer-col .btn-link:hover {
-  text-decoration: underline;
-}
 
 /* Skeleton loading */
 .skeleton {

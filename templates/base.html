@@ -16,7 +16,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <a href="#main-content" class="fp-skip-link">Skip to main content</a>
     <nav class="navbar navbar-expand-lg navbar-dark navbar-fp">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'dashboard:index' %}">
@@ -131,60 +130,6 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
-
-    <footer class="fp-footer">
-        <div class="container-fluid">
-            <div class="fp-footer-inner">
-                <div class="fp-footer-col">
-                    <h6>Main</h6>
-                    <ul>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-                        <li><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
-                        <li><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
-                        <li><a href="{% url 'dashboard:alerts' %}">Alerts</a></li>
-                        {% else %}
-                        <li><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-                <div class="fp-footer-col">
-                    <h6>Reports</h6>
-                    <ul>
-                        <li><a href="{% url 'reports:index' %}">Reports</a></li>
-                        <li><a href="{% url 'dashboard:predictions' %}">Failure predictions</a></li>
-                        <li><a href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a></li>
-                    </ul>
-                </div>
-                <div class="fp-footer-col">
-                    <h6>Account</h6>
-                    <ul>
-                        {% if user.is_authenticated %}
-                        <li><a href="{% url 'users:profile' %}">Profile</a></li>
-                        <li>
-                            <form method="post" action="{% url 'users:logout' %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-link p-0 align-baseline text-primary">Logout</button>
-                            </form>
-                        </li>
-                        {% else %}
-                        <li><a href="{% url 'users:login' %}">Login</a></li>
-                        <li><a href="{% url 'users:register' %}">Register</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
-                <div class="fp-footer-col">
-                    <h6>FleetPredict Pro</h6>
-                    <ul>
-                        <li><a href="https://github.com" target="_blank" rel="noopener">Repository</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="fp-footer-bottom">
-                FleetPredict Pro &middot; Predictive fleet maintenance &middot; &copy; 2025
-            </div>
-        </div>
-    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>

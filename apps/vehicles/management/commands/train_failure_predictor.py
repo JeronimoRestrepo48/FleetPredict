@@ -1,8 +1,9 @@
 """
-Train the ML failure predictor from the CSV produced by build_ml_dataset.
+Train the ML failure predictor from CSV or JSON produced by build_ml_dataset.
 Saves a joblib pipeline (scaler + classifier) to ML_FAILURE_PREDICTOR_PATH.
 """
 
+import json
 import os
 import csv
 import numpy as np
@@ -11,14 +12,20 @@ from django.conf import settings
 
 
 class Command(BaseCommand):
-    help = 'Train failure predictor from build_ml_dataset CSV and save joblib pipeline.'
+    help = 'Train failure predictor from build_ml_dataset CSV or JSON and save joblib pipeline.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--input',
             type=str,
-            default='dataset.csv',
-            help='Input CSV path (default: dataset.csv)',
+            default=None,
+            help='Input CSV path (default: dataset.csv if --input-json not set)',
+        )
+        parser.add_argument(
+            '--input-json',
+            type=str,
+            default=None,
+            help='Input JSON path for continuous learning (e.g. media/models/ml_training_data.json). Overrides --input.',
         )
         parser.add_argument(
             '--output',
@@ -29,13 +36,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         input_path = options['input']
+        input_json_path = options['input_json']
         output_path = options['output'] or getattr(settings, 'ML_FAILURE_PREDICTOR_PATH', None)
         if not output_path:
             self.stderr.write(self.style.ERROR('ML_FAILURE_PREDICTOR_PATH not set and --output not given.'))
-            return
-
-        if not os.path.isfile(input_path):
-            self.stderr.write(self.style.ERROR(f'Input file not found: {input_path}'))
             return
 
         try:
@@ -48,25 +52,42 @@ class Command(BaseCommand):
             return
 
         rows = []
-        with open(input_path, newline='') as f:
-            reader = csv.reader(f)
-            header = next(reader, None)
-            if not header or header[-1] != 'label':
-                self.stderr.write(self.style.ERROR('CSV must have last column "label".'))
+        if input_json_path and os.path.isfile(input_json_path):
+            with open(input_json_path) as f:
+                data = json.load(f)
+            samples = data.get('samples') or []
+            for s in samples:
+                feats = s.get('features')
+                label = s.get('label')
+                if feats is not None and label is not None:
+                    try:
+                        rows.append(([float(x) for x in feats], str(label).strip()))
+                    except (ValueError, TypeError):
+                        continue
+        else:
+            input_path = input_path or 'dataset.csv'
+            if not os.path.isfile(input_path):
+                self.stderr.write(self.style.ERROR(f'Input file not found: {input_path}'))
                 return
-            n_features = len(header) - 1
-            for row in reader:
-                if len(row) != n_features + 1:
-                    continue
-                try:
-                    feats = [float(x) for x in row[:n_features]]
-                    label = row[n_features].strip()
-                    rows.append((feats, label))
-                except ValueError:
-                    continue
+            with open(input_path, newline='') as f:
+                reader = csv.reader(f)
+                header = next(reader, None)
+                if not header or header[-1] != 'label':
+                    self.stderr.write(self.style.ERROR('CSV must have last column "label".'))
+                    return
+                n_features = len(header) - 1
+                for row in reader:
+                    if len(row) != n_features + 1:
+                        continue
+                    try:
+                        feats = [float(x) for x in row[:n_features]]
+                        label = row[n_features].strip()
+                        rows.append((feats, label))
+                    except ValueError:
+                        continue
 
         if not rows:
-            self.stderr.write(self.style.ERROR('No valid rows in CSV.'))
+            self.stderr.write(self.style.ERROR('No valid rows in input.'))
             return
 
         X = np.array([r[0] for r in rows])

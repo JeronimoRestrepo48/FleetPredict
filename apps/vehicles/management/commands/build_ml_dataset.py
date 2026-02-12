@@ -1,10 +1,11 @@
 """
 Build ML dataset from historical telemetry and alerts.
 Slides over time per vehicle, forms windows of W readings, labels from VehicleAlert
-within a short delay after window end, else "normal". Writes CSV: features_1,...,features_K,label.
+within a short delay after window end, else "normal". Writes CSV and/or JSON for training and continuous learning.
 """
 
 import csv
+import json
 import os
 from datetime import timedelta
 from django.core.management.base import BaseCommand
@@ -20,14 +21,20 @@ LABEL_DELTA_MINUTES = 5
 
 
 class Command(BaseCommand):
-    help = 'Build ML dataset CSV from telemetry windows and alert labels.'
+    help = 'Build ML dataset from telemetry windows and alert labels. Writes CSV and/or JSON for training and continuous learning.'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--output',
             type=str,
-            default='dataset.csv',
-            help='Output CSV path (default: dataset.csv)',
+            default=None,
+            help='Output CSV path (default: dataset.csv if --output-json not given; omit to write only JSON).',
+        )
+        parser.add_argument(
+            '--output-json',
+            type=str,
+            default=None,
+            help='Also write JSON for continuous learning (e.g. media/models/ml_training_data.json). Same samples as CSV.',
         )
         parser.add_argument(
             '--days',
@@ -49,55 +56,74 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        output_path = options['output']
+        output_path = (options['output'] or '').strip() or None
+        output_json_path = (options['output_json'] or '').strip() or None
         days = options['days']
         window_size = options['window_size'] or getattr(settings, 'ML_WINDOW_SIZE', 20)
         step = max(1, options['step_readings'])
         since = timezone.now() - timedelta(days=days)
         label_delta = timedelta(minutes=LABEL_DELTA_MINUTES)
 
+        if output_path is None and not output_json_path:
+            output_path = 'dataset.csv'
+        elif output_path is None and output_json_path:
+            output_path = None  # JSON only
+
         vehicles = Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True)
         n_features = extract_features([]).size
-        total_rows = 0
+        rows = []  # list of (features_list, label)
 
-        os.makedirs(os.path.dirname(os.path.abspath(output_path)) or '.', exist_ok=True)
-        with open(output_path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            header = [f'f{i}' for i in range(n_features)] + ['label']
-            writer.writerow(header)
+        for vehicle_id in vehicles:
+            readings_qs = (
+                VehicleTelemetry.objects.filter(vehicle_id=vehicle_id, timestamp__gte=since)
+                .order_by('-timestamp')
+            )
+            all_readings = list(readings_qs)
+            if len(all_readings) < window_size:
+                continue
+            alerts_in_range = list(
+                VehicleAlert.objects.filter(
+                    vehicle_id=vehicle_id,
+                    created_at__gte=since,
+                ).order_by('created_at')
+            )
 
-            for vehicle_id in vehicles:
-                # All telemetry for this vehicle in range, ordered desc (newest first)
-                readings_qs = (
-                    VehicleTelemetry.objects.filter(vehicle_id=vehicle_id, timestamp__gte=since)
-                    .order_by('-timestamp')
-                )
-                all_readings = list(readings_qs)
-                if len(all_readings) < window_size:
-                    continue
-                # Alerts for this vehicle in the same time range (for labeling)
-                alerts_in_range = list(
-                    VehicleAlert.objects.filter(
-                        vehicle_id=vehicle_id,
-                        created_at__gte=since,
-                    ).order_by('created_at')
-                )
+            idx = 0
+            while idx + window_size <= len(all_readings):
+                window = all_readings[idx : idx + window_size]
+                last_ts = window[-1].timestamp
+                label = 'normal'
+                for alert in alerts_in_range:
+                    if alert.created_at >= last_ts and (alert.created_at - last_ts) <= label_delta:
+                        label = alert.alert_type
+                        break
+                feats = extract_features(window)
+                rows.append((feats.tolist(), label))
+                idx += step
 
-                # Slide: start at index 0, then step, then 2*step, ... while we have a full window
-                idx = 0
-                while idx + window_size <= len(all_readings):
-                    window = all_readings[idx : idx + window_size]
-                    last_ts = window[-1].timestamp
-                    # Label: any alert created within label_delta after last_ts?
-                    label = 'normal'
-                    for alert in alerts_in_range:
-                        if alert.created_at >= last_ts and (alert.created_at - last_ts) <= label_delta:
-                            label = alert.alert_type
-                            break
-                    feats = extract_features(window)
-                    row = feats.tolist() + [label]
-                    writer.writerow(row)
-                    total_rows += 1
-                    idx += step
+        total_rows = len(rows)
 
-        self.stdout.write(self.style.SUCCESS(f'Wrote {total_rows} rows to {output_path}'))
+        if output_path and total_rows > 0:
+            os.makedirs(os.path.dirname(os.path.abspath(output_path)) or '.', exist_ok=True)
+            with open(output_path, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([f'f{i}' for i in range(n_features)] + ['label'])
+                for feats, label in rows:
+                    writer.writerow(feats + [label])
+            self.stdout.write(self.style.SUCCESS(f'Wrote {total_rows} rows to {output_path}'))
+
+        if output_json_path:
+            os.makedirs(os.path.dirname(os.path.abspath(output_json_path)) or '.', exist_ok=True)
+            data = {
+                'samples': [{'features': feats, 'label': label} for feats, label in rows],
+                'updated': timezone.now().isoformat(),
+                'n_features': n_features,
+            }
+            with open(output_json_path, 'w') as f:
+                json.dump(data, f, indent=2)
+            self.stdout.write(self.style.SUCCESS(f'Wrote {total_rows} samples to {output_json_path}'))
+
+        if total_rows == 0:
+            self.stdout.write(self.style.WARNING('No rows generated. Need more telemetry and/or alerts.'))
+        elif not output_path and output_json_path:
+            self.stdout.write(self.style.SUCCESS(f'Built {total_rows} samples (JSON only).'))

@@ -127,10 +127,13 @@ class TelemetryConsumer(AsyncWebsocketConsumer):
         self.vehicle = None
         # Optional token auth from query string
         token = None
-        for key, value in self.scope.get('query_string', b'').decode().split('&'):
-            if key == 'token' and value:
-                token = value
-                break
+        qs = self.scope.get('query_string', b'').decode()
+        for part in qs.split('&'):
+            if '=' in part:
+                key, value = part.split('=', 1)
+                if key.strip() == 'token' and value.strip():
+                    token = value.strip()
+                    break
         from django.conf import settings
         expected = getattr(settings, 'TELEMETRY_WS_TOKEN', None)
         if expected and token != expected:

@@ -182,3 +182,10 @@ ML_FAILURE_PREDICTOR_PATH = os.environ.get(
     'ML_FAILURE_PREDICTOR_PATH',
     str(BASE_DIR / 'media' / 'models' / 'failure_predictor.joblib'),
 )
+# JSON for continuous learning: accumulated training samples, updated on each export/retrain.
+ML_TRAINING_DATA_JSON = os.environ.get(
+    'ML_TRAINING_DATA_JSON',
+    str(BASE_DIR / 'media' / 'models' / 'ml_training_data.json'),
+)
+# Minimum samples required to train the first model (when none exists).
+ML_MIN_SAMPLES_TO_TRAIN = int(os.environ.get('ML_MIN_SAMPLES_TO_TRAIN', 80))
