@@ -5,16 +5,20 @@ Renders HTML templates instead of JSON.
 """
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import TemplateView, View, ListView
+from django.views.generic import TemplateView, View, ListView, UpdateView
 from django.shortcuts import redirect, get_object_or_404
+from django.urls import reverse_lazy
+from django import forms
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
 from datetime import timedelta
 from collections import OrderedDict
 
-from apps.vehicles.models import Vehicle, VehicleAlert, Playbook, Runbook
+from apps.vehicles.models import Vehicle, VehicleAlert, Playbook, Runbook, ComplianceRequirement
 from apps.maintenance.models import MaintenanceTask
+from .models import AlertRule, AuditLog
+from .audit import log_audit
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -29,7 +33,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         today = timezone.now().date()
-        next_week = today + timedelta(days=7)
+        due_days = AlertRule.get_maintenance_due_days()
+        next_week = today + timedelta(days=due_days)
 
         # Period filter: 7d, 30d, month (default 7d for charts)
         period = self.request.GET.get('period', '7d')
@@ -78,7 +83,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         for v in vehicles_list:
             vehicle_health_counts[v.health_status] = vehicle_health_counts.get(v.health_status, 0) + 1
 
-        # Upcoming maintenance (next 7 days)
+        # Upcoming maintenance (next N days, FR8 configurable)
         upcoming_qs = tasks_qs.filter(
             status__in=['scheduled', 'overdue'],
             scheduled_date__gte=today,
@@ -181,6 +186,18 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         soc_alerts_with_playbook = [(a, playbooks_by_type.get(a.alert_type)) for a in soc_alerts]
         runbooks_list = list(Runbook.objects.filter(is_active=True).order_by('name'))
 
+        # FR25: Compliance expiration alerts (for vehicles user can see)
+        vehicle_ids = list(vehicles_qs.values_list('id', flat=True))
+        compliance_expired = ComplianceRequirement.objects.filter(
+            vehicle_id__in=vehicle_ids,
+            expiration_date__lt=today,
+        ).count() if vehicle_ids else 0
+        compliance_expiring = ComplianceRequirement.objects.filter(
+            vehicle_id__in=vehicle_ids,
+            expiration_date__gte=today,
+            expiration_date__lte=today + timedelta(days=30),
+        ).count() if vehicle_ids else 0
+
         context.update({
             'vehicle_health_counts': vehicle_health_counts,
             'vehicles_with_health': vehicles_list[:15],
@@ -203,6 +220,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'period': period,
             'costs_by_day': costs_by_day,
             'completed_by_day': completed_by_day,
+            'compliance_expired': compliance_expired,
+            'compliance_expiring': compliance_expiring,
         })
         return context
 
@@ -259,16 +278,117 @@ class PredictionsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         if user.is_driver:
             vehicle_ids = vehicle_ids.filter(assigned_driver=user)
         vehicle_ids = vehicle_ids.values_list('id', flat=True)
-        return (
+        qs = (
             VehicleAlert.objects.filter(vehicle_id__in=vehicle_ids)
             .select_related('vehicle')
             .order_by('-created_at')
         )
+        severity = self.request.GET.get('severity')
+        if severity and severity in dict(VehicleAlert.Severity.choices):
+            qs = qs.filter(severity=severity)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['runbooks_list'] = list(Runbook.objects.filter(is_active=True).order_by('name'))
+        context['severity_choices'] = VehicleAlert.Severity.choices
         return context
+
+
+class SuggestedMaintenanceView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """FR11: Suggested maintenance - list pending suggestions with Accept / Dismiss."""
+    model = VehicleAlert
+    template_name = 'dashboard/suggested_maintenance.html'
+    context_object_name = 'suggestions'
+    paginate_by = 20
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_view_reports()
+
+    def get_queryset(self):
+        user = self.request.user
+        vehicle_ids = Vehicle.objects.filter(is_deleted=False)
+        if user.is_driver:
+            vehicle_ids = vehicle_ids.filter(assigned_driver=user)
+        vehicle_ids = vehicle_ids.values_list('id', flat=True)
+        return (
+            VehicleAlert.objects.filter(
+                vehicle_id__in=vehicle_ids,
+            )
+            .filter(Q(suggestion_status__isnull=True) | Q(suggestion_status='pending'))
+            .select_related('vehicle')
+            .order_by('-created_at')
+        )
+
+
+class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """FR11: Accept suggested maintenance - create task and mark accepted."""
+    http_method_names = ['post']
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_maintenance()
+
+    def post(self, request):
+        from apps.maintenance.models import MaintenanceTask
+        alert_id = request.POST.get('alert_id')
+        if not alert_id:
+            messages.error(request, 'Missing alert.')
+            return redirect('dashboard:suggested_maintenance')
+        user = request.user
+        vehicle_ids = set(Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True))
+        if user.is_driver:
+            vehicle_ids = set(Vehicle.objects.filter(is_deleted=False, assigned_driver=user).values_list('id', flat=True))
+        alert = get_object_or_404(VehicleAlert, pk=alert_id)
+        if alert.vehicle_id not in vehicle_ids:
+            messages.error(request, 'Not allowed.')
+            return redirect('dashboard:suggested_maintenance')
+        if alert.suggestion_status not in (None, 'pending'):
+            messages.warning(request, 'Suggestion already handled.')
+            return redirect('dashboard:suggested_maintenance')
+        from datetime import timedelta
+        task = MaintenanceTask.objects.create(
+            vehicle=alert.vehicle,
+            title=f"Suggested: {alert.get_alert_type_display()}",
+            description=alert.message,
+            maintenance_type='preventive',
+            scheduled_date=(timezone.now() + timedelta(days=7)).date(),
+            status=MaintenanceTask.Status.SCHEDULED,
+            priority='high' if alert.severity in ('high', 'critical') else 'medium',
+            created_by=user,
+        )
+        alert.suggestion_status = 'accepted'
+        alert.save(update_fields=['suggestion_status'])
+        messages.success(request, f'Maintenance task created: {task.title}')
+        return redirect('dashboard:suggested_maintenance')
+
+
+class DismissSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """FR11: Dismiss suggested maintenance."""
+    http_method_names = ['post']
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_view_reports()
+
+    def post(self, request):
+        alert_id = request.POST.get('alert_id')
+        if not alert_id:
+            messages.error(request, 'Missing alert.')
+            return redirect('dashboard:suggested_maintenance')
+        user = request.user
+        vehicle_ids = set(Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True))
+        if user.is_driver:
+            vehicle_ids = set(Vehicle.objects.filter(is_deleted=False, assigned_driver=user).values_list('id', flat=True))
+        alert = get_object_or_404(VehicleAlert, pk=alert_id)
+        if alert.vehicle_id not in vehicle_ids:
+            messages.error(request, 'Not allowed.')
+            return redirect('dashboard:suggested_maintenance')
+        if alert.suggestion_status not in (None, 'pending'):
+            messages.warning(request, 'Suggestion already handled.')
+            return redirect('dashboard:suggested_maintenance')
+        alert.suggestion_status = 'dismissed'
+        alert.save(update_fields=['suggestion_status'])
+        messages.success(request, 'Suggestion dismissed.')
+        return redirect('dashboard:suggested_maintenance')
 
 
 class AlertsView(LoginRequiredMixin, ListView):
@@ -303,4 +423,80 @@ class AlertsView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['runbooks_list'] = list(Runbook.objects.filter(is_active=True).order_by('name'))
         context['severity_choices'] = VehicleAlert.Severity.choices
+        return context
+
+
+# ============== FR8: Alert rules (configurable thresholds) ==============
+
+class AlertRuleForm(forms.ModelForm):
+    class Meta:
+        model = AlertRule
+        fields = ('value_int', 'enabled')
+        widgets = {
+            'value_int': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 365}),
+            'enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List alert rules. Admin or Fleet Manager only."""
+    model = AlertRule
+    template_name = 'dashboard/alertrule_list.html'
+    context_object_name = 'rules'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def get_queryset(self):
+        # Ensure default rule exists
+        AlertRule.objects.get_or_create(
+            name='maintenance_due_days',
+            defaults={'value_int': 7, 'enabled': True},
+        )
+        return AlertRule.objects.all().order_by('name')
+
+
+class AlertRuleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Edit one alert rule."""
+    model = AlertRule
+    form_class = AlertRuleForm
+    template_name = 'dashboard/alertrule_form.html'
+    context_object_name = 'rule'
+    success_url = reverse_lazy('dashboard:alertrule_list')
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Alert rule updated.')
+        return super().form_valid(form)
+
+
+# ============== FR27: Audit log ==============
+
+class AuditLogListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List audit log entries. Admin only."""
+    model = AuditLog
+    template_name = 'dashboard/auditlog_list.html'
+    context_object_name = 'audit_logs'
+    paginate_by = 50
+
+    def test_func(self):
+        return self.request.user.is_authenticated and getattr(
+            self.request.user, 'role', None
+        ) == 'administrator'
+
+    def get_queryset(self):
+        qs = AuditLog.objects.select_related('user').order_by('-created_at')
+        action = self.request.GET.get('action')
+        if action and action in dict(AuditLog.ACTION_CHOICES):
+            qs = qs.filter(action=action)
+        model_name = self.request.GET.get('model')
+        if model_name:
+            qs = qs.filter(model_name=model_name)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['action_choices'] = AuditLog.ACTION_CHOICES
         return context

@@ -221,6 +221,56 @@ class Vehicle(models.Model):
 
         return 'green'
 
+    def get_health_status_reasons(self, alert_days=7):
+        """
+        Return a list of human-readable reasons for the current health status.
+        Used for tooltip/modal explanation (FR6).
+        """
+        from django.utils import timezone
+        from datetime import timedelta
+        from django.conf import settings
+        now = timezone.now()
+        since = now - timedelta(days=alert_days)
+        reasons = []
+
+        if self.alerts.filter(
+            severity=VehicleAlert.Severity.CRITICAL,
+            read_at__isnull=True,
+            created_at__gte=since,
+        ).exists():
+            reasons.append('Alerta crítica sin leer')
+        overdue = self.maintenance_tasks.filter(
+            status__in=['scheduled', 'overdue'],
+            scheduled_date__lt=now.date(),
+        )
+        if overdue.exists():
+            reasons.append('Mantenimiento vencido')
+        if reasons:
+            return ('red', reasons)
+
+        if self.alerts.filter(
+            severity=VehicleAlert.Severity.HIGH,
+            read_at__isnull=True,
+            created_at__gte=since,
+        ).exists():
+            reasons.append('Alerta alta sin leer')
+        next_due = now.date() + timedelta(days=14)
+        if self.maintenance_tasks.filter(
+            status__in=['scheduled', 'overdue'],
+            scheduled_date__lte=next_due,
+        ).exists():
+            reasons.append('Mantenimiento próximo (14 días)')
+        day_ago = now - timedelta(hours=24)
+        thresh = getattr(settings, 'TELEMETRY_PATTERNS_ENGINE_TEMP_HIGH_C', 105)
+        if self.telemetry_readings.filter(
+            timestamp__gte=day_ago,
+            engine_temperature_c__gte=thresh,
+        ).exists():
+            reasons.append('Telemetría: temperatura alta reciente')
+        if reasons:
+            return ('yellow', reasons)
+        return ('green', ['Sin problemas detectados.'])
+
     @property
     def health_status(self):
         """FR6: expose get_health_status() as property for templates."""
@@ -351,6 +401,18 @@ class VehicleAlert(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
+    # FR11: Suggested maintenance - accept (create task) or dismiss
+    suggestion_status = models.CharField(
+        max_length=16,
+        choices=[
+            ('pending', 'Pending'),
+            ('accepted', 'Accepted'),
+            ('dismissed', 'Dismissed'),
+        ],
+        null=True,
+        blank=True,
+        db_index=True,
+    )
 
     class Meta:
         verbose_name = 'Vehicle Alert'
@@ -446,6 +508,58 @@ class Runbook(models.Model):
             task.save()
             return True, f'Maintenance task created: {task.title}'
         return False, 'Unknown action type.'
+
+
+class ComplianceRequirement(models.Model):
+    """
+    Regulatory compliance requirement per vehicle (FR25).
+    Inspections, certifications, licenses, registrations with expiration alerts.
+    """
+
+    class Type(models.TextChoices):
+        INSPECTION = 'inspection', 'Inspection'
+        CERTIFICATION = 'certification', 'Certification'
+        LICENSE = 'license', 'License'
+        REGISTRATION = 'registration', 'Registration'
+        INSURANCE = 'insurance', 'Insurance'
+        OTHER = 'other', 'Other'
+
+    vehicle = models.ForeignKey(
+        Vehicle,
+        on_delete=models.CASCADE,
+        related_name='compliance_requirements',
+    )
+    requirement_type = models.CharField(
+        max_length=20,
+        choices=Type.choices,
+        default=Type.INSPECTION,
+    )
+    name = models.CharField(max_length=200, help_text='Short name (e.g. Annual inspection)')
+    expiration_date = models.DateField()
+    issuing_authority = models.CharField(max_length=200, blank=True)
+    document_reference = models.CharField(max_length=255, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Compliance Requirement'
+        verbose_name_plural = 'Compliance Requirements'
+        ordering = ['expiration_date']
+
+    def __str__(self):
+        return f'{self.name} - {self.vehicle} (exp: {self.expiration_date})'
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return self.expiration_date < timezone.now().date()
+
+    @property
+    def days_until_expiry(self):
+        from django.utils import timezone
+        delta = self.expiration_date - timezone.now().date()
+        return delta.days
 
 
 class VehicleManager(models.Manager):

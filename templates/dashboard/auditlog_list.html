@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Audit Log - FleetPredict Pro{% endblock %}
+{% block meta_description %}FR27: User action audit log.{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Audit Log (FR27)</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+</div>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <select name="action" class="form-select form-select-sm">
+      <option value="">All actions</option>
+      {% for v, l in action_choices %}
+      <option value="{{ v }}" {% if request.GET.action == v %}selected{% endif %}>{{ l }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <input type="text" name="model" class="form-control form-control-sm" placeholder="Model name" value="{{ request.GET.model }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+  </div>
+</form>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Model</th>
+            <th>Object ID</th>
+            <th>Message</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in audit_logs %}
+          <tr>
+            <td>{{ e.created_at|date:"Y-m-d H:i:s" }}</td>
+            <td>{{ e.user.get_full_name|default:e.user.email|default:"—" }}</td>
+            <td>{{ e.get_action_display }}</td>
+            <td>{{ e.model_name|default:"—" }}</td>
+            <td>{{ e.object_id|default:"—" }}</td>
+            <td>{{ e.message|truncatewords:10 }}</td>
+            <td>{{ e.ip_address|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7">No audit log entries.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-2">
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.action %}&action={{ request.GET.action }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.action %}&action={{ request.GET.action }}{% endif %}{% if request.GET.model %}&model={{ request.GET.model }}{% endif %}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

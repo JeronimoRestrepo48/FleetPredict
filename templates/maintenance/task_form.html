@@ -13,7 +13,20 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">{% if object %}Edit Maintenance Task{% else %}Add Maintenance Task{% endif %}</h2>
-  <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+  <div class="d-flex gap-2 align-items-center">
+    {% if not object and maintenance_templates %}
+    <form method="get" action="{% url 'maintenance:task_create' %}" class="d-inline">
+      <label for="id_apply_template" class="me-2">Apply template:</label>
+      <select name="template" id="id_apply_template" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+        <option value="">— None —</option>
+        {% for t in maintenance_templates %}
+        <option value="{{ t.pk }}" {% if selected_template_id == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    {% endif %}
+    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+  </div>
 </div>
 <div class="card card-fp">
     <div class="card-body">

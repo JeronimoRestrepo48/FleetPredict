@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Maintenance Templates - FleetPredict Pro{% endblock %}
+{% block meta_description %}Manage maintenance templates (FR23). Apply when creating tasks.{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Templates</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Maintenance Templates</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'maintenance:template_create' %}" class="btn btn-primary">Add template</a>
+    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to Maintenance</a>
+  </div>
+</div>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Duration (min)</th>
+            <th>Steps</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for t in templates %}
+          <tr>
+            <td>{{ t.name }}</td>
+            <td>{{ t.get_maintenance_type_display }}</td>
+            <td>{{ t.estimated_duration|default:"—" }}</td>
+            <td>{{ t.steps|length }} step(s)</td>
+            <td>
+              <a href="{% url 'maintenance:task_create' %}?template={{ t.pk }}" class="btn btn-sm btn-outline-primary">Use</a>
+              <a href="{% url 'maintenance:template_update' t.pk %}">Edit</a>
+              <a href="{% url 'maintenance:template_delete' t.pk %}" class="ms-2 text-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">No templates. Create one to prefill tasks.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

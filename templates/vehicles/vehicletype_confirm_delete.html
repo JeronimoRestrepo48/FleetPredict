@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Delete Vehicle Type - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Delete vehicle type</h2>
+  <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">Back to types</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <p>Are you sure you want to delete <strong>{{ vehicle_type.name }}</strong>?</p>
+    {% if vehicle_type.vehicles.exists %}
+    <p class="text-danger">This type is used by {{ vehicle_type.vehicles.count }} vehicle(s). Reassign them before deleting.</p>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" {% if vehicle_type.vehicles.exists %}disabled{% endif %}>Delete</button>
+      <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

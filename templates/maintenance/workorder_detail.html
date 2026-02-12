@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Work Order {{ work_order.work_order_number }} - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work orders</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ work_order.work_order_number }}</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Work Order {{ work_order.work_order_number }}</h2>
+  <div>
+    {% if work_order.status != 'completed' %}
+    <a href="{% url 'maintenance:workorder_update' work_order.pk %}" class="btn btn-primary">Edit</a>
+    {% endif %}
+    <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-outline-secondary">Back to list</a>
+  </div>
+</div>
+<div class="card card-fp mb-3">
+  <div class="card-body">
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Task</dt>
+      <dd class="col-sm-9"><a href="{% url 'maintenance:task_detail' work_order.task_id %}">{{ work_order.task.title }}</a> ({{ work_order.task.vehicle }})</dd>
+      <dt class="col-sm-3">Status</dt>
+      <dd class="col-sm-9">
+        <span class="badge bg-{% if work_order.status == 'completed' %}success{% elif work_order.status == 'cancelled' %}secondary{% elif work_order.is_overdue %}danger{% else %}primary{% endif %}">
+          {{ work_order.get_status_display }}
+        </span>
+      </dd>
+      <dt class="col-sm-3">Assignee</dt>
+      <dd class="col-sm-9">{{ work_order.assignee|default:"—" }}</dd>
+      <dt class="col-sm-3">Priority</dt>
+      <dd class="col-sm-9">{{ work_order.get_priority_display }}</dd>
+      <dt class="col-sm-3">Due date</dt>
+      <dd class="col-sm-9">{{ work_order.due_date|default:"—" }}</dd>
+      <dt class="col-sm-3">Completion date</dt>
+      <dd class="col-sm-9">{{ work_order.completion_date|default:"—" }}</dd>
+      <dt class="col-sm-3">Notes</dt>
+      <dd class="col-sm-9">{{ work_order.notes|default:"—" }}</dd>
+      <dt class="col-sm-3">Created</dt>
+      <dd class="col-sm-9">{{ work_order.created_at }}</dd>
+    </dl>
+  </div>
+</div>
+{% endblock %}

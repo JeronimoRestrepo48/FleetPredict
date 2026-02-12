@@ -84,3 +84,30 @@ class DashboardAccessTest(TestCase):
         self.assertIn(resp.status_code, [200, 302])
         self.alert.refresh_from_db()
         self.assertIsNotNone(self.alert.read_at)
+
+    def test_suggested_maintenance_requires_can_view_reports(self):
+        self.client.force_login(self.driver)
+        resp = self.client.get(reverse('dashboard:suggested_maintenance'))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_suggested_maintenance_ok_for_manager(self):
+        self.client.force_login(self.manager)
+        resp = self.client.get(reverse('dashboard:suggested_maintenance'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('suggestions', resp.context)
+
+    def test_audit_log_requires_administrator(self):
+        self.client.force_login(self.manager)
+        resp = self.client.get(reverse('dashboard:auditlog_list'))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_audit_log_ok_for_administrator(self):
+        admin = User.objects.create_user(
+            email='admin@test.local',
+            password='TestPass123!',
+            role=User.Role.ADMINISTRATOR,
+        )
+        self.client.force_login(admin)
+        resp = self.client.get(reverse('dashboard:auditlog_list'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('audit_logs', resp.context)

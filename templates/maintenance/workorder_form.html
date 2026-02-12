@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% if work_order %}Edit{% else %}Create{% endif %} Work Order - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:workorder_list' %}">Work orders</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if work_order %}Edit{% else %}Create{% endif %}</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">{% if work_order %}Edit Work Order{% else %}Create Work Order{% endif %}</h2>
+  <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-outline-secondary">Back to list</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="post" class="fp-validate">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="mb-3">
+        <label for="id_task" class="form-label">Maintenance task</label>
+        {{ form.task }}
+        {% if form.task.errors %}<div class="invalid-feedback d-block">{{ form.task.errors }}</div>{% endif %}
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="id_assignee" class="form-label">Assignee</label>
+          {{ form.assignee }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="id_priority" class="form-label">Priority</label>
+          {{ form.priority }}
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="id_due_date" class="form-label">Due date</label>
+          {{ form.due_date }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="id_status" class="form-label">Status</label>
+          {{ form.status }}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="id_notes" class="form-label">Notes</label>
+        {{ form.notes }}
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

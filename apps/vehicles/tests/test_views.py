@@ -98,3 +98,43 @@ class VehicleHistoryAccessTest(TestCase):
         resp = self.client.get(reverse('vehicles:vehicle_history', args=[self.vehicle.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertIn('history', resp.context)
+
+
+class VehicleComplianceAndExportTest(TestCase):
+    """Compliance list and bulk CSV export require can_manage_vehicles."""
+
+    def setUp(self):
+        self.client = Client()
+        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.driver = User.objects.create_user(
+            email='compdriver@test.local',
+            password='TestPass123!',
+            role=User.Role.DRIVER,
+        )
+        self.manager = User.objects.create_user(
+            email='compmanager@test.local',
+            password='TestPass123!',
+            role=User.Role.FLEET_MANAGER,
+        )
+
+    def test_compliance_list_requires_can_manage_vehicles(self):
+        self.client.force_login(self.driver)
+        resp = self.client.get(reverse('vehicles:compliance_list'))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_compliance_list_ok_for_manager(self):
+        self.client.force_login(self.manager)
+        resp = self.client.get(reverse('vehicles:compliance_list'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('compliance_list', resp.context)
+
+    def test_vehicles_export_csv_requires_can_manage_vehicles(self):
+        self.client.force_login(self.driver)
+        resp = self.client.get(reverse('vehicles:vehicles_export_csv'))
+        self.assertEqual(resp.status_code, 403)
+
+    def test_vehicles_export_csv_ok_for_manager(self):
+        self.client.force_login(self.manager)
+        resp = self.client.get(reverse('vehicles:vehicles_export_csv'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('text/csv', resp.get('Content-Type', ''))

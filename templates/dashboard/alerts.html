@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Mis alertas - FleetPredict Pro{% endblock %}
-{% block meta_description %}Centro de notificaciones (FR7).{% endblock %}
+{% block title %}My alerts - FleetPredict Pro{% endblock %}
+{% block meta_description %}Notification center (FR7).{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Mis alertas</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+  <h2 class="page-title mb-0">My alerts</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
 </div>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto">
-    <label class="form-label visually-hidden">Severidad</label>
+    <label class="form-label visually-hidden">Severity</label>
     <select name="severity" class="form-select form-select-sm">
-      <option value="">Todas las severidades</option>
+      <option value="">All severities</option>
       {% for val, label in severity_choices %}
       <option value="{{ val }}" {% if request.GET.severity == val %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <label class="form-label visually-hidden">Estado</label>
+    <label class="form-label visually-hidden">Status</label>
     <select name="read" class="form-select form-select-sm">
-      <option value="">Todas</option>
-      <option value="unread" {% if request.GET.read == 'unread' %}selected{% endif %}>No leídas</option>
-      <option value="read" {% if request.GET.read == 'read' %}selected{% endif %}>Leídas</option>
+      <option value="">All</option>
+      <option value="unread" {% if request.GET.read == 'unread' %}selected{% endif %}>Unread</option>
+      <option value="read" {% if request.GET.read == 'read' %}selected{% endif %}>Read</option>
     </select>
   </div>
   <div class="col-auto">
-    <button type="submit" class="btn btn-sm btn-primary">Filtrar</button>
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
   </div>
 </form>
 <div class="card card-fp">
@@ -35,13 +35,13 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Vehículo</th>
-            <th>Tipo</th>
-            <th>Severidad</th>
-            <th>Mensaje</th>
-            <th>Fecha</th>
-            <th>Leída</th>
-            <th>Acciones</th>
+            <th>Vehicle</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Message</th>
+            <th>Date</th>
+            <th>Read</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -75,17 +75,17 @@
     <nav class="p-3">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Anterior</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Previous</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Pág. {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Siguiente</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Next</a></li>
         {% endif %}
       </ul>
     </nav>
     {% endif %}
     {% else %}
-    <div class="p-4 text-muted text-center">No hay alertas.</div>
+    <div class="p-4 text-muted text-center">No alerts.</div>
     {% endif %}
   </div>
 </div>

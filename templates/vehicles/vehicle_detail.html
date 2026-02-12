@@ -48,6 +48,24 @@
   </div>
 </div>
 {% endif %}
+<div class="modal fade" id="healthReasonsModal" tabindex="-1" aria-labelledby="healthReasonsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="healthReasonsModalLabel">Health indicator</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-2">This vehicle has status <strong>{% if health_status == 'green' %}Good{% elif health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</strong> because:</p>
+        <ul class="mb-0">
+          {% for reason in health_reasons %}
+          <li>{{ reason }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="row g-3">
   <div class="col-md-6">
     <div class="card card-fp mb-0">
@@ -68,8 +86,12 @@
                     <dd class="col-sm-8">{{ vehicle.vehicle_type|default:"-" }}</dd>
                     <dt class="col-sm-4">Status</dt>
                     <dd class="col-sm-8"><span class="badge bg-{% if vehicle.status == 'active' %}success{% elif vehicle.status == 'under_maintenance' %}warning{% elif vehicle.status == 'retired' %}secondary{% else %}secondary{% endif %}">{{ vehicle.get_status_display }}</span></dd>
-                    <dt class="col-sm-4">Salud</dt>
-                    <dd class="col-sm-8"><span class="badge bg-{% if vehicle.health_status == 'green' %}success{% elif vehicle.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if vehicle.health_status == 'green' %}Buena{% elif vehicle.health_status == 'yellow' %}Precaución{% else %}Crítica{% endif %}</span></dd>
+                    <dt class="col-sm-4">Health</dt>
+                    <dd class="col-sm-8">
+                      <button type="button" class="btn btn-link p-0 border-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#healthReasonsModal" aria-label="Why this health status?">
+                        <span class="badge bg-{% if health_status == 'green' %}success{% elif health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if health_status == 'green' %}Good{% elif health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</span>
+                      </button>
+                    </dd>
                     <dt class="col-sm-4">Current Mileage</dt>
                     <dd class="col-sm-8">{{ vehicle.current_mileage|default:"-" }} km</dd>
                     <dt class="col-sm-4">Fuel Type</dt>
@@ -96,33 +118,91 @@
     </div>
 </div>
 
+{% if compliance_requirements or can_manage %}
 <div class="row g-3 mt-1">
   <div class="col-12">
     <div class="card card-fp">
       <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <span>Telemetría en vivo</span>
+        <span>Compliance (FR25)</span>
+        {% if can_manage %}
+        <a href="{% url 'vehicles:compliance_create' %}?vehicle={{ vehicle.pk }}" class="btn btn-sm btn-primary">Add requirement</a>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if compliance_requirements %}
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Requirement</th>
+                <th>Type</th>
+                <th>Expiration</th>
+                <th>Status</th>
+                {% if can_manage %}<th></th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in compliance_requirements %}
+              <tr>
+                <td>{{ c.name }}</td>
+                <td>{{ c.get_requirement_type_display }}</td>
+                <td>{{ c.expiration_date }}</td>
+                <td>
+                  {% if c.is_expired %}
+                  <span class="badge bg-danger">Expired</span>
+                  {% elif c.days_until_expiry <= 30 %}
+                  <span class="badge bg-warning text-dark">Expiring in {{ c.days_until_expiry }} days</span>
+                  {% else %}
+                  <span class="badge bg-success">OK</span>
+                  {% endif %}
+                </td>
+                {% if can_manage %}
+                <td>
+                  <a href="{% url 'vehicles:compliance_update' c.pk %}">Edit</a>
+                  <a href="{% url 'vehicles:compliance_delete' c.pk %}" class="ms-2 text-danger">Delete</a>
+                </td>
+                {% endif %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No compliance requirements. {% if can_manage %}Add one to track inspections, licenses, etc.{% endif %}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mt-1">
+  <div class="col-12">
+    <div class="card card-fp">
+      <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <span>Live telemetry</span>
         <span id="telemetry-engine-status" class="badge fs-6 {% if vehicle_engine_on_initial %}bg-success{% else %}bg-danger{% endif %}">
-          {% if vehicle_engine_on_initial %}Encendido{% else %}Apagado{% endif %}
+          {% if vehicle_engine_on_initial %}On{% else %}Off{% endif %}
         </span>
       </div>
       <div class="card-body">
-        <p class="text-muted small mb-3">Datos recibidos por WebSocket. Conectando…</p>
+        <p class="text-muted small mb-3">Data received via WebSocket. Connecting…</p>
         <div class="row g-2 g-md-3">
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Velocidad</div>
+              <div class="small text-muted">Speed</div>
               <div id="telem-speed" class="fw-semibold">—</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Combustible %</div>
+              <div class="small text-muted">Fuel %</div>
               <div id="telem-fuel" class="fw-semibold">—</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Temp. motor °C</div>
+              <div class="small text-muted">Engine temp °C</div>
               <div id="telem-temp" class="fw-semibold">—</div>
             </div>
           </div>
@@ -134,25 +214,25 @@
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Odómetro km</div>
+              <div class="small text-muted">Odometer km</div>
               <div id="telem-mileage" class="fw-semibold">—</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Voltaje</div>
+              <div class="small text-muted">Voltage</div>
               <div id="telem-voltage" class="fw-semibold">—</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Posición</div>
+              <div class="small text-muted">Position</div>
               <div id="telem-position" class="fw-semibold small">—</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Última lectura</div>
+              <div class="small text-muted">Last reading</div>
               <div id="telem-timestamp" class="fw-semibold small">—</div>
             </div>
           </div>

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Cost Report - FleetPredict Pro{% endblock %}
+{% block meta_description %}FR13: Maintenance cost by vehicle.{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Cost Report (FR13)</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+<p class="text-muted">Actual cost of completed maintenance by vehicle.</p>
+<div class="card card-fp">
+  <div class="card-body">
+    <p><strong>Grand total (all vehicles):</strong> ${{ grand_total|floatformat:2 }}</p>
+    <div class="table-responsive">
+      <table class="table table-fp mb-0">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Tasks</th>
+            <th>Total cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in by_vehicle %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' row.vehicle__id %}">{{ row.vehicle__make }} {{ row.vehicle__model }} ({{ row.vehicle__license_plate }})</a></td>
+            <td>{{ row.count }}</td>
+            <td>${{ row.total|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No completed maintenance with cost data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

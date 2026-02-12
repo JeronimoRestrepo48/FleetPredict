@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Edit alert rule - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Edit: {{ rule.get_name_display }}</h2>
+  <a href="{% url 'dashboard:alertrule_list' %}" class="btn btn-outline-secondary">Back to rules</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

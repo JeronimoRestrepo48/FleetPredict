@@ -1,12 +1,25 @@
 {% extends "base.html" %}
-{% block title %}Predicción de fallas - FleetPredict Pro{% endblock %}
-{% block meta_description %}Recomendaciones de posibles fallas por vehículo (FR9).{% endblock %}
+{% block title %}Failure predictions - FleetPredict Pro{% endblock %}
+{% block meta_description %}Failure recommendations per vehicle (FR9).{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Predicción de fallas</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+  <h2 class="page-title mb-0">Failure predictions</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
 </div>
-<p class="text-muted">Vehículo, tipo, mensaje, confianza y plazo. Acciones disponibles con runbooks.</p>
+<p class="text-muted">Vehicle, type, message, confidence and timeframe. Runbook actions available. FR10: filter by severity.</p>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <select name="severity" class="form-select form-select-sm">
+      <option value="">All severities</option>
+      {% for val, label in severity_choices %}
+      <option value="{{ val }}" {% if request.GET.severity == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+  </div>
+</form>
 <div class="card card-fp">
   <div class="card-body p-0">
     {% if alerts %}
@@ -14,14 +27,14 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Vehículo</th>
-            <th>Tipo</th>
-            <th>Severidad</th>
-            <th>Mensaje</th>
-            <th>Confianza</th>
-            <th>Plazo</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
+            <th>Vehicle</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Message</th>
+            <th>Confidence</th>
+            <th>Timeframe</th>
+            <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -56,17 +69,17 @@
     <nav class="p-3">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Pág. {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
         {% endif %}
       </ul>
     </nav>
     {% endif %}
     {% else %}
-    <div class="p-4 text-muted text-center">No hay alertas de predicción.</div>
+    <div class="p-4 text-muted text-center">No prediction alerts.</div>
     {% endif %}
   </div>
 </div>

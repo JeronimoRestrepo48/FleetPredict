@@ -17,6 +17,20 @@
   <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
 </div>
 
+{% if compliance_expired or compliance_expiring %}
+<div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3" role="alert">
+  <span>
+    <strong>Compliance (FR25):</strong>
+    {% if compliance_expired %}<span class="text-danger">{{ compliance_expired }} expired</span>{% endif %}
+    {% if compliance_expired and compliance_expiring %} · {% endif %}
+    {% if compliance_expiring %}<span>{{ compliance_expiring }} expiring in 30 days</span>{% endif %}
+  </span>
+  {% if user.can_manage_vehicles %}
+  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-sm btn-outline-dark">View compliance</a>
+  {% endif %}
+</div>
+{% endif %}
+
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
   <span class="text-muted small">Charts period:</span>
   <a href="?period=7d" class="btn btn-sm btn-outline-primary period-btn {% if period == '7d' %}active{% endif %}">7 days</a>
@@ -62,21 +76,21 @@
 <div class="row g-3 g-md-4 mb-3">
   <div class="col-12">
     <div class="card card-fp">
-      <div class="card-header">Salud de flota (FR6)</div>
+      <div class="card-header">Fleet health (FR6)</div>
       <div class="card-body py-2">
-        <span class="badge bg-success me-2">Buena {{ vehicle_health_counts.green|default:0 }}</span>
-        <span class="badge bg-warning text-dark me-2">Precaución {{ vehicle_health_counts.yellow|default:0 }}</span>
-        <span class="badge bg-danger">Crítica {{ vehicle_health_counts.red|default:0 }}</span>
+        <span class="badge bg-success me-2">Good {{ vehicle_health_counts.green|default:0 }}</span>
+        <span class="badge bg-warning text-dark me-2">Caution {{ vehicle_health_counts.yellow|default:0 }}</span>
+        <span class="badge bg-danger">Critical {{ vehicle_health_counts.red|default:0 }}</span>
         {% if vehicles_with_health %}
         <div class="table-responsive mt-2">
           <table class="table table-sm table-fp mb-0">
-            <thead><tr><th>Vehículo</th><th>Salud</th><th>Motor</th></tr></thead>
+            <thead><tr><th>Vehicle</th><th>Health</th><th>Engine</th></tr></thead>
             <tbody>
               {% for v in vehicles_with_health %}
               <tr>
                 <td><a href="{% url 'vehicles:vehicle_detail' v.pk %}">{{ v.display_name }}</a></td>
-                <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}Buena{% elif v.health_status == 'yellow' %}Precaución{% else %}Crítica{% endif %}</span></td>
-                <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}Encendido{% else %}Apagado{% endif %}</span></td>
+                <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}Good{% elif v.health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</span></td>
+                <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}On{% else %}Off{% endif %}</span></td>
               </tr>
               {% endfor %}
             </tbody>
@@ -139,11 +153,11 @@
     <div class="card card-fp border-warning">
       <div class="card-header bg-light d-flex align-items-center">
         <i class="bi bi-shield-exclamation me-2"></i>
-        <span>Centro de operaciones (SOC) – Alertas altas y críticas</span>
+        <span>Operations center (SOC) – High and critical alerts</span>
       </div>
       <div class="card-body">
         {% if soc_alerts %}
-        <p class="text-muted small mb-3">Acciones sugeridas (playbooks) y runbooks ejecutables para cada alerta.</p>
+        <p class="text-muted small mb-3">Suggested actions (playbooks) and runnable runbooks for each alert.</p>
         <div class="accordion" id="socAccordion">
           {% for alert, playbook in soc_alerts_with_playbook %}
           <div class="accordion-item">
@@ -158,7 +172,7 @@
                 <p class="mb-2">{{ alert.message }}</p>
                 {% if playbook %}
                 <div class="mb-3">
-                  <strong>Playbook – Pasos sugeridos:</strong>
+                  <strong>Playbook – Suggested steps:</strong>
                   <ol class="mb-0 ps-3">
                     {% for step in playbook.steps %}
                     <li>{{ step }}</li>
@@ -166,7 +180,7 @@
                   </ol>
                 </div>
                 {% endif %}
-                <div class="mb-2"><strong>Runbooks – Acciones:</strong></div>
+                <div class="mb-2"><strong>Runbooks – Actions:</strong></div>
                 <div class="d-flex flex-wrap gap-2">
                   {% for runbook in runbooks_list %}
                     {% if not runbook.alert_type or runbook.alert_type == alert.alert_type %}
@@ -185,7 +199,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted mb-0">No hay alertas altas o críticas en este momento.</p>
+        <p class="text-muted mb-0">No high or critical alerts at this time.</p>
         {% endif %}
       </div>
     </div>

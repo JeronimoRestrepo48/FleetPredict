@@ -157,6 +157,40 @@ class MaintenanceTask(models.Model):
         return False
 
 
+class MaintenanceTemplate(models.Model):
+    """
+    Reusable maintenance template (FR23).
+    Apply when creating a task to pre-fill title, type, duration, description.
+    """
+    name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    maintenance_type = models.CharField(
+        max_length=20,
+        choices=MaintenanceTask.Type.choices,
+        default=MaintenanceTask.Type.PREVENTIVE,
+    )
+    estimated_duration = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text='Estimated duration in minutes',
+    )
+    steps = models.JSONField(
+        default=list,
+        blank=True,
+        help_text='List of step strings (checklist)',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Maintenance Template'
+        verbose_name_plural = 'Maintenance Templates'
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class MaintenanceDocument(models.Model):
     """
     Document/attachment for maintenance tasks.
@@ -228,3 +262,80 @@ class MaintenanceComment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.user} on {self.task}'
+
+
+class WorkOrder(models.Model):
+    """
+    Work order linked to a maintenance task (FR24).
+    Tracks status, assignee, due date, completion, and notes.
+    """
+
+    class Status(models.TextChoices):
+        OPEN = 'open', 'Open'
+        IN_PROGRESS = 'in_progress', 'In Progress'
+        COMPLETED = 'completed', 'Completed'
+        CANCELLED = 'cancelled', 'Cancelled'
+
+    task = models.OneToOneField(
+        MaintenanceTask,
+        on_delete=models.CASCADE,
+        related_name='work_order',
+        unique=True,
+    )
+    work_order_number = models.CharField(max_length=50, unique=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.OPEN,
+    )
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='work_orders',
+    )
+    priority = models.CharField(
+        max_length=20,
+        choices=MaintenanceTask.Priority.choices,
+        default=MaintenanceTask.Priority.MEDIUM,
+    )
+    due_date = models.DateField(null=True, blank=True)
+    completion_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Work Order'
+        verbose_name_plural = 'Work Orders'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.work_order_number} - {self.task.title}'
+
+    @property
+    def is_overdue(self):
+        if self.status in (self.Status.COMPLETED, self.Status.CANCELLED):
+            return False
+        if self.due_date:
+            return self.due_date < timezone.now().date()
+        return False
+
+    def save(self, *args, **kwargs):
+        if not self.work_order_number:
+            from django.db.models import Max
+            year = timezone.now().year
+            prefix = f'WO-{year}-'
+            last = WorkOrder.objects.filter(
+                work_order_number__startswith=prefix
+            ).aggregate(Max('work_order_number'))['work_order_number__max']
+            if last:
+                try:
+                    num = int(last.split('-')[-1]) + 1
+                except (IndexError, ValueError):
+                    num = 1
+            else:
+                num = 1
+            self.work_order_number = f'{prefix}{num:04d}'
+        super().save(*args, **kwargs)

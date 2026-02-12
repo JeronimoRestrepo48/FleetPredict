@@ -1,15 +1,19 @@
 """
-Views for PDF report export (FR5 reportes).
+Views for PDF report export (FR5 reportes) and FR12–15 (trends, cost, comparison).
 Restricted to users with can_view_reports().
 """
 
+from datetime import timedelta
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views import View
 from django.views.generic import TemplateView
+from django.db.models import Count, Sum
 
 from apps.vehicles.models import Vehicle
+from apps.maintenance.models import MaintenanceTask
 from .pdf_utils import generate_vehicle_pdf, generate_fleet_pdf
 
 
@@ -64,3 +68,63 @@ class FleetReportPDFView(LoginRequiredMixin, CanViewReportsMixin, View):
 class ReportsIndexView(LoginRequiredMixin, CanViewReportsMixin, TemplateView):
     """Reports landing: fleet PDF download and link to vehicle reports."""
     template_name = 'reports/reports_index.html'
+
+
+def _tasks_queryset(user):
+    qs = MaintenanceTask.objects.filter(status='completed').select_related('vehicle')
+    if user.is_driver:
+        qs = qs.filter(vehicle__assigned_driver=user)
+    return qs
+
+
+class MaintenanceTrendsView(LoginRequiredMixin, CanViewReportsMixin, TemplateView):
+    """FR12: Maintenance trends - completed tasks over time."""
+    template_name = 'reports/trends.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tasks = _tasks_queryset(self.request.user)
+        today = timezone.now().date()
+        last_90 = today - timedelta(days=90)
+        by_month = (
+            tasks.filter(completion_date__gte=last_90)
+            .values('completion_date__year', 'completion_date__month')
+            .annotate(count=Count('id'))
+            .order_by('completion_date__year', 'completion_date__month')
+        )
+        context['by_month'] = list(by_month)
+        context['total_completed'] = tasks.filter(completion_date__gte=last_90).count()
+        return context
+
+
+class CostReportView(LoginRequiredMixin, CanViewReportsMixin, TemplateView):
+    """FR13: Cost report - costs by vehicle and total."""
+    template_name = 'reports/cost_report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tasks = _tasks_queryset(self.request.user)
+        by_vehicle = (
+            tasks.values('vehicle__id', 'vehicle__license_plate', 'vehicle__make', 'vehicle__model')
+            .annotate(total=Sum('actual_cost'), count=Count('id'))
+            .order_by('-total')
+        )
+        context['by_vehicle'] = list(by_vehicle)
+        context['grand_total'] = tasks.aggregate(s=Sum('actual_cost'))['s'] or 0
+        return context
+
+
+class ComparisonReportView(LoginRequiredMixin, CanViewReportsMixin, TemplateView):
+    """FR14/15: Comparison - vehicles by maintenance count and cost."""
+    template_name = 'reports/comparison.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tasks = _tasks_queryset(self.request.user)
+        by_vehicle = (
+            tasks.values('vehicle__id', 'vehicle__license_plate', 'vehicle__make', 'vehicle__model')
+            .annotate(total_cost=Sum('actual_cost'), task_count=Count('id'))
+            .order_by('-task_count')
+        )
+        context['by_vehicle'] = list(by_vehicle)
+        return context

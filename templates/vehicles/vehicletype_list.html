@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Vehicle Types - FleetPredict Pro{% endblock %}
+{% block meta_description %}Manage vehicle types and maintenance intervals (FR22).{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Vehicle Types</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'vehicles:vehicletype_create' %}" class="btn btn-primary">Add type</a>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to vehicles</a>
+  </div>
+</div>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Interval (days)</th>
+            <th>Interval (km)</th>
+            <th>Vehicles</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for vt in vehicle_types %}
+          <tr>
+            <td>{{ vt.name }}</td>
+            <td>{{ vt.maintenance_interval_days }}</td>
+            <td>{{ vt.maintenance_interval_km }}</td>
+            <td>{{ vt.vehicles.count }}</td>
+            <td>
+              <a href="{% url 'vehicles:vehicletype_update' vt.pk %}">Edit</a>
+              <a href="{% url 'vehicles:vehicletype_delete' vt.pk %}" class="ms-2 text-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5">No vehicle types. Add one to use in vehicles.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -7,6 +7,7 @@
   <h2 class="page-title mb-0">Maintenance Tasks</h2>
   {% if can_manage %}
   <a href="{% url 'maintenance:task_create' %}" class="btn btn-primary btn-fp-primary"><i class="bi bi-plus-lg me-1"></i> Add Task</a>
+  <a href="{% url 'maintenance:maintenance_export_csv' %}" class="btn btn-outline-secondary">Export CSV</a>
   {% endif %}
 </div>
 <div class="card card-fp">

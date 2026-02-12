@@ -31,7 +31,7 @@
                         <a class="nav-link" href="{% url 'dashboard:index' %}">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link position-relative" href="{% url 'dashboard:alerts' %}">Alertas{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
+                        <a class="nav-link position-relative" href="{% url 'dashboard:alerts' %}">Alerts{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a>
@@ -39,12 +39,31 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'maintenance:task_list' %}">Maintenance</a>
                     </li>
-                    {% if user.can_view_reports %}
+                    {% if user.can_manage_maintenance %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard:predictions' %}">Predicción de fallas</a>
+                        <a class="nav-link" href="{% url 'maintenance:template_list' %}">Maintenance templates</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reports:index' %}">Reportes</a>
+                        <a class="nav-link" href="{% url 'maintenance:workorder_list' %}">Work orders</a>
+                    </li>
+                    {% endif %}
+                    {% if user.can_view_reports %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:predictions' %}">Failure predictions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reports:index' %}">Reports</a>
+                    </li>
+                    {% endif %}
+                    {% if user.can_manage_vehicles %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:alertrule_list' %}">Alert rules</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vehicles:compliance_list' %}">Compliance</a>
                     </li>
                     {% endif %}
                     <li class="nav-item">
@@ -53,6 +72,12 @@
                     {% if user.role == 'administrator' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'users:user_list' %}">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'vehicles:vehicletype_list' %}">Vehicle types</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:auditlog_list' %}">Audit log</a>
                     </li>
                     {% endif %}
                     {% endif %}

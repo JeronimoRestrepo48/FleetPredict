@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{% if compliance %}Edit{% else %}Add{% endif %} Compliance - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if compliance %}Edit{% else %}Add{% endif %}</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">{% if compliance %}Edit Compliance Requirement{% else %}Add Compliance Requirement{% endif %}</h2>
+  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">Back to list</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="post" class="fp-validate">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="mb-3">
+        <label for="id_vehicle" class="form-label">Vehicle</label>
+        {{ form.vehicle }}
+        {% if form.vehicle.errors %}<div class="invalid-feedback d-block">{{ form.vehicle.errors }}</div>{% endif %}
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="id_requirement_type" class="form-label">Type</label>
+          {{ form.requirement_type }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="id_name" class="form-label">Name</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="id_expiration_date" class="form-label">Expiration date</label>
+        {{ form.expiration_date }}
+        {% if form.expiration_date.errors %}<div class="invalid-feedback d-block">{{ form.expiration_date.errors }}</div>{% endif %}
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="id_issuing_authority" class="form-label">Issuing authority</label>
+          {{ form.issuing_authority }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="id_document_reference" class="form-label">Document reference</label>
+          {{ form.document_reference }}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="id_notes" class="form-label">Notes</label>
+        {{ form.notes }}
+      </div>
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

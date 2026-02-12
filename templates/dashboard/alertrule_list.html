@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Alert rules - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Alert rules (FR8)</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to dashboard</a>
+</div>
+<p class="text-muted">Configure when alerts are triggered (e.g. maintenance due within N days).</p>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <table class="table table-fp table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Rule</th>
+          <th>Value</th>
+          <th>Enabled</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rule in rules %}
+        <tr>
+          <td>{{ rule.get_name_display }}</td>
+          <td>{{ rule.value_int|default:"-" }}</td>
+          <td>{% if rule.enabled %}Yes{% else %}No{% endif %}</td>
+          <td><a href="{% url 'dashboard:alertrule_edit' rule.pk %}">Edit</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">No rules. Default rules are created on first load.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

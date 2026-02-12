@@ -7,6 +7,7 @@
   <h2 class="page-title mb-0">Vehicles</h2>
   {% if can_manage %}
   <a href="{% url 'vehicles:vehicle_create' %}" class="btn btn-primary btn-fp-primary"><i class="bi bi-plus-lg me-1"></i> Add Vehicle</a>
+  <a href="{% url 'vehicles:vehicles_export_csv' %}" class="btn btn-outline-secondary">Export CSV</a>
   {% endif %}
 </div>
 <div class="card card-fp">
@@ -22,6 +23,15 @@
           <option value="">All statuses</option>
           {% for value, label in status_choices %}
           <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="id_health_filter" class="form-label visually-hidden">Filter by health</label>
+        <select name="health" id="id_health_filter" class="form-select" aria-label="Filter by health">
+          <option value="">All health</option>
+          {% for value, label in health_choices %}
+          <option value="{{ value }}" {% if request.GET.health == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
@@ -45,8 +55,8 @@
             <th>License Plate</th>
             <th>Vehicle</th>
             <th>Status</th>
-            <th>Salud</th>
-            <th>Motor</th>
+            <th>Health</th>
+            <th>Engine</th>
             <th>Mileage</th>
             <th>Driver</th>
             <th></th>
@@ -58,8 +68,8 @@
             <td>{{ v.license_plate }}</td>
             <td>{{ v.display_name }}</td>
             <td><span class="badge bg-{% if v.status == 'active' %}success{% elif v.status == 'under_maintenance' %}warning text-dark{% elif v.status == 'retired' %}secondary{% else %}secondary{% endif %}">{{ v.get_status_display }}</span></td>
-            <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}Buena{% elif v.health_status == 'yellow' %}Precaución{% else %}Crítica{% endif %}</span></td>
-            <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}Encendido{% else %}Apagado{% endif %}</span></td>
+            <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}Good{% elif v.health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</span></td>
+            <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}On{% else %}Off{% endif %}</span></td>
             <td>{{ v.current_mileage|default:"-" }} km</td>
             <td>{% if v.assigned_driver %}{{ v.assigned_driver.get_full_name }}{% else %}-{% endif %}</td>
             <td>
@@ -82,7 +92,7 @@
         <div class="fp-list-card-title">{{ v.display_name }} · {{ v.license_plate }}</div>
         <div class="fp-list-card-meta">
           <span class="badge bg-{% if v.status == 'active' %}success{% elif v.status == 'under_maintenance' %}warning text-dark{% else %}secondary{% endif %}">{{ v.get_status_display }}</span>
-          <span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}Encendido{% else %}Apagado{% endif %}</span>
+          <span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}On{% else %}Off{% endif %}</span>
           {{ v.current_mileage|default:"-" }} km
           {% if v.assigned_driver %} · {{ v.assigned_driver.get_full_name }}{% endif %}
         </div>

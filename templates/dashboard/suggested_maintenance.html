@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Suggested Maintenance - FleetPredict Pro{% endblock %}
+{% block meta_description %}Accept or dismiss suggested maintenance from predictions (FR11).{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Suggested Maintenance (FR11)</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+</div>
+<p class="text-muted">Recommendations from predictions. Accept to create a maintenance task, or dismiss.</p>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    {% if suggestions %}
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Message</th>
+            <th>Confidence</th>
+            <th>Timeframe</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in suggestions %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' s.vehicle_id %}">{{ s.vehicle.display_name }}</a></td>
+            <td>{{ s.get_alert_type_display }}</td>
+            <td><span class="badge bg-{% if s.severity == 'critical' %}danger{% elif s.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ s.get_severity_display }}</span></td>
+            <td>{{ s.message|truncatewords:12 }}</td>
+            <td>{{ s.confidence|default:"—" }}</td>
+            <td>{{ s.timeframe_text|default:"—" }}</td>
+            <td>{{ s.created_at|date:"M d, H:i" }}</td>
+            <td>
+              {% if user.can_manage_maintenance %}
+              <form method="post" action="{% url 'dashboard:accept_suggestion' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="alert_id" value="{{ s.id }}">
+                <button type="submit" class="btn btn-sm btn-success">Accept</button>
+              </form>
+              {% endif %}
+              <form method="post" action="{% url 'dashboard:dismiss_suggestion' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="alert_id" value="{{ s.id }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Dismiss</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="p-3">
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="p-4 text-muted text-center">No pending suggestions. Accepted and dismissed items no longer appear here.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

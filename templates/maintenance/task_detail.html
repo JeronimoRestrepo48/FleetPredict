@@ -76,6 +76,13 @@
                     <dt class="col-sm-3">Description</dt>
                     <dd class="col-sm-9">{{ task.description }}</dd>
                     {% endif %}
+                    {% if work_order %}
+                    <dt class="col-sm-3">Work order</dt>
+                    <dd class="col-sm-9"><a href="{% url 'maintenance:workorder_detail' work_order.pk %}">{{ work_order.work_order_number }}</a> ({{ work_order.get_status_display }})</dd>
+                    {% elif can_manage %}
+                    <dt class="col-sm-3">Work order</dt>
+                    <dd class="col-sm-9"><a href="{% url 'maintenance:workorder_create' %}?task={{ task.pk }}">Create work order</a></dd>
+                    {% endif %}
                 </dl>
             </div>
         </div>

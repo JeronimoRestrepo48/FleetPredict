@@ -169,9 +169,7 @@ SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', 1209600))  # 14 da
 SESSION_SAVE_EVERY_REQUEST = False
 
 # Optional WebSocket telemetry auth (query ?token=...). Leave unset to allow anonymous.
-# TELEMETRY_WS_TOKEN = os.environ.get('TELEMETRY_WS_TOKEN', '')
-
-# Optional pattern thresholds (see apps.vehicles.services.telemetry_patterns.DEFAULTS)
+# TELEMETRY_WS_TOKEN = os.environ.get('TELEMETRY_WS_TOKEN', '')# Optional pattern thresholds (see apps.vehicles.services.telemetry_patterns.DEFAULTS)
 # TELEMETRY_PATTERNS_ENGINE_TEMP_HIGH_C = 105
 # TELEMETRY_PATTERNS_FUEL_DROP_PCT_PER_WINDOW = 8
 # TELEMETRY_PATTERNS_MAINTENANCE_KM_BUFFER = 500

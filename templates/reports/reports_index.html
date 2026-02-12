@@ -1,23 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Reportes - FleetPredict Pro{% endblock %}
-{% block meta_description %}Exportar reportes PDF por vehículo o flota.{% endblock %}
+{% block title %}Reports - FleetPredict Pro{% endblock %}
+{% block meta_description %}Export PDF reports per vehicle or fleet.{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Reportes</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Volver al Dashboard</a>
+  <h2 class="page-title mb-0">Reports</h2>
+  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <h5 class="card-title">Reporte de flota</h5>
-    <p class="card-text text-muted">Descargue un PDF con resumen de todos los vehículos visibles (salud, última alerta, próximo mantenimiento, kilometraje).</p>
-    <a href="{% url 'reports:fleet_pdf' %}" class="btn btn-primary">Descargar reporte flota (PDF)</a>
+    <h5 class="card-title">Fleet report</h5>
+    <p class="card-text text-muted">Download a PDF summary of all visible vehicles (health, latest alert, upcoming maintenance, mileage).</p>
+    <a href="{% url 'reports:fleet_pdf' %}" class="btn btn-primary">Download fleet report (PDF)</a>
   </div>
 </div>
 <div class="card card-fp mt-3">
   <div class="card-body">
-    <h5 class="card-title">Reporte por vehículo</h5>
-    <p class="card-text text-muted">Para un reporte detallado de un vehículo (historial de mantenimiento, alertas recientes, telemetría), abra el detalle del vehículo y use el botón &quot;Exportar reporte PDF&quot;.</p>
-    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-primary">Ir a lista de vehículos</a>
+    <h5 class="card-title">Per-vehicle report</h5>
+    <p class="card-text text-muted">For a detailed vehicle report (maintenance history, recent alerts, telemetry), open the vehicle detail and use the &quot;Export PDF report&quot; button.</p>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-primary">Go to vehicle list</a>
+  </div>
+</div>
+<div class="card card-fp mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Analytics reports (FR12–15)</h5>
+    <p class="card-text text-muted">Maintenance trends, cost by vehicle, and comparison.</p>
+    <a href="{% url 'reports:trends' %}" class="btn btn-outline-primary me-2">Trends</a>
+    <a href="{% url 'reports:cost' %}" class="btn btn-outline-primary me-2">Cost</a>
+    <a href="{% url 'reports:comparison' %}" class="btn btn-outline-primary">Comparison</a>
   </div>
 </div>
 {% endblock %}

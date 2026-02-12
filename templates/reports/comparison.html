@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Comparison Report - FleetPredict Pro{% endblock %}
+{% block meta_description %}FR14/15: Compare vehicles by maintenance count and cost.{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Comparison Report (FR14/15)</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to Reports</a>
+</div>
+<p class="text-muted">Vehicles compared by number of completed tasks and total cost.</p>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Completed tasks</th>
+            <th>Total cost</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in by_vehicle %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' row.vehicle__id %}">{{ row.vehicle__make }} {{ row.vehicle__model }} ({{ row.vehicle__license_plate }})</a></td>
+            <td>{{ row.task_count }}</td>
+            <td>${{ row.total_cost|floatformat:2 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3">No data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

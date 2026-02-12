@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Compliance - FleetPredict Pro{% endblock %}
+{% block meta_description %}Regulatory compliance requirements (FR25).{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Compliance</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Compliance Requirements</h2>
+  <a href="{% url 'vehicles:compliance_create' %}" class="btn btn-primary">Add requirement</a>
+</div>
+<form method="get" class="card card-fp mb-3">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label for="id_type" class="form-label">Type</label>
+        <select name="type" id="id_type" class="form-select form-select-sm">
+          <option value="">All</option>
+          {% for v, l in type_choices %}
+          <option value="{{ v }}" {% if request.GET.type == v %}selected{% endif %}>{{ l }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label for="id_status" class="form-label">Status</label>
+        <select name="status" id="id_status" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="expired" {% if request.GET.status == 'expired' %}selected{% endif %}>Expired</option>
+          <option value="expiring" {% if request.GET.status == 'expiring' %}selected{% endif %}>Expiring (30 days)</option>
+          <option value="ok" {% if request.GET.status == 'ok' %}selected{% endif %}>OK</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+      </div>
+    </div>
+  </div>
+</form>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Vehicle</th>
+            <th>Requirement</th>
+            <th>Type</th>
+            <th>Expiration</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in compliance_list %}
+          <tr>
+            <td><a href="{% url 'vehicles:vehicle_detail' c.vehicle_id %}">{{ c.vehicle.display_name }}</a></td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.get_requirement_type_display }}</td>
+            <td>{{ c.expiration_date }}</td>
+            <td>
+              {% if c.is_expired %}
+              <span class="badge bg-danger">Expired</span>
+              {% elif c.days_until_expiry <= 30 %}
+              <span class="badge bg-warning text-dark">Expiring</span>
+              {% else %}
+              <span class="badge bg-success">OK</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'vehicles:compliance_update' c.pk %}">Edit</a>
+              <a href="{% url 'vehicles:compliance_delete' c.pk %}" class="ms-2 text-danger">Delete</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6">No compliance requirements. Add one from Vehicles or here.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-2">
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

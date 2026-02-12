@@ -9,6 +9,10 @@ from django.contrib.auth.views import (
     LoginView as AuthLoginView,
     LogoutView as AuthLogoutView,
     PasswordChangeView as AuthPasswordChangeView,
+    PasswordResetView as AuthPasswordResetView,
+    PasswordResetDoneView as AuthPasswordResetDoneView,
+    PasswordResetConfirmView as AuthPasswordResetConfirmView,
+    PasswordResetCompleteView as AuthPasswordResetCompleteView,
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
@@ -93,6 +97,36 @@ class PasswordChangeView(LoginRequiredMixin, AuthPasswordChangeView):
 
     template_name = 'registration/password_change.html'
     success_url = reverse_lazy('users:profile')
+
+
+# ============== Password reset (FR1 acceptance criteria) ==============
+
+class PasswordResetView(AuthPasswordResetView):
+    """Request password reset - send email with link."""
+
+    template_name = 'registration/password_reset_form.html'
+    email_template_name = 'registration/password_reset_email.html'
+    subject_template_name = 'registration/password_reset_subject.txt'
+    success_url = reverse_lazy('users:password_reset_done')
+
+
+class PasswordResetDoneView(AuthPasswordResetDoneView):
+    """Shown after user submits email for reset."""
+
+    template_name = 'registration/password_reset_done.html'
+
+
+class PasswordResetConfirmView(AuthPasswordResetConfirmView):
+    """Set new password from token in email link."""
+
+    template_name = 'registration/password_reset_confirm.html'
+    success_url = reverse_lazy('users:password_reset_complete')
+
+
+class PasswordResetCompleteView(AuthPasswordResetCompleteView):
+    """Shown after password has been reset."""
+
+    template_name = 'registration/password_reset_complete.html'
 
 
 # ============== User Management Views (Admin only) ==============
