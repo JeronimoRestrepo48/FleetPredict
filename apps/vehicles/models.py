@@ -224,7 +224,7 @@ class Vehicle(models.Model):
     def get_health_status_reasons(self, alert_days=7):
         """
         Return a list of human-readable reasons for the current health status.
-        Used for tooltip/modal explanation (FR6).
+        Used for tooltip/modal explanation.
         """
         from django.utils import timezone
         from datetime import timedelta
@@ -397,7 +397,7 @@ class VehicleAlert(models.Model):
     timeframe_text = models.CharField(
         max_length=128,
         blank=True,
-        help_text='e.g. "Próximos 7 días", "En 500 km" (FR9)',
+        help_text='e.g. "Próximos 7 días", "En 500 km"',
     )
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
@@ -512,7 +512,7 @@ class Runbook(models.Model):
 
 class ComplianceRequirement(models.Model):
     """
-    Regulatory compliance requirement per vehicle (FR25).
+    Regulatory compliance requirement per vehicle.
     Inspections, certifications, licenses, registrations with expiration alerts.
     """
 

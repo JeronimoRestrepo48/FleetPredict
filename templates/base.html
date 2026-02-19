@@ -66,7 +66,7 @@
                         </ul>
                     </li>
                     {% endif %}
-                    {% if user.can_manage_vehicles or user.role == 'administrator' %}
+                    {% if user.can_manage_vehicles or user.can_manage_platform %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">Settings</a>
                         <ul class="dropdown-menu" aria-labelledby="navSettings">
@@ -74,7 +74,7 @@
                             <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}">Alert rules</a></li>
                             <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
                             {% endif %}
-                            {% if user.role == 'administrator' %}
+                            {% if user.can_manage_platform %}
                             <li><a class="dropdown-item" href="{% url 'users:user_list' %}">Users</a></li>
                             <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}">Vehicle types</a></li>
                             <li><a class="dropdown-item" href="{% url 'dashboard:auditlog_list' %}">Audit log</a></li>

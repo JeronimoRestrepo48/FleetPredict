@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard - FleetPredict Pro{% endblock %}
+{% block meta_description %}Your assigned maintenance tasks and workload.{% endblock %}
+{% block extra_css %}
+<style>
+  .dashboard-hero { margin-bottom: var(--fp-spacing-lg); }
+  .dashboard-hero h1 { font-weight: 700; color: var(--fp-dark); font-size: 1.5rem; }
+  .dashboard-summary { font-size: var(--fp-text-sm); color: var(--fp-secondary); max-width: 640px; }
+  @media (min-width: 768px) { .dashboard-hero h1 { font-size: 1.75rem; } }
+  .period-btn.active { font-weight: 600; }
+</style>
+{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="dashboard-hero">
+  <h1 class="mb-1">My Workload</h1>
+  <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
+</div>
+
+<div class="row g-3 g-md-4 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-person-check me-1"></i> Assigned to Me</div>
+        <div class="kpi-value">{{ my_assigned_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-success">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-person-plus me-1"></i> Unassigned</div>
+        <div class="kpi-value">{{ unassigned_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-warning">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-exclamation-triangle me-1"></i> Need Attention</div>
+        <div class="kpi-value">{{ tasks_needing_attention }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-danger">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-clock-history me-1"></i> Overdue</div>
+        <div class="kpi-value">{{ overdue_tasks }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 g-md-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Tasks by Status</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartTasks"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Tasks by Priority (open)</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartPriority"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 g-md-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Upcoming Maintenance (Next 7 Days)</div>
+      <div class="card-body p-0">
+        {% if upcoming_maintenance %}
+        <div class="table-responsive">
+          <table class="table table-fp mb-0">
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Task</th>
+                <th>Date</th>
+                <th>Priority</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in upcoming_maintenance %}
+              <tr>
+                <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}" class="text-decoration-none fw-medium">{{ task.vehicle.display_name }}</a></td>
+                <td><a href="{% url 'maintenance:task_detail' task.id %}" class="text-decoration-none">{{ task.title }}</a></td>
+                <td>{{ task.scheduled_date }}</td>
+                <td><span class="badge bg-{% if task.priority == 'critical' %}danger{% elif task.priority == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ task.priority }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <p>No upcoming maintenance.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Recent Completions (Mine)</div>
+      <div class="card-body p-0">
+        {% if recent_completed %}
+        <div class="table-responsive">
+          <table class="table table-fp mb-0">
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Task</th>
+                <th>Completed</th>
+                <th>Cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in recent_completed %}
+              <tr>
+                <td><a href="{% url 'vehicles:vehicle_detail' task.vehicle.id %}" class="text-decoration-none fw-medium">{{ task.vehicle.display_name }}</a></td>
+                <td><a href="{% url 'maintenance:task_detail' task.id %}" class="text-decoration-none">{{ task.title }}</a></td>
+                <td>{{ task.completion_date|default:"-" }}</td>
+                <td>{% if task.actual_cost %}${{ task.actual_cost|floatformat:2 }}{% else %}-{% endif %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <p>No recent completions.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mb-3">
+  <a href="{% url 'maintenance:task_list' %}" class="btn btn-primary">View all maintenance tasks</a>
+</div>
+
+{{ task_status_dict|json_script:"taskStatusData" }}
+{{ task_priority_dict|json_script:"taskPriorityData" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const taskData = JSON.parse(document.getElementById('taskStatusData').textContent);
+  const priorityData = JSON.parse(document.getElementById('taskPriorityData').textContent);
+  const taskLabels = ['Scheduled', 'In Progress', 'Completed', 'Cancelled', 'Overdue'];
+  const taskKeys = ['scheduled', 'in_progress', 'completed', 'cancelled', 'overdue'];
+  const taskValues = taskKeys.map(function(k) { return taskData[k] || 0; });
+  const taskColors = ['#0d6efd', '#0dcaf0', '#198754', '#6c757d', '#dc3545'];
+  const priorityLabels = ['Low', 'Medium', 'High', 'Critical'];
+  const priorityKeys = ['low', 'medium', 'high', 'critical'];
+  const priorityValues = priorityKeys.map(function(k) { return priorityData[k] || 0; });
+  const priorityColors = ['#6c757d', '#0d6efd', '#ffc107', '#dc3545'];
+  const taskEl = document.getElementById('chartTasks');
+  const priorityEl = document.getElementById('chartPriority');
+  if (taskEl) {
+    new Chart(taskEl.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: taskLabels,
+        datasets: [{ data: taskValues, backgroundColor: taskColors, borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        cutout: '60%'
+      }
+    });
+  }
+  if (priorityEl) {
+    new Chart(priorityEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: priorityLabels,
+        datasets: [{ label: 'Tasks', data: priorityValues, backgroundColor: priorityColors }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

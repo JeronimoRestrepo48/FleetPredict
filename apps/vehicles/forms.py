@@ -48,7 +48,7 @@ class VehicleForm(forms.ModelForm):
 
 
 class ComplianceRequirementForm(forms.ModelForm):
-    """Form for ComplianceRequirement create/edit (FR25)."""
+    """Form for ComplianceRequirement create/edit."""
 
     class Meta:
         model = ComplianceRequirement

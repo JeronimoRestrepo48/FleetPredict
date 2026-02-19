@@ -43,7 +43,7 @@ class AdminRequiredMixin(UserPassesTestMixin):
         ) == 'administrator'
 
 
-# ============== Vehicle Views (FR2) ==============
+# ============== Vehicle Views ==============
 
 class VehicleListView(LoginRequiredMixin, ListView):
     """List vehicles with filters and pagination."""
@@ -186,7 +186,7 @@ class VehicleDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteView):
 
 
 class VehicleHistoryView(LoginRequiredMixin, DetailView):
-    """Vehicle maintenance history (FR5)."""
+    """Vehicle maintenance history."""
 
     model = Vehicle
     template_name = 'vehicles/vehicle_history.html'
@@ -241,7 +241,7 @@ class VehiclesBulkCsvView(LoginRequiredMixin, CanManageVehiclesMixin, View):
 
 
 class VehicleHistoryCsvView(LoginRequiredMixin, View):
-    """Export vehicle maintenance history as CSV (FR5). Same access as VehicleHistoryView."""
+    """Export vehicle maintenance history as CSV. Same access as VehicleHistoryView."""
 
     def get(self, request, pk):
         user = request.user
@@ -273,7 +273,7 @@ class VehicleHistoryCsvView(LoginRequiredMixin, View):
         return response
 
 
-# ============== Vehicle Type Views (FR22) ==============
+# ============== Vehicle Type Views ==============
 
 class VehicleTypeListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
     """List vehicle types. Admin only."""
@@ -329,7 +329,7 @@ class VehicleTypeDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
         return super().form_valid(form)
 
 
-# ============== Compliance Requirements (FR25) ==============
+# ============== Compliance Requirements ==============
 
 class ComplianceListView(LoginRequiredMixin, CanManageVehiclesMixin, ListView):
     """Fleet-wide compliance list with filters (type, status)."""

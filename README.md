@@ -29,12 +29,35 @@ After running `python manage.py seed_simulated_fleet`, 10 drivers are created an
 
 Drivers only see their assigned vehicle in list, detail, history, maintenance, and alerts.
 
+### Fleet Manager and Mechanic (created by seed)
+
+Run `python manage.py create_seed_users` to create default users:
+
+| Role          | Email                         | Password           |
+|---------------|-------------------------------|--------------------|
+| Fleet Manager | `manager@fleetpredict.local`  | `ManagerPass123!`  |
+| Mechanic      | `mechanic@fleetpredict.local`  | `MechanicPass123!` |
+
 ### User for reports and predictions (optional)
 
 **Failure predictions** and **Reports** (PDF) views are only available to users with report permission (Administrator or Fleet Manager). To test:
 
 - Use the superuser, or  
+- Use the Fleet Manager seed user (`manager@fleetpredict.local`), or  
 - Create a user via **Register** or the admin and assign role *Fleet Manager* or *Administrator*.
+
+---
+
+## Roles and dashboard differences
+
+Each role sees a different dashboard:
+
+| Role           | Dashboard focus                          |
+|----------------|------------------------------------------|
+| Administrator  | Platform overview: users, roles, vehicle types, audit log, fleet summary |
+| Fleet Manager  | Full fleet ops: vehicles, maintenance, costs, health, alerts, compliance |
+| Mechanic       | Assigned tasks, unassigned tasks, workload, recent completions       |
+| Driver         | Assigned vehicles only; same fleet-style dashboard with scoped data   |
 
 ---
 
@@ -233,8 +256,8 @@ Use email and password. This user has full access.
 |-------|-------------|
 | `/` | Dashboard (fleet status, metrics, upcoming maintenance, SOC with alerts and runbooks, FR6 health) |
 | `/soc/runbook/` | POST: execute runbook on an alert (mark read, create task, etc.) |
-| `/alerts/` | Notification center (FR7): alert list with filters and runbook actions. Unread badge in nav. |
-| `/predictions/` | Failure predictions (FR9): recommendations with timeframe and confidence. Report permission required. |
+| `/alerts/` | Notification center: alert list with filters and runbook actions. Unread badge in nav. |
+| `/predictions/` | Failure predictions: recommendations with timeframe and confidence. Report permission required. |
 | `/suggested-maintenance/` | FR11: accept or dismiss suggested maintenance from predictions. |
 | `/alert-rules/` | FR8: configurable alert thresholds. |
 | `/audit-log/` | FR27: audit log list (administrator only). |
@@ -297,18 +320,20 @@ Use email and password. This user has full access.
 
 | Role | Permissions |
 |------|-------------|
-| **Administrator** | Full: users, vehicles, maintenance, reports, predictions, alerts, vehicle types, audit log, Django admin. |
+| **Administrator** | Platform management: users, vehicle types, audit log, Django admin; plus full fleet ops (same as Fleet Manager). |
 | **Fleet Manager** | Manage vehicles and maintenance; view reports, predictions, alerts, compliance, alert rules. |
-| **Mechanic** | View and manage maintenance tasks. |
+| **Mechanic** | View and manage maintenance tasks (assigned to them or unassigned). Dashboard shows workload and assigned tasks. |
 | **Driver** | View only assigned vehicles, their maintenance and history; alerts filtered by their vehicles. No reports or failure predictions. |
+
+See "Roles and dashboard differences" above for what each role sees on the dashboard.
 
 ---
 
 ## Telemetry and simulators
 
 - **Ingest:** Simulators (or devices) send JSON over WebSocket to `/ws/telemetry/`. Can be protected with `TELEMETRY_WS_TOKEN` (URL query `token`).
-- **Patterns:** After each reading is saved, patterns (high temperature, anomalous fuel, maintenance by km/time, etc.) are evaluated and `VehicleAlert` records are created with severity and, when applicable, `timeframe_text` (FR9).
-- **Email alerts (FR7):** For high or critical alerts, email is sent to users with report permission and notification preferences enabled (`email_enabled`, `critical_alerts` in profile).
+- **Patterns:** After each reading is saved, patterns (high temperature, anomalous fuel, maintenance by km/time, etc.) are evaluated and `VehicleAlert` records are created with severity and, when applicable, `timeframe_text`.
+- **Email alerts:** For high or critical alerts, email is sent to users with report permission and notification preferences enabled (`email_enabled`, `critical_alerts` in profile).
 - **Browser subscription:** The vehicle detail page subscribes via WebSocket to that vehicle’s updates; only if the user is allowed to see it (drivers only their vehicle).
 
 ### Optional ML failure prediction (Scikit-learn)

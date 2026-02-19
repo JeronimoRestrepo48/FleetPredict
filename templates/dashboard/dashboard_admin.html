@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Dashboard - FleetPredict Pro{% endblock %}
+{% block meta_description %}Platform overview: users, vehicle types, audit activity.{% endblock %}
+{% block extra_css %}
+<style>
+  .dashboard-hero { margin-bottom: var(--fp-spacing-lg); }
+  .dashboard-hero h1 { font-weight: 700; color: var(--fp-dark); font-size: 1.5rem; }
+  .dashboard-summary { font-size: var(--fp-text-sm); color: var(--fp-secondary); max-width: 640px; }
+  @media (min-width: 768px) { .dashboard-hero h1 { font-size: 1.75rem; } }
+</style>
+{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="dashboard-hero">
+  <h1 class="mb-1">Platform Overview</h1>
+  <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
+</div>
+
+<div class="row g-3 g-md-4 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-people me-1"></i> Total Users</div>
+        <div class="kpi-value">{{ total_users }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-success">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-truck me-1"></i> Vehicle Types</div>
+        <div class="kpi-value">{{ vehicle_types_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-warning">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-car-front me-1"></i> Fleet Vehicles</div>
+        <div class="kpi-value">{{ total_vehicles }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card card-fp kpi-card kpi-danger">
+      <div class="card-body">
+        <div class="kpi-label"><i class="bi bi-check-circle me-1"></i> Fleet Availability</div>
+        <div class="kpi-value">{{ fleet_availability }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 g-md-4 mb-4">
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Users by Role</div>
+      <div class="card-body">
+        <div class="chart-container">
+          <canvas id="chartRoles"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card card-fp">
+      <div class="card-header">Quick Links</div>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><a href="{% url 'users:user_list' %}" class="text-decoration-none"><i class="bi bi-people me-2"></i>Manage Users</a></li>
+          <li class="mb-2"><a href="{% url 'vehicles:vehicletype_list' %}" class="text-decoration-none"><i class="bi bi-truck me-2"></i>Vehicle Types</a></li>
+          <li class="mb-2"><a href="{% url 'dashboard:auditlog_list' %}" class="text-decoration-none"><i class="bi bi-journal-text me-2"></i>Audit Log</a></li>
+          <li><a href="/admin/" class="text-decoration-none" target="_blank"><i class="bi bi-gear me-2"></i>Django Admin</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 g-md-4">
+  <div class="col-12">
+    <div class="card card-fp">
+      <div class="card-header">Recent Audit Activity</div>
+      <div class="card-body p-0">
+        {% if recent_audit %}
+        <div class="table-responsive">
+          <table class="table table-fp mb-0">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>User</th>
+                <th>Model</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in recent_audit %}
+              <tr>
+                <td>{{ entry.created_at|date:"M d, H:i" }}</td>
+                <td><span class="badge bg-secondary">{{ entry.get_action_display }}</span></td>
+                <td>{{ entry.user.email|default:"-" }}</td>
+                <td>{{ entry.model_name|default:"-" }}</td>
+                <td class="text-muted small">{{ entry.message|truncatewords:12|default:"-" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="card-footer bg-transparent border-top">
+          <a href="{% url 'dashboard:auditlog_list' %}" class="btn btn-sm btn-outline-primary">View full audit log</a>
+        </div>
+        {% else %}
+        <div class="empty-state p-4">
+          <p class="mb-0 text-muted">No audit entries yet.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ role_counts|json_script:"roleCountsData" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+  const data = JSON.parse(document.getElementById('roleCountsData').textContent);
+  const labels = ['Administrator', 'Fleet Manager', 'Mechanic', 'Driver'];
+  const values = [
+    data.administrator || 0,
+    data.fleet_manager || 0,
+    data.mechanic || 0,
+    data.driver || 0
+  ];
+  const colors = ['#6c757d', '#0d6efd', '#ffc107', '#198754'];
+  const el = document.getElementById('chartRoles');
+  if (el) {
+    new Chart(el.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        cutout: '60%'
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

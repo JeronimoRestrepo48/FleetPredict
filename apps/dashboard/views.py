@@ -15,22 +15,160 @@ from django.db.models import Count, Q, Sum
 from datetime import timedelta
 from collections import OrderedDict
 
-from apps.vehicles.models import Vehicle, VehicleAlert, Playbook, Runbook, ComplianceRequirement
+from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement
 from apps.maintenance.models import MaintenanceTask
+from django.contrib.auth import get_user_model
 from .models import AlertRule, AuditLog
 from .audit import log_audit
+
+User = get_user_model()
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
     """
-    Dashboard view - fleet status, metrics, upcoming maintenance.
-    FR3: Single view showing fleet status in near real-time.
+    Dashboard view - role-specific content.
+    FR3: Administrator sees platform stats; Fleet Manager/Driver see fleet ops; Mechanic sees assigned tasks.
     """
 
-    template_name = 'dashboard/dashboard.html'
+    def get_template_names(self):
+        user = self.request.user
+        if user.is_administrator:
+            return ['dashboard/dashboard_admin.html']
+        if user.is_mechanic:
+            return ['dashboard/dashboard_mechanic.html']
+        return ['dashboard/dashboard.html']  # Fleet Manager and Driver
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_administrator:
+            return self._get_admin_context(context)
+        if user.is_mechanic:
+            return self._get_mechanic_context(context)
+        if user.is_fleet_manager:
+            return self._get_fleet_manager_context(context)
+        return self._get_driver_context(context)
+
+    def _get_admin_context(self, context):
+        """Platform management dashboard: users, roles, vehicle types, audit."""
+        user = self.request.user
+        today = timezone.now().date()
+        total_users = User.objects.count()
+        users_by_role = dict(
+            User.objects.values('role').annotate(count=Count('id')).values_list('role', 'count')
+        )
+        role_counts = {
+            'administrator': users_by_role.get('administrator', 0),
+            'fleet_manager': users_by_role.get('fleet_manager', 0),
+            'mechanic': users_by_role.get('mechanic', 0),
+            'driver': users_by_role.get('driver', 0),
+        }
+        vehicle_types_count = VehicleType.objects.count()
+        recent_audit = AuditLog.objects.select_related('user').order_by('-created_at')[:15]
+        total_vehicles = Vehicle.objects.filter(is_deleted=False).count()
+        active_vehicles = Vehicle.objects.filter(is_deleted=False, status='active').count()
+        fleet_availability = (
+            (active_vehicles / total_vehicles * 100) if total_vehicles > 0 else 0
+        )
+        summary = (
+            f"Platform overview: {total_users} users, {vehicle_types_count} vehicle types, "
+            f"{total_vehicles} vehicles ({fleet_availability:.0f}% availability)."
+        )
+        context.update({
+            'executive_summary': summary,
+            'total_users': total_users,
+            'role_counts': role_counts,
+            'vehicle_types_count': vehicle_types_count,
+            'recent_audit': recent_audit,
+            'total_vehicles': total_vehicles,
+            'fleet_availability': round(fleet_availability, 1),
+        })
+        return context
+
+    def _get_mechanic_context(self, context):
+        """Mechanic dashboard: assigned tasks, unassigned tasks, recent completions."""
+        user = self.request.user
+        today = timezone.now().date()
+        due_days = AlertRule.get_maintenance_due_days()
+        next_week = today + timedelta(days=due_days)
+        tasks_qs = MaintenanceTask.objects.filter(
+            Q(assignee=user) | Q(assignee__isnull=True)
+        ).select_related('vehicle', 'assignee')
+        my_assigned = tasks_qs.filter(assignee=user)
+        unassigned = tasks_qs.filter(assignee__isnull=True)
+        tasks_needing_attention = my_assigned.filter(
+            Q(status='overdue') |
+            Q(status='scheduled', scheduled_date__lt=today) |
+            Q(status='scheduled', priority__in=['high', 'critical'], scheduled_date__lte=next_week)
+        ).count()
+        task_status_counts = tasks_qs.values('status').annotate(count=Count('id'))
+        task_status_dict = {
+            'scheduled': 0, 'in_progress': 0, 'completed': 0, 'cancelled': 0, 'overdue': 0,
+        }
+        for item in task_status_counts:
+            task_status_dict[item['status']] = item['count']
+        overdue_count = tasks_qs.filter(
+            status='scheduled', scheduled_date__lt=today
+        ).count()
+        task_status_dict['overdue'] = overdue_count
+        priority_counts = tasks_qs.filter(
+            status__in=['scheduled', 'overdue', 'in_progress']
+        ).values('priority').annotate(count=Count('id'))
+        task_priority_dict = {'low': 0, 'medium': 0, 'high': 0, 'critical': 0}
+        for item in priority_counts:
+            task_priority_dict[item['priority']] = item['count']
+        upcoming_maintenance = list(tasks_qs.filter(
+            status__in=['scheduled', 'overdue'],
+            scheduled_date__gte=today,
+            scheduled_date__lte=next_week
+        ).order_by('scheduled_date')[:10])
+        recent_completed = list(
+            tasks_qs.filter(status='completed', assignee=user)
+            .order_by('-completion_date')[:5]
+        )
+        summary = (
+            f"{my_assigned.count()} tasks assigned to you, {unassigned.count()} unassigned. "
+            f"{tasks_needing_attention} need attention."
+        )
+        context.update({
+            'executive_summary': summary,
+            'my_assigned_count': my_assigned.count(),
+            'unassigned_count': unassigned.count(),
+            'tasks_needing_attention': tasks_needing_attention,
+            'task_status_dict': task_status_dict,
+            'task_priority_dict': task_priority_dict,
+            'upcoming_maintenance': upcoming_maintenance,
+            'recent_completed': recent_completed,
+            'period': '7d',
+            'vehicle_status_dict': {},
+            'vehicle_health_counts': {'green': 0, 'yellow': 0, 'red': 0},
+            'vehicles_with_health': [],
+            'soc_alerts': [],
+            'soc_alerts_with_playbook': [],
+            'runbooks_list': [],
+            'total_vehicles': 0,
+            'fleet_availability': 0,
+            'available_vehicles': 0,
+            'overdue_tasks': overdue_count,
+            'upcoming_count': len(upcoming_maintenance),
+            'monthly_total': 0,
+            'costs_by_day': OrderedDict(),
+            'completed_by_day': OrderedDict(),
+            'compliance_expired': 0,
+            'compliance_expiring': 0,
+        })
+        return context
+
+    def _get_fleet_manager_context(self, context):
+        """Full fleet operations dashboard (current behavior)."""
+        return self._get_fleet_or_driver_context(context, fleet_scope=True)
+
+    def _get_driver_context(self, context):
+        """Driver dashboard - scoped to assigned vehicles."""
+        return self._get_fleet_or_driver_context(context, fleet_scope=False)
+
+    def _get_fleet_or_driver_context(self, context, fleet_scope):
+        """Shared logic for Fleet Manager (full fleet) and Driver (assigned only)."""
         user = self.request.user
         today = timezone.now().date()
         due_days = AlertRule.get_maintenance_due_days()
@@ -46,8 +184,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             period = '7d'
             chart_start = today - timedelta(days=6)
 
-        # Get base querysets based on user role
-        if user.is_driver:
+        if fleet_scope:
+            vehicles_qs = Vehicle.objects.filter(is_deleted=False)
+            tasks_qs = MaintenanceTask.objects.all()
+        else:
             vehicles_qs = Vehicle.objects.filter(
                 is_deleted=False,
                 assigned_driver=user
@@ -55,9 +195,6 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             tasks_qs = MaintenanceTask.objects.filter(
                 vehicle__assigned_driver=user
             )
-        else:
-            vehicles_qs = Vehicle.objects.filter(is_deleted=False)
-            tasks_qs = MaintenanceTask.objects.all()
 
         # Vehicle statistics
         total_vehicles = vehicles_qs.count()
@@ -482,9 +619,7 @@ class AuditLogListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     paginate_by = 50
 
     def test_func(self):
-        return self.request.user.is_authenticated and getattr(
-            self.request.user, 'role', None
-        ) == 'administrator'
+        return self.request.user.is_authenticated and self.request.user.can_manage_platform()
 
     def get_queryset(self):
         qs = AuditLog.objects.select_related('user').order_by('-created_at')

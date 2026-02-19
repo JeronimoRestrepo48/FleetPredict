@@ -1,6 +1,6 @@
 """
 Context processors for FleetPredict Pro.
-Adds alerts_unread_count for nav badge (FR7).
+Adds alerts_unread_count for nav badge.
 """
 
 from apps.vehicles.models import Vehicle, VehicleAlert

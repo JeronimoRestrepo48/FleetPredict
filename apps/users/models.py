@@ -118,6 +118,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Check if user can view reports."""
         return self.role in [self.Role.ADMINISTRATOR, self.Role.FLEET_MANAGER]
 
+    def can_manage_platform(self):
+        """Check if user can manage platform settings (users, vehicle types, audit)."""
+        return self.role == self.Role.ADMINISTRATOR
+
 
 class UserProfile(models.Model):
     """

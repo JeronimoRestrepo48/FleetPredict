@@ -27,7 +27,7 @@
 {% if compliance_expired or compliance_expiring %}
 <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3" role="alert">
   <span>
-    <strong>Compliance (FR25):</strong>
+    <strong>Compliance:</strong>
     {% if compliance_expired %}<span class="text-danger">{{ compliance_expired }} expired</span>{% endif %}
     {% if compliance_expired and compliance_expiring %} · {% endif %}
     {% if compliance_expiring %}<span>{{ compliance_expiring }} expiring in 30 days</span>{% endif %}
@@ -83,7 +83,7 @@
 <div class="row g-3 g-md-4 mb-3">
   <div class="col-12">
     <div class="card card-fp">
-      <div class="card-header">Fleet health (FR6)</div>
+      <div class="card-header">Fleet health</div>
       <div class="card-body py-2">
         <span class="badge bg-success me-2">Good {{ vehicle_health_counts.green|default:0 }}</span>
         <span class="badge bg-warning text-dark me-2">Caution {{ vehicle_health_counts.yellow|default:0 }}</span>

@@ -111,3 +111,28 @@ class DashboardAccessTest(TestCase):
         resp = self.client.get(reverse('dashboard:auditlog_list'))
         self.assertEqual(resp.status_code, 200)
         self.assertIn('audit_logs', resp.context)
+
+    def test_dashboard_admin_sees_platform_overview(self):
+        admin = User.objects.create_user(
+            email='admin2@test.local',
+            password='TestPass123!',
+            role=User.Role.ADMINISTRATOR,
+        )
+        self.client.force_login(admin)
+        resp = self.client.get(reverse('dashboard:index'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('total_users', resp.context)
+        self.assertIn('role_counts', resp.context)
+        self.assertIn('recent_audit', resp.context)
+
+    def test_dashboard_mechanic_sees_assigned_tasks(self):
+        mechanic = User.objects.create_user(
+            email='mechanic@test.local',
+            password='TestPass123!',
+            role=User.Role.MECHANIC,
+        )
+        self.client.force_login(mechanic)
+        resp = self.client.get(reverse('dashboard:index'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('my_assigned_count', resp.context)
+        self.assertIn('unassigned_count', resp.context)

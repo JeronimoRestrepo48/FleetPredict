@@ -55,7 +55,7 @@ class MaintenanceTaskCompleteForm(forms.Form):
 
 
 class MaintenanceTemplateForm(forms.ModelForm):
-    """Form for MaintenanceTemplate create/edit (FR23)."""
+    """Form for MaintenanceTemplate create/edit."""
 
     class Meta:
         model = MaintenanceTemplate
@@ -105,7 +105,7 @@ class MaintenanceTemplateForm(forms.ModelForm):
 
 
 class WorkOrderForm(forms.ModelForm):
-    """Form for creating/editing WorkOrder (FR24)."""
+    """Form for creating/editing WorkOrder."""
 
     class Meta:
         model = WorkOrder

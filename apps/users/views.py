@@ -34,10 +34,10 @@ class AdminRequiredMixin(UserPassesTestMixin):
     """Mixin that requires user to be administrator."""
 
     def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.role == 'administrator'
+        return self.request.user.is_authenticated and self.request.user.can_manage_platform()
 
 
-# ============== Authentication Views (FR1) ==============
+# ============== Authentication Views ==============
 
 class LoginView(AuthLoginView):
     """Login view - uses Django session auth."""
@@ -66,7 +66,7 @@ class RegisterView(FormView):
 
 
 class ProfileView(LoginRequiredMixin, UpdateView):
-    """Profile view - edit user profile (FR21)."""
+    """Profile view - edit user profile."""
 
     model = UserProfile
     form_class = ProfileForm

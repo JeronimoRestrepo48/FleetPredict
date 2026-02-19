@@ -159,7 +159,7 @@ class MaintenanceTask(models.Model):
 
 class MaintenanceTemplate(models.Model):
     """
-    Reusable maintenance template (FR23).
+    Reusable maintenance template.
     Apply when creating a task to pre-fill title, type, duration, description.
     """
     name = models.CharField(max_length=200)
@@ -266,7 +266,7 @@ class MaintenanceComment(models.Model):
 
 class WorkOrder(models.Model):
     """
-    Work order linked to a maintenance task (FR24).
+    Work order linked to a maintenance task.
     Tracks status, assignee, due date, completion, and notes.
     """
 

@@ -40,7 +40,7 @@ class CanManageMaintenanceMixin(UserPassesTestMixin):
         return self.request.user.is_authenticated and self.request.user.can_manage_maintenance()
 
 
-# ============== Maintenance Task Views (FR4) ==============
+# ============== Maintenance Task Views ==============
 
 class MaintenanceBulkCsvView(LoginRequiredMixin, CanManageMaintenanceMixin, View):
     """FR16: Bulk export maintenance tasks as CSV."""
@@ -140,7 +140,7 @@ class MaintenanceTaskDetailView(LoginRequiredMixin, DetailView):
 
 
 class MaintenanceTaskCreateView(LoginRequiredMixin, CanManageMaintenanceMixin, CreateView):
-    """Create maintenance task. Supports ?template=<pk> to prefill from MaintenanceTemplate (FR23)."""
+    """Create maintenance task. Supports ?template=<pk> to prefill from MaintenanceTemplate."""
 
     model = MaintenanceTask
     form_class = MaintenanceTaskForm
@@ -216,7 +216,7 @@ class MaintenanceTaskDeleteView(LoginRequiredMixin, CanManageMaintenanceMixin, D
 
 
 class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin, View):
-    """Mark maintenance task as completed (FR4)."""
+    """Mark maintenance task as completed."""
 
     def get(self, request, pk):
         task = get_object_or_404(MaintenanceTask, pk=pk)
@@ -244,7 +244,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
 
 
 class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixin, View):
-    """Upload document to maintenance task (FR5)."""
+    """Upload document to maintenance task."""
 
     def get(self, request, pk):
         """Redirect GET to task detail (upload is via POST form)."""
@@ -269,7 +269,7 @@ class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixi
         return redirect('maintenance:task_detail', pk=pk)
 
 
-# ============== Maintenance Templates (FR23) ==============
+# ============== Maintenance Templates ==============
 
 class MaintenanceTemplateListView(LoginRequiredMixin, CanManageMaintenanceMixin, ListView):
     """List maintenance templates."""
@@ -322,7 +322,7 @@ class MaintenanceTemplateDeleteView(LoginRequiredMixin, CanManageMaintenanceMixi
         return super().form_valid(form)
 
 
-# ============== Work Orders (FR24) ==============
+# ============== Work Orders ==============
 
 class WorkOrderListView(LoginRequiredMixin, CanManageMaintenanceMixin, ListView):
     """List work orders with filters (status, assignee, date range)."""

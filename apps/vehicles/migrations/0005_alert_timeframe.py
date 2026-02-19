@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='vehiclealert',
             name='timeframe_text',
-            field=models.CharField(blank=True, help_text='e.g. "Próximos 7 días", "En 500 km" (FR9)', max_length=128),
+            field=models.CharField(blank=True, help_text='e.g. "Próximos 7 días", "En 500 km"', max_length=128),
         ),
     ]
