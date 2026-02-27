@@ -34,7 +34,7 @@ class Command(BaseCommand):
             '--output-json',
             type=str,
             default=None,
-            help='Also write JSON for continuous learning (e.g. media/models/ml_training_data.json). Same samples as CSV.',
+            help='Also write JSON for continuous learning (e.g. static/models/ml_training_data.json). Same samples as CSV.',
         )
         parser.add_argument(
             '--days',

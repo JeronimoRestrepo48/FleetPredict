@@ -9,8 +9,8 @@ set -e
 DEV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$DEV_DIR"
 
-ML_JSON="${ML_TRAINING_DATA_JSON:-media/models/ml_training_data.json}"
-ML_MODEL="${ML_FAILURE_PREDICTOR_PATH:-media/models/failure_predictor.joblib}"
+ML_JSON="${ML_TRAINING_DATA_JSON:-static/models/ml_training_data.json}"
+ML_MODEL="${ML_FAILURE_PREDICTOR_PATH:-static/models/failure_predictor.joblib}"
 MIN_SAMPLES="${ML_MIN_SAMPLES_TO_TRAIN:-80}"
 CL_INTERVAL="${ML_CONTINUOUS_LEARNING_INTERVAL:-900}"
 
@@ -25,7 +25,7 @@ echo "[*] Checking migrations..."
 python manage.py migrate --noinput
 
 echo "[*] Ensuring ML model directory exists..."
-mkdir -p media/models
+mkdir -p static/models
 
 echo "[*] Starting ASGI server (Daphne) on http://127.0.0.1:8000 ..."
 python -m daphne -b 127.0.0.1 -p 8000 fleetpredict.asgi:application &

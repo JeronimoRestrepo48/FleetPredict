@@ -25,7 +25,7 @@ class Command(BaseCommand):
             '--input-json',
             type=str,
             default=None,
-            help='Input JSON path for continuous learning (e.g. media/models/ml_training_data.json). Overrides --input.',
+            help='Input JSON path for continuous learning (e.g. static/models/ml_training_data.json). Overrides --input.',
         )
         parser.add_argument(
             '--output',

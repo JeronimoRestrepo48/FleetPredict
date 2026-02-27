@@ -10,6 +10,7 @@ websockets>=12.0,<15.0
 # Utilities
 python-decouple>=3.8
 Pillow>=10.0.0
+jinja2>=3.1
 
 # ML failure prediction (optional)
 scikit-learn>=1.3

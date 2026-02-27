@@ -13,3 +13,13 @@ __pycache__/
 *.pywz
 *.pyzw
 *.pyz
+
+# Django / Python
+db.sqlite3
+*.sqlite3
+media/
+venv/
+.env
+*.log
+.DS_Store
+staticfiles/

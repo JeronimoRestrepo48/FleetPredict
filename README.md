@@ -90,6 +90,16 @@ dev/
 └── README.md
 ```
 
+**Modelo y datos ML:** El modelo entrenado y el JSON de aprendizaje continuo están en `static/models/` (`failure_predictor.joblib`, `ml_training_data.json`). Para listar todas las dependencias del entorno: `pip freeze > requirements.txt` (ejecutar desde el venv del proyecto).
+
+---
+
+## Flujo de trabajo (GitHub Flow)
+
+- **Rama principal:** `main` o `master` estable; solo se integra código probado.
+- **Ramas por característica:** crear una rama por requisito o feature (ej. `feat/health-indicators`, `feat/alerts-center`). Desarrollar y probar en esa rama.
+- **Merge:** cuando la funcionalidad esté lista y probada, hacer merge a la rama principal. Evitar commits directos a `main` para features nuevas.
+
 ---
 
 ## Implemented requirements
@@ -345,7 +355,7 @@ Failure prediction can use an **optional** Scikit-learn model that classifies wi
   python manage.py build_ml_dataset --output dataset.csv --days 90 --window-size 20
   python manage.py train_failure_predictor --input dataset.csv
   ```
-  The pipeline (scaler + classifier) is saved to `media/models/failure_predictor.joblib` by default (configurable via `ML_FAILURE_PREDICTOR_PATH`).
+  The pipeline (scaler + classifier) is saved to `static/models/failure_predictor.joblib` by default (configurable via `ML_FAILURE_PREDICTOR_PATH`).
 - **Inference:** When a model exists, after rule-based alerts are evaluated, the ML predictor runs on the same telemetry window and creates additional `VehicleAlert` records for predicted types above `ML_PREDICTION_CONFIDENCE_THRESHOLD` (default 0.5), respecting the same cooldown as rules.
 - **Settings:** `ML_FAILURE_PREDICTOR_PATH`, `ML_WINDOW_SIZE` (default 20), `ML_PREDICTION_CONFIDENCE_THRESHOLD` (default 0.5). With little or no historical data, the dataset may be small; run the telemetry simulator for a while, then build dataset and train, or document that the model improves as more data is collected.
 
