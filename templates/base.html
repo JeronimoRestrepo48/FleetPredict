@@ -28,85 +28,121 @@
                 <ul class="navbar-nav me-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.namespace == 'dashboard' and request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'dashboard:index' %}">Dashboard</a>
+                        <a class="nav-link {% if request.resolver_match.namespace == 'dashboard' and request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'dashboard:index' %}" data-i18n="dashboard">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link position-relative {% if request.resolver_match.url_name == 'alerts' %}active{% endif %}" href="{% url 'dashboard:alerts' %}">Alerts{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
+                        <a class="nav-link position-relative {% if request.resolver_match.url_name == 'alerts' %}active{% endif %}" href="{% url 'dashboard:alerts' %}"><span data-i18n="alerts">Alerts</span>{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
                     </li>
                     {% if user.can_manage_vehicles %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="#" id="navFleet" role="button" data-bs-toggle="dropdown" aria-expanded="false">Fleet</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="#" id="navFleet" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="fleet">Fleet</a>
                         <ul class="dropdown-menu" aria-labelledby="navFleet">
-                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
-                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicle_list' %}" data-i18n="vehicles">Vehicles</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}" data-i18n="compliance">Compliance</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="{% url 'vehicles:vehicle_list' %}">Vehicles</a>
+                        <a class="nav-link {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="{% url 'vehicles:vehicle_list' %}" data-i18n="vehicles">Vehicles</a>
                     </li>
                     {% endif %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'maintenance' %}active{% endif %}" href="#" id="navMaintenance" role="button" data-bs-toggle="dropdown" aria-expanded="false">Maintenance</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'maintenance' %}active{% endif %}" href="#" id="navMaintenance" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="maintenance">Maintenance</a>
                         <ul class="dropdown-menu" aria-labelledby="navMaintenance">
-                            <li><a class="dropdown-item" href="{% url 'maintenance:task_list' %}">Tasks</a></li>
+                            <li><a class="dropdown-item" href="{% url 'maintenance:task_list' %}" data-i18n="tasks">Tasks</a></li>
                             {% if user.can_manage_maintenance %}
-                            <li><a class="dropdown-item" href="{% url 'maintenance:template_list' %}">Maintenance templates</a></li>
-                            <li><a class="dropdown-item" href="{% url 'maintenance:workorder_list' %}">Work orders</a></li>
+                            <li><a class="dropdown-item" href="{% url 'maintenance:template_list' %}" data-i18n="maintenance_templates">Maintenance templates</a></li>
+                            <li><a class="dropdown-item" href="{% url 'maintenance:workorder_list' %}" data-i18n="work_orders">Work orders</a></li>
                             {% endif %}
                         </ul>
                     </li>
                     {% if user.can_view_reports %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'reports' or request.resolver_match.url_name == 'predictions' or request.resolver_match.url_name == 'suggested_maintenance' %}active{% endif %}" href="#" id="navReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">Reports &amp; predictions</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'reports' or request.resolver_match.url_name == 'predictions' or request.resolver_match.url_name == 'suggested_maintenance' %}active{% endif %}" href="#" id="navReports" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="reports_predictions">Reports &amp; predictions</a>
                         <ul class="dropdown-menu" aria-labelledby="navReports">
-                            <li><a class="dropdown-item" href="{% url 'dashboard:predictions' %}">Failure predictions</a></li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard:suggested_maintenance' %}">Suggested maintenance</a></li>
-                            <li><a class="dropdown-item" href="{% url 'reports:index' %}">Reports</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:predictions' %}" data-i18n="failure_predictions">Failure predictions</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:suggested_maintenance' %}" data-i18n="suggested_maintenance">Suggested maintenance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'reports:index' %}" data-i18n="reports">Reports</a></li>
                         </ul>
                     </li>
                     {% endif %}
                     {% if user.can_manage_vehicles or user.can_manage_platform %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">Settings</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="settings">Settings</a>
                         <ul class="dropdown-menu" aria-labelledby="navSettings">
                             {% if user.can_manage_vehicles %}
-                            <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}">Alert rules</a></li>
-                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}" data-i18n="alert_rules">Alert rules</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}" data-i18n="compliance">Compliance</a></li>
                             {% endif %}
                             {% if user.can_manage_platform %}
-                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}">Users</a></li>
-                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}">Vehicle types</a></li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard:auditlog_list' %}">Audit log</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:user_list' %}" data-i18n="users">Users</a></li>
+                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}" data-i18n="vehicle_types">Vehicle types</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:auditlog_list' %}" data-i18n="audit_log">Audit log</a></li>
                             {% endif %}
                         </ul>
                     </li>
                     {% endif %}
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav align-items-center">
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown me-1">
+                        <a class="nav-link position-relative" href="#" id="notifBell" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                            <i class="bi bi-bell fs-5"></i>
+                            {% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.65rem">{{ alerts_unread_count }}</span>{% endif %}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end p-0 notif-dropdown" aria-labelledby="notifBell">
+                            <div class="px-3 py-2 border-bottom d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold" data-i18n="notifications">Notifications</span>
+                                {% if alerts_unread_count %}<span class="badge bg-danger">{{ alerts_unread_count }}</span>{% endif %}
+                            </div>
+                            {% if recent_alerts_inbox %}
+                            {% for alert in recent_alerts_inbox %}
+                            <a href="{% url 'dashboard:alerts' %}" class="dropdown-item px-3 py-2 border-bottom d-flex align-items-start gap-2 notif-item {% if not alert.read_at %}bg-light{% endif %}">
+                                <i class="bi bi-{% if alert.severity == 'critical' %}exclamation-octagon text-danger{% elif alert.severity == 'high' %}exclamation-triangle text-warning{% else %}info-circle text-primary{% endif %} mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium small">{{ alert.get_alert_type_display }}</div>
+                                    <div class="text-muted notif-meta">{{ alert.vehicle.display_name }} &middot; {{ alert.created_at|timesince }} ago</div>
+                                </div>
+                                {% if not alert.read_at %}<span class="badge bg-primary rounded-pill notif-new-badge">new</span>{% endif %}
+                            </a>
+                            {% endfor %}
+                            <div class="text-center py-2">
+                                <a href="{% url 'dashboard:alerts' %}" class="small text-decoration-none" data-i18n="view_all_alerts">View all alerts</a>
+                            </div>
+                            {% else %}
+                            <div class="text-center text-muted py-4 small" data-i18n="no_notifications">No notifications</div>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item me-1">
+                        <button class="nav-link btn btn-link text-white p-1" id="langToggle" type="button" title="Toggle language" aria-label="Toggle language">
+                            EN
+                        </button>
+                    </li>
                     {% if user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ user.get_full_name|default:user.email }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="{% url 'users:profile' %}">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'users:profile' %}" data-i18n="profile">Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'users:logout' %}" class="d-inline">
                                     {% csrf_token %}
-                                    <button type="submit" class="dropdown-item">Logout</button>
+                                    <button type="submit" class="dropdown-item" data-i18n="logout">Logout</button>
                                 </form>
                             </li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'users:login' %}" data-i18n="login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+                        <a class="nav-link" href="{% url 'users:register' %}" data-i18n="register">Register</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -148,6 +184,57 @@
             if (field.validity.valid) field.classList.remove('is-invalid');
         });
     });
+    </script>
+    <script>
+    (function() {
+      var translations = {
+        en: {
+          notifications: 'Notifications', view_all_alerts: 'View all alerts',
+          no_notifications: 'No notifications', profile: 'Profile', logout: 'Logout',
+          login: 'Login', register: 'Register',
+          dashboard: 'Dashboard', alerts: 'Alerts', vehicles: 'Vehicles',
+          maintenance: 'Maintenance', fleet: 'Fleet', compliance: 'Compliance',
+          tasks: 'Tasks', maintenance_templates: 'Maintenance templates',
+          work_orders: 'Work orders', reports_predictions: 'Reports & predictions',
+          failure_predictions: 'Failure predictions', suggested_maintenance: 'Suggested maintenance',
+          reports: 'Reports', settings: 'Settings', alert_rules: 'Alert rules',
+          users: 'Users', vehicle_types: 'Vehicle types', audit_log: 'Audit log',
+          charts_period: 'Charts period:', seven_days: '7 days', thirty_days: '30 days', this_month: 'This month'
+        },
+        es: {
+          notifications: 'Notificaciones', view_all_alerts: 'Ver todas las alertas',
+          no_notifications: 'Sin notificaciones', profile: 'Perfil', logout: 'Cerrar sesión',
+          login: 'Iniciar sesión', register: 'Registrarse',
+          dashboard: 'Panel', alerts: 'Alertas', vehicles: 'Vehículos',
+          maintenance: 'Mantenimiento', fleet: 'Flota', compliance: 'Cumplimiento',
+          tasks: 'Tareas', maintenance_templates: 'Plantillas de mantenimiento',
+          work_orders: 'Órdenes de trabajo', reports_predictions: 'Reportes y predicciones',
+          failure_predictions: 'Predicción de fallas', suggested_maintenance: 'Mantenimiento sugerido',
+          reports: 'Reportes', settings: 'Configuración', alert_rules: 'Reglas de alerta',
+          users: 'Usuarios', vehicle_types: 'Tipos de vehículo', audit_log: 'Registro de auditoría',
+          charts_period: 'Período de gráficos:', seven_days: '7 días', thirty_days: '30 días', this_month: 'Este mes'
+        }
+      };
+      var lang = localStorage.getItem('fp_lang') || 'en';
+      var btn = document.getElementById('langToggle');
+
+      function applyLang(l) {
+        lang = l;
+        localStorage.setItem('fp_lang', l);
+        if (btn) btn.textContent = l.toUpperCase() === 'EN' ? 'ES' : 'EN';
+        document.documentElement.lang = l;
+        var dict = translations[l] || translations.en;
+        document.querySelectorAll('[data-i18n]').forEach(function(el) {
+          var key = el.getAttribute('data-i18n');
+          if (dict[key]) el.textContent = dict[key];
+        });
+      }
+
+      applyLang(lang);
+      if (btn) btn.addEventListener('click', function() {
+        applyLang(lang === 'en' ? 'es' : 'en');
+      });
+    })();
     </script>
     {% block extra_js %}{% endblock %}
 </body>

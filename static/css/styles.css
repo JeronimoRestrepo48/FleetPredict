@@ -411,6 +411,35 @@ footer.fp-footer {
   color: #212529 !important;
 }
 
+/* Notification bell dropdown */
+.notif-dropdown {
+  width: 360px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  white-space: normal;
+}
+
+.notif-meta {
+  font-size: 0.78rem;
+}
+
+.notif-new-badge {
+  font-size: 0.6rem;
+}
+
+/* Language toggle button */
+#langToggle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  line-height: 1;
+  padding: 4px 7px !important;
+}
+
 /* Breadcrumbs */
 .breadcrumb-fp {
   font-size: var(--fp-text-sm);
