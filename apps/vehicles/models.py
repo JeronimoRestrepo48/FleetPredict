@@ -372,6 +372,7 @@ class VehicleAlert(models.Model):
         MAINTENANCE_MILEAGE = 'maintenance_mileage', 'Maintenance due by mileage'
         MAINTENANCE_TIME = 'maintenance_time', 'Maintenance due by time'
         STATISTICAL_ANOMALY = 'statistical_anomaly', 'Statistical anomaly'
+        THRESHOLD_EXCEEDED = 'threshold_exceeded', 'Custom threshold exceeded'
 
     class Severity(models.TextChoices):
         LOW = 'low', 'Low'

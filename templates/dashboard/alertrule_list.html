@@ -3,27 +3,67 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Alert rules</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to dashboard</a>
+  <div class="d-flex gap-2">
+    {% if available_rule_types %}
+    <a href="{% url 'dashboard:alertrule_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i> Add rule
+    </a>
+    {% endif %}
+    <a href="{% url 'dashboard:alertthreshold_list' %}" class="btn btn-outline-primary">Telemetry thresholds</a>
+    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to dashboard</a>
+  </div>
 </div>
-<p class="text-muted">Configure when alerts are triggered (e.g. maintenance due within N days).</p>
+<p class="text-muted mb-4">Configure when alerts are triggered. {% if available_rule_types %}Add new rules with <strong>Add rule</strong>, or {% endif %}adjust the values below and click <strong>Save</strong> to apply changes.</p>
 <div class="card card-fp">
   <div class="card-body p-0">
-    <table class="table table-fp table-hover mb-0">
+    <table class="table table-fp table-hover mb-0 align-middle">
       <thead>
         <tr>
-          <th>Rule</th>
-          <th>Value</th>
-          <th>Enabled</th>
-          <th></th>
+          <th style="width: 35%;">Rule</th>
+          <th style="width: 25%;">Value</th>
+          <th style="width: 20%;">Enabled</th>
+          <th style="width: 20%;">Action</th>
         </tr>
       </thead>
       <tbody>
         {% for rule in rules %}
         <tr>
-          <td>{{ rule.get_name_display }}</td>
-          <td>{{ rule.value_int|default:"-" }}</td>
-          <td>{% if rule.enabled %}Yes{% else %}No{% endif %}</td>
-          <td><a href="{% url 'dashboard:alertrule_edit' rule.pk %}">Edit</a></td>
+          <td>
+            <span class="fw-medium">{{ rule.get_name_display }}</span>
+            {% if rule.name == 'maintenance_due_days' %}
+              <small class="text-muted d-block">Alert when maintenance is due within N days</small>
+            {% elif rule.name == 'maintenance_overdue' %}
+              <small class="text-muted d-block">Alert when maintenance is overdue</small>
+            {% endif %}
+          </td>
+          <td>
+            <form method="post" id="rule-form-{{ rule.pk }}">
+              {% csrf_token %}
+              <input type="hidden" name="rule_id" value="{{ rule.pk }}">
+              {% if rule.name == 'maintenance_due_days' %}
+                <div class="d-inline-flex align-items-center gap-2">
+                  <input type="number" name="value_int" value="{{ rule.value_int|default:7 }}" min="1" max="365"
+                         class="form-control form-control-sm" style="width: 4.5rem;">
+                  <span class="small text-muted">days</span>
+                </div>
+              {% else %}
+                <input type="hidden" name="value_int" value="{{ rule.value_int|default:1 }}">
+                <span class="text-muted small">—</span>
+              {% endif %}
+            </form>
+          </td>
+          <td>
+            <div class="form-check form-switch mb-0">
+              <input type="checkbox" name="enabled" {% if rule.enabled %}checked{% endif %}
+                     class="form-check-input" id="enabled-{{ rule.pk }}" form="rule-form-{{ rule.pk }}">
+              <label class="form-check-label small" for="enabled-{{ rule.pk }}">
+                {% if rule.enabled %}On{% else %}Off{% endif %}
+              </label>
+            </div>
+          </td>
+          <td>
+            <button type="submit" form="rule-form-{{ rule.pk }}" class="btn btn-primary btn-sm">Save</button>
+          </td>
         </tr>
         {% empty %}
         <tr><td colspan="4">No rules. Default rules are created on first load.</td></tr>

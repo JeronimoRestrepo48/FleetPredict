@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{% if threshold %}Edit{% else %}Create{% endif %} threshold - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">{% if threshold %}Edit threshold{% else %}Create threshold{% endif %}</h2>
+  <a href="{% url 'dashboard:alertthreshold_list' %}" class="btn btn-outline-secondary">Back to thresholds</a>
+</div>
+<p class="text-muted mb-4">Define a trigger: select the telemetry attribute, comparison operator, threshold value, and severity. When the attribute crosses the threshold, an alert is created.</p>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="id_attribute" class="form-label">Attribute</label>
+          {{ form.attribute }}
+        </div>
+        <div class="col-md-3">
+          <label for="id_operator" class="form-label">Operator</label>
+          {{ form.operator }}
+        </div>
+        <div class="col-md-3">
+          <label for="id_value_float" class="form-label">Threshold value</label>
+          {{ form.value_float }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_severity" class="form-label">Severity</label>
+          {{ form.severity }}
+        </div>
+        <div class="col-md-6">
+          <label for="id_description" class="form-label">Label (optional)</label>
+          {{ form.description }}
+        </div>
+        <div class="col-12">
+          <div class="form-check">
+            {{ form.enabled }}
+            <label class="form-check-label" for="id_enabled">Enabled</label>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <button type="submit" class="btn btn-primary">{% if threshold %}Save{% else %}Create{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

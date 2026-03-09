@@ -43,6 +43,59 @@ class AlertRule(models.Model):
         return r.value_int if r and r.value_int is not None else 7
 
 
+class AlertThreshold(models.Model):
+    """
+    Configurable trigger/threshold for telemetry attributes.
+    Users can create rules like "alert when engine_temperature_c >= 105".
+    """
+    ATTRIBUTES = [
+        ('engine_temperature_c', 'Engine temperature (°C)'),
+        ('fuel_level_pct', 'Fuel level (%)'),
+        ('speed_kmh', 'Speed (km/h)'),
+        ('rpm', 'Engine RPM'),
+        ('mileage', 'Mileage (km)'),
+        ('voltage', 'Battery voltage (V)'),
+        ('throttle_pct', 'Throttle position (%)'),
+    ]
+    OPERATORS = [
+        ('gte', '≥ (greater or equal)'),
+        ('lte', '≤ (less or equal)'),
+        ('gt', '> (greater)'),
+        ('lt', '< (less)'),
+    ]
+
+    attribute = models.CharField(max_length=64, choices=ATTRIBUTES)
+    operator = models.CharField(max_length=8, choices=OPERATORS)
+    value_float = models.FloatField(help_text='Threshold value')
+    severity = models.CharField(
+        max_length=16,
+        choices=[
+            ('low', 'Low'),
+            ('medium', 'Medium'),
+            ('high', 'High'),
+            ('critical', 'Critical'),
+        ],
+        default='medium',
+    )
+    description = models.CharField(
+        max_length=128,
+        blank=True,
+        help_text='Optional label for this rule (e.g. "Engine overheating warning")',
+    )
+    enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Alert Threshold'
+        verbose_name_plural = 'Alert Thresholds'
+        ordering = ['attribute', 'value_float']
+
+    def __str__(self):
+        op_symbol = {'gte': '≥', 'lte': '≤', 'gt': '>', 'lt': '<'}.get(self.operator, self.operator)
+        return f'{self.get_attribute_display()} {op_symbol} {self.value_float}'
+
+
 class AuditLog(models.Model):
     """
     FR27: Audit log - record user actions for compliance and traceability.

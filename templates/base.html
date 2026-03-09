@@ -68,10 +68,11 @@
                     {% endif %}
                     {% if user.can_manage_vehicles or user.can_manage_platform %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="settings">Settings</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'alertthreshold_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="settings">Settings</a>
                         <ul class="dropdown-menu" aria-labelledby="navSettings">
                             {% if user.can_manage_vehicles %}
                             <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}" data-i18n="alert_rules">Alert rules</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:alertthreshold_list' %}" data-i18n="telemetry_thresholds">Telemetry thresholds</a></li>
                             <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}" data-i18n="compliance">Compliance</a></li>
                             {% endif %}
                             {% if user.can_manage_platform %}
@@ -197,7 +198,7 @@
           tasks: 'Tasks', maintenance_templates: 'Maintenance templates',
           work_orders: 'Work orders', reports_predictions: 'Reports & predictions',
           failure_predictions: 'Failure predictions', suggested_maintenance: 'Suggested maintenance',
-          reports: 'Reports', settings: 'Settings', alert_rules: 'Alert rules',
+          reports: 'Reports', settings: 'Settings', alert_rules: 'Alert rules', telemetry_thresholds: 'Telemetry thresholds',
           users: 'Users', vehicle_types: 'Vehicle types', audit_log: 'Audit log',
           charts_period: 'Charts period:', seven_days: '7 days', thirty_days: '30 days', this_month: 'This month'
         },
@@ -210,7 +211,7 @@
           tasks: 'Tareas', maintenance_templates: 'Plantillas de mantenimiento',
           work_orders: 'Órdenes de trabajo', reports_predictions: 'Reportes y predicciones',
           failure_predictions: 'Predicción de fallas', suggested_maintenance: 'Mantenimiento sugerido',
-          reports: 'Reportes', settings: 'Configuración', alert_rules: 'Reglas de alerta',
+          reports: 'Reportes', settings: 'Configuración', alert_rules: 'Reglas de alerta', telemetry_thresholds: 'Umbrales de telemetría',
           users: 'Usuarios', vehicle_types: 'Tipos de vehículo', audit_log: 'Registro de auditoría',
           charts_period: 'Período de gráficos:', seven_days: '7 días', thirty_days: '30 días', this_month: 'Este mes'
         }

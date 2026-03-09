@@ -11,6 +11,7 @@ from datetime import timedelta
 from apps.vehicles.models import Vehicle, VehicleTelemetry, VehicleAlert
 from apps.vehicles.notifications import send_alert_notification_emails
 from apps.maintenance.models import MaintenanceTask
+from apps.dashboard.models import AlertThreshold
 
 
 # Default thresholds (override in settings.TELEMETRY_PATTERNS_*)
@@ -239,6 +240,60 @@ def check_statistical_anomaly(readings):
     return None
 
 
+def check_custom_thresholds(readings):
+    """
+    Check readings against user-defined AlertThreshold rules.
+    Returns list of alert dicts for any triggered thresholds.
+    """
+    thresholds = list(AlertThreshold.objects.filter(enabled=True).order_by('attribute'))
+    if not thresholds or not readings:
+        return []
+    attr_map = {
+        'engine_temperature_c': 'engine_temperature_c',
+        'fuel_level_pct': 'fuel_level_pct',
+        'speed_kmh': 'speed_kmh',
+        'rpm': 'rpm',
+        'mileage': 'mileage',
+        'voltage': 'voltage',
+        'throttle_pct': 'throttle_pct',
+    }
+    results = []
+    seen = set()  # avoid duplicates: (attribute, operator, value_float)
+    for r in readings[:10]:
+        for th in thresholds:
+            attr = th.attribute
+            if attr not in attr_map:
+                continue
+            field_name = attr_map[attr]
+            val = _decimal(getattr(r, field_name, None)) or _int(getattr(r, field_name, None))
+            if val is None:
+                continue
+            triggered = False
+            if th.operator == 'gte' and val >= th.value_float:
+                triggered = True
+            elif th.operator == 'lte' and val <= th.value_float:
+                triggered = True
+            elif th.operator == 'gt' and val > th.value_float:
+                triggered = True
+            elif th.operator == 'lt' and val < th.value_float:
+                triggered = True
+            if triggered:
+                key = (attr, th.operator, th.value_float)
+                if key in seen:
+                    continue
+                seen.add(key)
+                op_sym = {'gte': '≥', 'lte': '≤', 'gt': '>', 'lt': '<'}.get(th.operator, '')
+                msg = th.description or f'{th.get_attribute_display()}: {val} {op_sym} {th.value_float}'
+                results.append({
+                    'type': VehicleAlert.AlertType.THRESHOLD_EXCEEDED,
+                    'severity': th.severity,
+                    'message': msg,
+                    'confidence': Decimal('0.90'),
+                    'timeframe_text': '',
+                })
+    return results
+
+
 def evaluate_patterns(vehicle_id, readings=None):
     """
     Run all pattern checks and return list of alert dicts (type, severity, message, confidence).
@@ -274,6 +329,8 @@ def evaluate_patterns(vehicle_id, readings=None):
         results.append(r)
     r = check_statistical_anomaly(readings)
     if r:
+        results.append(r)
+    for r in check_custom_thresholds(readings):
         results.append(r)
 
     return results

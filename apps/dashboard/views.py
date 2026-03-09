@@ -5,9 +5,10 @@ Renders HTML templates instead of JSON.
 """
 
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import TemplateView, View, ListView, UpdateView
+from django.views.generic import TemplateView, View, ListView, UpdateView, DeleteView
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.views.generic import CreateView
 from django import forms
 from django.contrib import messages
 from django.utils import timezone
@@ -18,7 +19,7 @@ from collections import OrderedDict
 from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement
 from apps.maintenance.models import MaintenanceTask
 from django.contrib.auth import get_user_model
-from .models import AlertRule, AuditLog
+from .models import AlertRule, AlertThreshold, AuditLog
 from .audit import log_audit
 
 User = get_user_model()
@@ -575,6 +576,27 @@ class AlertRuleForm(forms.ModelForm):
         }
 
 
+class AlertRuleCreateForm(forms.ModelForm):
+    """Form to create a new alert rule (choose from rule types not yet configured)."""
+    class Meta:
+        model = AlertRule
+        fields = ('name', 'value_int', 'enabled')
+        widgets = {
+            'name': forms.Select(attrs={'class': 'form-select'}),
+            'value_int': forms.NumberInput(attrs={'class': 'form-control', 'min': 1, 'max': 365}),
+            'enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Only show rule types that don't have a rule yet
+        existing = set(AlertRule.objects.values_list('name', flat=True))
+        choices = [(k, v) for k, v in AlertRule.RULE_TYPES if k not in existing]
+        self.fields['name'].choices = choices
+        if not choices:
+            self.fields['name'].choices = [('', '— All rule types are configured —')]
+
+
 class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     """List alert rules. Admin or Fleet Manager only."""
     model = AlertRule
@@ -585,12 +607,68 @@ class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def get_queryset(self):
-        # Ensure default rule exists
+        # Ensure default rules exist
         AlertRule.objects.get_or_create(
             name='maintenance_due_days',
             defaults={'value_int': 7, 'enabled': True},
         )
+        AlertRule.objects.get_or_create(
+            name='maintenance_overdue',
+            defaults={'value_int': 1, 'enabled': True},
+        )
         return AlertRule.objects.all().order_by('name')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        existing = set(AlertRule.objects.values_list('name', flat=True))
+        context['available_rule_types'] = [
+            (k, v) for k, v in AlertRule.RULE_TYPES if k not in existing
+        ]
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Handle inline configuration (save rule from list page)."""
+        rule_id = request.POST.get('rule_id')
+        if not rule_id:
+            return self.get(request, *args, **kwargs)
+        try:
+            rule = AlertRule.objects.get(pk=rule_id)
+        except AlertRule.DoesNotExist:
+            messages.error(request, 'Rule not found.')
+            return self.get(request, *args, **kwargs)
+        value_raw = request.POST.get('value_int')
+        enabled = request.POST.get('enabled') == 'on'
+        if value_raw is not None and value_raw != '':
+            try:
+                rule.value_int = max(1, min(365, int(value_raw)))
+            except ValueError:
+                rule.value_int = 7
+        rule.enabled = enabled
+        rule.save()
+        messages.success(request, f'Alert rule "{rule.get_name_display()}" updated.')
+        return self.get(request, *args, **kwargs)
+
+
+class AlertRuleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Create a new alert rule (choose from types not yet configured)."""
+    model = AlertRule
+    form_class = AlertRuleCreateForm
+    template_name = 'dashboard/alertrule_create.html'
+    success_url = reverse_lazy('dashboard:alertrule_list')
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Alert rule created.')
+        return super().form_valid(form)
+
+    def get(self, request, *args, **kwargs):
+        existing = set(AlertRule.objects.values_list('name', flat=True))
+        if len(existing) >= len(AlertRule.RULE_TYPES):
+            messages.info(request, 'All alert rule types are already configured.')
+            return redirect(reverse_lazy('dashboard:alertrule_list'))
+        return super().get(request, *args, **kwargs)
 
 
 class AlertRuleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -606,6 +684,80 @@ class AlertRuleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         messages.success(self.request, 'Alert rule updated.')
+        return super().form_valid(form)
+
+
+# ============== Alert thresholds (telemetry triggers) ==============
+
+class AlertThresholdForm(forms.ModelForm):
+    class Meta:
+        model = AlertThreshold
+        fields = ('attribute', 'operator', 'value_float', 'severity', 'description', 'enabled')
+        widgets = {
+            'attribute': forms.Select(attrs={'class': 'form-select'}),
+            'operator': forms.Select(attrs={'class': 'form-select'}),
+            'value_float': forms.NumberInput(attrs={'class': 'form-control', 'step': 'any'}),
+            'severity': forms.Select(attrs={'class': 'form-select'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional label'}),
+            'enabled': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+
+class AlertThresholdListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """List telemetry thresholds (triggers)."""
+    model = AlertThreshold
+    template_name = 'dashboard/alertthreshold_list.html'
+    context_object_name = 'thresholds'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def get_queryset(self):
+        return AlertThreshold.objects.all().order_by('attribute', 'value_float')
+
+
+class AlertThresholdCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+    """Create a new telemetry threshold trigger."""
+    model = AlertThreshold
+    form_class = AlertThresholdForm
+    template_name = 'dashboard/alertthreshold_form.html'
+    success_url = reverse_lazy('dashboard:alertthreshold_list')
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Threshold created.')
+        return super().form_valid(form)
+
+
+class AlertThresholdUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """Edit a telemetry threshold."""
+    model = AlertThreshold
+    form_class = AlertThresholdForm
+    template_name = 'dashboard/alertthreshold_form.html'
+    context_object_name = 'threshold'
+    success_url = reverse_lazy('dashboard:alertthreshold_list')
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Threshold updated.')
+        return super().form_valid(form)
+
+
+class AlertThresholdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """Delete a telemetry threshold."""
+    model = AlertThreshold
+    success_url = reverse_lazy('dashboard:alertthreshold_list')
+    template_name = 'dashboard/alertthreshold_confirm_delete.html'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Threshold deleted.')
         return super().form_valid(form)
 
 

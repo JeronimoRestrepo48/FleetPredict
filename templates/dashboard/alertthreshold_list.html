@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Telemetry thresholds - FleetPredict Pro{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Telemetry thresholds</h2>
+  <div class="d-flex gap-2">
+    <a href="{% url 'dashboard:alertthreshold_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-lg me-1"></i> Add threshold
+    </a>
+    <a href="{% url 'dashboard:alertrule_list' %}" class="btn btn-outline-secondary">Alert rules</a>
+    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Dashboard</a>
+  </div>
+</div>
+<p class="text-muted mb-4">Create triggers and thresholds for telemetry attributes. When a value crosses the threshold, an alert is generated (e.g. engine temperature ≥ 105 °C, fuel level ≤ 15%).</p>
+<div class="card card-fp">
+  <div class="card-body p-0">
+    <table class="table table-fp table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Condition</th>
+          <th>Severity</th>
+          <th>Label</th>
+          <th>Enabled</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in thresholds %}
+        <tr>
+          <td>{{ t.get_attribute_display }}</td>
+          <td>
+            {% if t.operator == 'gte' %}≥{% elif t.operator == 'lte' %}≤{% elif t.operator == 'gt' %}&gt;{% else %}&lt;{% endif %}
+            {{ t.value_float }}
+          </td>
+          <td><span class="badge bg-{% if t.severity == 'critical' %}danger{% elif t.severity == 'high' %}warning{% elif t.severity == 'medium' %}info{% else %}secondary{% endif %}">{{ t.severity }}</span></td>
+          <td>{{ t.description|default:"—" }}</td>
+          <td>{% if t.enabled %}Yes{% else %}No{% endif %}</td>
+          <td>
+            <a href="{% url 'dashboard:alertthreshold_edit' t.pk %}" class="me-2"><i class="bi bi-pencil"></i> Edit</a>
+            <a href="{% url 'dashboard:alertthreshold_delete' t.pk %}" class="text-danger"><i class="bi bi-trash"></i> Delete</a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No thresholds yet. Click <strong>Add threshold</strong> to create one.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
