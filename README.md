@@ -236,6 +236,55 @@ Use email and password. This user has full access.
 
 ---
 
+## One-command start (migrations + server + simulator + ML)
+
+From the `dev/` folder you can run a single script that:
+
+- Runs migrations
+- Ensures the ML model directory exists
+- Starts the ASGI server (Daphne) on http://127.0.0.1:8000
+- Waits for the server to be up, then starts the telemetry simulator
+- If there is no ML model yet: waits until there are enough telemetry samples (default 80), then trains the model
+- Starts continuous learning in the background (periodically rebuilds the dataset and retrains; default interval 900 s)
+
+**Stop everything:** press **Ctrl+C** in the same terminal.
+
+### Linux / macOS
+
+```bash
+cd dev
+./start_all.sh
+```
+
+If you use a virtualenv, the script will activate it automatically when `venv/` exists in `dev/`.
+
+### Windows
+
+From a terminal in the `dev/` folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File start_all.ps1
+```
+
+Or run the batch file (double-click or from CMD):
+
+```cmd
+start_all.bat
+```
+
+The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
+
+### Optional environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `ML_TRAINING_DATA_JSON` | Path to the JSON dataset for training | `static/models/ml_training_data.json` |
+| `ML_FAILURE_PREDICTOR_PATH` | Path where the trained model is saved | `static/models/failure_predictor.joblib` |
+| `ML_MIN_SAMPLES_TO_TRAIN` | Minimum telemetry samples before first training | `80` |
+| `ML_CONTINUOUS_LEARNING_INTERVAL` | Seconds between retrain cycles | `900` |
+
+---
+
 ## Management commands
 
 | Command | Description |
