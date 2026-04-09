@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Route Planner - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item active">Route Planner</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h2 class="page-title"><i class="bi bi-signpost-split me-2"></i>Route Planner</h2>
+<div class="card card-fp"><div class="card-body">
+  <p class="text-muted mb-3">Enter origin, destination, and select a vehicle. The system will suggest 3 route alternatives based on vehicle health and your optimization priority.</p>
+  <form method="post" class="fp-validate">{% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Get suggestions</button>
+      <a href="{% url 'routes:history' %}" class="btn btn-outline-secondary">Route history</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

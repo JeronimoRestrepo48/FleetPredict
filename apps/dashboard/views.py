@@ -19,7 +19,7 @@ from collections import OrderedDict
 from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement
 from apps.maintenance.models import MaintenanceTask
 from django.contrib.auth import get_user_model
-from .models import AlertRule, AlertThreshold, AuditLog
+from .models import AlertRule, AlertThreshold, AuditLog, DashboardLayout
 from .audit import log_audit
 
 User = get_user_model()
@@ -43,12 +43,20 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         user = self.request.user
         if user.is_administrator:
-            return self._get_admin_context(context)
-        if user.is_mechanic:
-            return self._get_mechanic_context(context)
-        if user.is_fleet_manager:
-            return self._get_fleet_manager_context(context)
-        return self._get_driver_context(context)
+            ctx = self._get_admin_context(context)
+        elif user.is_mechanic:
+            ctx = self._get_mechanic_context(context)
+        elif user.is_fleet_manager:
+            ctx = self._get_fleet_manager_context(context)
+        else:
+            ctx = self._get_driver_context(context)
+        try:
+            layout = DashboardLayout.objects.get(user=user)
+            ctx['custom_layout'] = layout.layout
+        except DashboardLayout.DoesNotExist:
+            ctx['custom_layout'] = DashboardLayout.get_default_layout()
+        ctx['widget_choices'] = DashboardLayout.WIDGET_CHOICES
+        return ctx
 
     def _get_admin_context(self, context):
         """Platform management dashboard: users, roles, vehicle types, audit."""
@@ -330,10 +338,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             vehicle_id__in=vehicle_ids,
             expiration_date__lt=today,
         ).count() if vehicle_ids else 0
+        # Compliance expiring window is configurable via AlertRule (default 30 days)
+        compliance_window_days = AlertRule.get_compliance_expiring_days()
         compliance_expiring = ComplianceRequirement.objects.filter(
             vehicle_id__in=vehicle_ids,
             expiration_date__gte=today,
-            expiration_date__lte=today + timedelta(days=30),
+            expiration_date__lte=today + timedelta(days=compliance_window_days),
         ).count() if vehicle_ids else 0
 
         context.update({
@@ -360,6 +370,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'completed_by_day': completed_by_day,
             'compliance_expired': compliance_expired,
             'compliance_expiring': compliance_expiring,
+            'compliance_window_days': compliance_window_days,
         })
         return context
 
@@ -616,6 +627,14 @@ class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             name='maintenance_overdue',
             defaults={'value_int': 1, 'enabled': True},
         )
+        AlertRule.objects.get_or_create(
+            name='compliance_expiring_days',
+            defaults={'value_int': 30, 'enabled': True},
+        )
+        AlertRule.objects.get_or_create(
+            name='workorder_due_days',
+            defaults={'value_int': 7, 'enabled': True},
+        )
         return AlertRule.objects.all().order_by('name')
 
     def get_context_data(self, **kwargs):
@@ -787,3 +806,53 @@ class AuditLogListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         context = super().get_context_data(**kwargs)
         context['action_choices'] = AuditLog.ACTION_CHOICES
         return context
+
+
+# ============== FR28: Dashboard Customization ==============
+
+class DashboardCustomizeView(LoginRequiredMixin, View):
+    def get(self, request):
+        from django.template.response import TemplateResponse
+        layout_obj, _ = DashboardLayout.objects.get_or_create(
+            user=request.user,
+            defaults={'layout': DashboardLayout.get_default_layout()},
+        )
+        import json
+        return TemplateResponse(request, 'dashboard/customize.html', {
+            'layout_json': json.dumps(layout_obj.layout),
+            'widget_choices': DashboardLayout.WIDGET_CHOICES,
+            'size_choices': DashboardLayout.SIZE_CHOICES,
+        })
+
+    def post(self, request):
+        import json
+        try:
+            new_layout = json.loads(request.body)
+        except (json.JSONDecodeError, ValueError):
+            from django.http import JsonResponse
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        valid_types = {c[0] for c in DashboardLayout.WIDGET_CHOICES}
+        valid_sizes = {c[0] for c in DashboardLayout.SIZE_CHOICES}
+        cleaned = []
+        for i, w in enumerate(new_layout):
+            wt = w.get('widget_type', '')
+            sz = w.get('size', 'sm')
+            if wt in valid_types and sz in valid_sizes:
+                cleaned.append({'widget_type': wt, 'position': i, 'size': sz})
+        layout_obj, _ = DashboardLayout.objects.get_or_create(
+            user=request.user,
+            defaults={'layout': cleaned},
+        )
+        layout_obj.layout = cleaned
+        layout_obj.save(update_fields=['layout', 'updated_at'])
+        from django.http import JsonResponse
+        return JsonResponse({'ok': True, 'count': len(cleaned)})
+
+
+class DashboardResetView(LoginRequiredMixin, View):
+    def post(self, request):
+        DashboardLayout.objects.filter(user=request.user).update(
+            layout=DashboardLayout.get_default_layout()
+        )
+        messages.success(request, 'Dashboard reset to default layout.')
+        return redirect('dashboard:index')

@@ -5,7 +5,7 @@ Forms for Vehicles app.
 from django import forms
 from django.contrib.auth import get_user_model
 
-from .models import Vehicle, VehicleType, ComplianceRequirement
+from .models import Vehicle, VehicleType, ComplianceRequirement, SensorReading
 
 User = get_user_model()
 
@@ -68,3 +68,33 @@ class ComplianceRequirementForm(forms.ModelForm):
                 field.widget.attrs.setdefault('class', 'form-control')
             if name == 'vehicle':
                 field.widget.attrs.setdefault('class', 'form-select')
+
+
+class SensorReadingForm(forms.ModelForm):
+    """FR18: Manual sensor reading entry."""
+
+    class Meta:
+        model = SensorReading
+        fields = ('vehicle', 'sensor_type', 'value', 'timestamp')
+        widgets = {
+            'vehicle': forms.Select(attrs={'class': 'form-select'}),
+            'sensor_type': forms.Select(attrs={'class': 'form-select'}),
+            'timestamp': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.setdefault('class', 'form-control')
+
+
+class SensorCSVUploadForm(forms.Form):
+    """FR18: Upload sensor readings via CSV file."""
+    vehicle = forms.ModelChoiceField(
+        queryset=Vehicle.objects.filter(is_deleted=False),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+    )
+    csv_file = forms.FileField(
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.csv'}),
+        help_text='CSV columns: sensor_type, value, timestamp (ISO format)',
+    )

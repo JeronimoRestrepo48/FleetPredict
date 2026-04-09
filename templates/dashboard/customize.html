@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Customize Dashboard - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item active">Customize</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0"><i class="bi bi-grid-1x2 me-2"></i>Customize Dashboard</h2>
+  <div class="d-flex gap-2">
+    <button id="saveLayout" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save layout</button>
+    <form method="post" action="{% url 'dashboard:dashboard_reset' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-outline-secondary">Reset to default</button></form>
+    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-lg-3">
+    <div class="card card-fp">
+      <div class="card-header">Available Widgets</div>
+      <div class="card-body" id="widgetLibrary">
+        {% for val, label in widget_choices %}
+        <div class="widget-item border rounded p-2 mb-2" data-widget-type="{{ val }}" draggable="true" style="cursor:grab">
+          <i class="bi bi-grip-vertical me-1 text-muted"></i>{{ label }}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card card-fp mt-3">
+      <div class="card-header">Widget Size</div>
+      <div class="card-body">
+        <select id="widgetSize" class="form-select">
+          {% for val, label in size_choices %}
+          <option value="{{ val }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-9">
+    <div class="card card-fp">
+      <div class="card-header">Current Layout <span class="badge bg-secondary" id="widgetCount">0</span></div>
+      <div class="card-body">
+        <div id="layoutArea" class="row g-2" style="min-height:200px;border:2px dashed #dee2e6;border-radius:.5rem;padding:1rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function(){
+  var layout=JSON.parse('{{ layout_json|escapejs }}');
+  var area=document.getElementById('layoutArea');
+  var sizeSelect=document.getElementById('widgetSize');
+  var csrfToken='{{ csrf_token }}';
+  var wl={};
+  {% for val, label in widget_choices %}wl['{{ val }}']='{{ label }}';{% endfor %}
+  function sizeToCol(s){return s==='lg'?'col-12':s==='md'?'col-md-6':'col-md-4'}
+  function render(){
+    area.innerHTML='';
+    layout.forEach(function(w,i){
+      var d=document.createElement('div');
+      d.className=sizeToCol(w.size)+' lw';d.draggable=true;d.dataset.index=i;
+      d.innerHTML='<div class="border rounded p-3 bg-white d-flex justify-content-between align-items-center"><span><i class="bi bi-grip-vertical me-1 text-muted"></i>'+(wl[w.widget_type]||w.widget_type)+' <span class="badge bg-light text-dark">'+w.size+'</span></span><button class="btn btn-sm btn-outline-danger rw" data-idx="'+i+'"><i class="bi bi-x"></i></button></div>';
+      area.appendChild(d);
+    });
+    document.getElementById('widgetCount').textContent=layout.length;
+    area.querySelectorAll('.rw').forEach(function(b){b.onclick=function(){layout.splice(+this.dataset.idx,1);render()}});
+    area.querySelectorAll('.lw').forEach(function(el){
+      el.ondragstart=function(e){e.dataTransfer.setData('text','m:'+el.dataset.index)};
+      el.ondragover=function(e){e.preventDefault();el.style.opacity='.6'};
+      el.ondragleave=function(){el.style.opacity='1'};
+      el.ondrop=function(e){e.preventDefault();el.style.opacity='1';var d=e.dataTransfer.getData('text');if(d.startsWith('m:')){var f=+d.split(':')[1],t=+el.dataset.index,it=layout.splice(f,1)[0];layout.splice(t,0,it);render()}};
+    });
+  }
+  document.getElementById('widgetLibrary').querySelectorAll('.widget-item').forEach(function(el){
+    el.ondragstart=function(e){e.dataTransfer.setData('text','a:'+el.dataset.widgetType)};
+  });
+  area.ondragover=function(e){e.preventDefault()};
+  area.ondrop=function(e){e.preventDefault();var d=e.dataTransfer.getData('text');if(d.startsWith('a:')){if(layout.length>=20){alert('Max 20 widgets.');return}layout.push({widget_type:d.split(':')[1],position:layout.length,size:sizeSelect.value});render()}};
+  document.getElementById('saveLayout').onclick=function(){
+    fetch('{% url "dashboard:dashboard_customize" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(layout)}).then(function(r){return r.json()}).then(function(d){if(d.ok)alert('Layout saved ('+d.count+' widgets).');else alert('Error: '+(d.error||'unknown'))});
+  };
+  render();
+})();
+</script>
+{% endblock %}

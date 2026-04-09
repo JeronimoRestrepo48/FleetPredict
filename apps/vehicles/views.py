@@ -23,8 +23,14 @@ from django.views.generic import (
 from django.db.models import Q
 
 from apps.dashboard.audit import log_audit
-from .models import Vehicle, VehicleType, VehicleTelemetry, ComplianceRequirement
-from .forms import VehicleForm, VehicleTypeForm, ComplianceRequirementForm
+from .models import (
+    Vehicle, VehicleType, VehicleTelemetry, ComplianceRequirement,
+    SensorReading, GPSReading, DrivingPattern,
+)
+from .forms import (
+    VehicleForm, VehicleTypeForm, ComplianceRequirementForm,
+    SensorReadingForm, SensorCSVUploadForm,
+)
 
 
 class CanManageVehiclesMixin(UserPassesTestMixin):
@@ -410,3 +416,204 @@ class ComplianceDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteVie
     def form_valid(self, form):
         messages.success(self.request, 'Compliance requirement removed.')
         return super().form_valid(form)
+
+
+# ============== FR18: Sensor Data Integration ==============
+
+class SensorDashboardView(LoginRequiredMixin, DetailView):
+    model = Vehicle
+    template_name = 'vehicles/sensor_dashboard.html'
+    context_object_name = 'vehicle'
+
+    def get_queryset(self):
+        qs = Vehicle.objects.filter(is_deleted=False)
+        if self.request.user.is_driver:
+            qs = qs.filter(assigned_driver=self.request.user)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta
+        import json
+        ctx = super().get_context_data(**kwargs)
+        days = int(self.request.GET.get('days', 7))
+        since = timezone.now() - timedelta(days=days)
+        sensor_type = self.request.GET.get('sensor_type', '')
+        qs = self.object.sensor_readings.filter(timestamp__gte=since)
+        if sensor_type:
+            qs = qs.filter(sensor_type=sensor_type)
+        readings = list(qs.order_by('timestamp').values('sensor_type', 'value', 'timestamp'))
+        chart_data = {}
+        for r in readings:
+            st = r['sensor_type']
+            chart_data.setdefault(st, {'labels': [], 'values': []})
+            chart_data[st]['labels'].append(r['timestamp'].strftime('%Y-%m-%d %H:%M'))
+            chart_data[st]['values'].append(float(r['value']))
+        ctx['chart_data_json'] = json.dumps(chart_data)
+        ctx['sensor_types'] = SensorReading.SensorType.choices
+        ctx['selected_days'] = days
+        ctx['selected_sensor_type'] = sensor_type
+        return ctx
+
+
+class SensorManualEntryView(LoginRequiredMixin, CanManageVehiclesMixin, CreateView):
+    model = SensorReading
+    form_class = SensorReadingForm
+    template_name = 'vehicles/sensor_form.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['vehicle'] = self.kwargs.get('pk')
+        initial['source'] = 'manual'
+        return initial
+
+    def form_valid(self, form):
+        form.instance.source = 'manual'
+        messages.success(self.request, 'Sensor reading added.')
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('vehicles:sensor_dashboard', kwargs={'pk': self.object.vehicle_id})
+
+
+class SensorCSVUploadView(LoginRequiredMixin, CanManageVehiclesMixin, View):
+    def get(self, request, pk):
+        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
+        form = SensorCSVUploadForm(initial={'vehicle': vehicle.pk})
+        return self._render(request, form, vehicle)
+
+    def post(self, request, pk):
+        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
+        form = SensorCSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = form.cleaned_data['csv_file']
+            decoded = csv_file.read().decode('utf-8')
+            reader = csv.DictReader(io.StringIO(decoded))
+            count = 0
+            from django.utils.dateparse import parse_datetime
+            for row in reader:
+                ts = parse_datetime(row.get('timestamp', ''))
+                if ts and row.get('sensor_type') and row.get('value'):
+                    SensorReading.objects.create(
+                        vehicle=vehicle,
+                        sensor_type=row['sensor_type'].strip(),
+                        value=row['value'].strip(),
+                        timestamp=ts,
+                        source='csv',
+                    )
+                    count += 1
+            messages.success(request, f'{count} sensor readings imported.')
+            return redirect('vehicles:sensor_dashboard', pk=vehicle.pk)
+        return self._render(request, form, vehicle)
+
+    def _render(self, request, form, vehicle):
+        from django.template.response import TemplateResponse
+        return TemplateResponse(request, 'vehicles/sensor_upload.html', {
+            'form': form, 'vehicle': vehicle,
+        })
+
+
+class SensorExportCsvView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
+        readings = vehicle.sensor_readings.order_by('timestamp')
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(['sensor_type', 'value', 'timestamp', 'source'])
+        for r in readings:
+            writer.writerow([r.sensor_type, r.value, r.timestamp.isoformat(), r.source])
+        response = HttpResponse(buffer.getvalue(), content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="sensors_{vehicle.license_plate}.csv"'
+        return response
+
+
+# ============== FR19: GPS and Driving Data ==============
+
+class GPSMapView(LoginRequiredMixin, DetailView):
+    model = Vehicle
+    template_name = 'vehicles/gps_map.html'
+    context_object_name = 'vehicle'
+
+    def get_queryset(self):
+        qs = Vehicle.objects.filter(is_deleted=False)
+        if self.request.user.is_driver:
+            qs = qs.filter(assigned_driver=self.request.user)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta
+        import json
+        ctx = super().get_context_data(**kwargs)
+        days = int(self.request.GET.get('days', 1))
+        since = timezone.now() - timedelta(days=days)
+        readings = list(
+            self.object.gps_readings.filter(timestamp__gte=since)
+            .order_by('timestamp')
+            .values('latitude', 'longitude', 'speed_kmh', 'timestamp')
+        )
+        points = []
+        for r in readings:
+            points.append({
+                'lat': float(r['latitude']),
+                'lng': float(r['longitude']),
+                'speed': float(r['speed_kmh'] or 0),
+                'time': r['timestamp'].strftime('%Y-%m-%d %H:%M'),
+            })
+        ctx['gps_points_json'] = json.dumps(points)
+        ctx['selected_days'] = days
+        return ctx
+
+
+class DrivingAnalysisView(LoginRequiredMixin, DetailView):
+    model = Vehicle
+    template_name = 'vehicles/driving_analysis.html'
+    context_object_name = 'vehicle'
+
+    def get_queryset(self):
+        qs = Vehicle.objects.filter(is_deleted=False)
+        if self.request.user.is_driver:
+            qs = qs.filter(assigned_driver=self.request.user)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        patterns = self.object.driving_patterns.all()[:30]
+        ctx['patterns'] = patterns
+        if patterns:
+            from django.db.models import Avg, Max, Sum
+            agg = self.object.driving_patterns.aggregate(
+                avg_speed=Avg('avg_speed_kmh'),
+                max_speed=Max('max_speed_kmh'),
+                total_km=Sum('total_km'),
+                total_driving=Sum('driving_hours'),
+                total_idle=Sum('idle_hours'),
+                total_aggressive=Sum('aggressive_events'),
+            )
+            ctx['stats'] = agg
+        return ctx
+
+
+class MileageReportView(LoginRequiredMixin, DetailView):
+    model = Vehicle
+    template_name = 'vehicles/mileage_report.html'
+    context_object_name = 'vehicle'
+
+    def get_queryset(self):
+        qs = Vehicle.objects.filter(is_deleted=False)
+        if self.request.user.is_driver:
+            qs = qs.filter(assigned_driver=self.request.user)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        import json
+        ctx = super().get_context_data(**kwargs)
+        patterns = list(
+            self.object.driving_patterns.order_by('period_start')
+            .values('period_start', 'total_km')[:60]
+        )
+        labels = [p['period_start'].strftime('%Y-%m-%d') for p in patterns]
+        values = [float(p['total_km']) for p in patterns]
+        ctx['mileage_json'] = json.dumps({'labels': labels, 'values': values})
+        ctx['current_mileage'] = self.object.current_mileage
+        return ctx

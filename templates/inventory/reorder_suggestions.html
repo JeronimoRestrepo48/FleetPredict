@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Reorder Suggestions - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Reorder suggestions</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Reorder Suggestions</h2>
+  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Back to spare parts</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <p class="text-muted small mb-3">Suggested order quantity = reorder point minus current stock (values shown separately).</p>
+    <div class="table-responsive">
+      <table class="table table-fp mb-0">
+        <thead>
+          <tr>
+            <th>Part#</th>
+            <th>Name</th>
+            <th>Stock</th>
+            <th>Reorder point</th>
+            <th>Suggested (reorder − stock)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in parts %}
+          <tr>
+            <td><a href="{% url 'inventory:sparepart_detail' p.pk %}">{{ p.part_number }}</a></td>
+            <td><a href="{% url 'inventory:sparepart_detail' p.pk %}">{{ p.name }}</a></td>
+            <td>{{ p.current_stock }}</td>
+            <td>{{ p.reorder_point }}</td>
+            <td class="text-muted"><span class="text-body">{{ p.reorder_point }}</span> − <span class="text-body">{{ p.current_stock }}</span></td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted py-4">No data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

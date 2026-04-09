@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FleetPredict Pro{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}FleetPredict Pro – Predictive fleet maintenance and vehicle management.{% endblock %}">
-    <link rel="icon" type="image/svg+xml" href="{% static 'img/logo.svg' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/logo.png' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -19,7 +19,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-fp">
         <div class="container-fluid">
             <a class="navbar-brand" href="{% url 'dashboard:index' %}">
-                <img src="{% static 'img/logo.svg' %}" alt="" class="fp-logo"> <span>FleetPredict Pro</span>
+                <img src="{% static 'img/logo.png' %}" alt="" class="fp-logo"> <span>FleetPredict Pro</span>
             </a>
             <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -39,6 +39,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navFleet">
                             <li><a class="dropdown-item" href="{% url 'vehicles:vehicle_list' %}" data-i18n="vehicles">Vehicles</a></li>
                             <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}" data-i18n="compliance">Compliance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'routes:planner' %}" data-i18n="route_planner">Route planner</a></li>
                         </ul>
                     </li>
                     {% else %}
@@ -53,6 +54,8 @@
                             {% if user.can_manage_maintenance %}
                             <li><a class="dropdown-item" href="{% url 'maintenance:template_list' %}" data-i18n="maintenance_templates">Maintenance templates</a></li>
                             <li><a class="dropdown-item" href="{% url 'maintenance:workorder_list' %}" data-i18n="work_orders">Work orders</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventory:sparepart_list' %}" data-i18n="spare_parts">Spare parts</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventory:supplier_list' %}" data-i18n="suppliers">Suppliers</a></li>
                             {% endif %}
                         </ul>
                     </li>

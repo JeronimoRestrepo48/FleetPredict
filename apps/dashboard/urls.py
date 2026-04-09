@@ -20,6 +20,8 @@ from .views import (
     AlertThresholdUpdateView,
     AlertThresholdDeleteView,
     AuditLogListView,
+    DashboardCustomizeView,
+    DashboardResetView,
 )
 
 app_name = 'dashboard'
@@ -40,4 +42,6 @@ urlpatterns = [
     path('alert-thresholds/<int:pk>/edit/', AlertThresholdUpdateView.as_view(), name='alertthreshold_edit'),
     path('alert-thresholds/<int:pk>/delete/', AlertThresholdDeleteView.as_view(), name='alertthreshold_delete'),
     path('audit-log/', AuditLogListView.as_view(), name='auditlog_list'),
+    path('dashboard/customize/', DashboardCustomizeView.as_view(), name='dashboard_customize'),
+    path('dashboard/reset/', DashboardResetView.as_view(), name='dashboard_reset'),
 ]

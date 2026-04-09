@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Route Suggestions{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'routes:planner' %}">Route Planner</a></li>
+  <li class="breadcrumb-item active">Suggestions</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h2 class="page-title"><i class="bi bi-signpost-split me-2"></i>Route Suggestions</h2>
+<p class="text-muted mb-3">{{ route.origin }} &rarr; {{ route.destination }} | Vehicle: {{ route.vehicle.display_name }} | Priority: {{ route.get_optimization_priority_display }}</p>
+<div class="row g-3">
+  {% for s in suggestions %}
+  <div class="col-md-4">
+    <div class="card card-fp h-100 {% if s.selected %}border-primary border-2{% endif %}">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Alternative {{ s.alternative_number }}</span>
+        {% if s.recommended %}<span class="badge bg-success">Recommended</span>{% endif %}
+        {% if s.selected %}<span class="badge bg-primary">Selected</span>{% endif %}
+      </div>
+      <div class="card-body">
+        <ul class="list-unstyled mb-3">
+          <li><strong>Distance:</strong> {{ s.distance_km }} km</li>
+          <li><strong>Time:</strong> {{ s.estimated_time_min }} min</li>
+          <li><strong>Fuel cost:</strong> ${{ s.fuel_cost }}</li>
+        </ul>
+        {% if s.vehicle_condition_impact %}
+        <div class="alert alert-warning py-2 small mb-3">{{ s.vehicle_condition_impact }}</div>
+        {% endif %}
+        {% if not s.selected %}
+        <form method="post" action="{% url 'routes:select' s.pk %}">{% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm w-100">Select this route</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<div class="mt-4">
+  <a href="{% url 'routes:planner' %}" class="btn btn-outline-secondary">Plan another route</a>
+  <a href="{% url 'routes:history' %}" class="btn btn-outline-secondary">Route history</a>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Add Sensor Reading{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item active">Add sensor reading</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h2 class="page-title">Add Sensor Reading</h2>
+<div class="card card-fp"><div class="card-body">
+  <form method="post" class="fp-validate">{% csrf_token %}
+    {% for field in form %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Save reading</button>
+  </form>
+</div></div>
+{% endblock %}

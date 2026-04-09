@@ -136,6 +136,17 @@ dev/
 | —    | Seed commands (fleet, playbooks, maintenance)   | ✅     |
 | —    | Tests (models, services, views, consumers)      | ✅     |
 
+### Sprint 3
+
+| ID   | Requirement                                      | Status |
+|------|--------------------------------------------------|--------|
+| FR17 | Intelligent route optimizer (suggestions)        | ✅     |
+| FR18 | Sensor data integration (manual, CSV, charts)    | ✅     |
+| FR19 | GPS and driving data integration (map, patterns) | ✅     |
+| FR20 | Spare parts and inventory management             | ✅     |
+| FR26 | Supplier management and comparison               | ✅     |
+| FR28 | Dashboard customization (drag-and-drop widgets)  | ✅     |
+
 ---
 
 ## Installation and setup
@@ -359,6 +370,49 @@ The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
 | `/reports/trends/` | FR12: maintenance trends. |
 | `/reports/cost/` | FR13: cost report. |
 | `/reports/comparison/` | FR14/15: comparison report. |
+
+### Routes (FR17)
+
+| Route | Description |
+|-------|-------------|
+| `/routes/` | Route planner form |
+| `/routes/<id>/suggestions/` | View generated route suggestions |
+| `/routes/select/<id>/` | Select a route suggestion |
+| `/routes/history/` | Route history list |
+
+### Inventory (FR20, FR26)
+
+| Route | Description |
+|-------|-------------|
+| `/inventory/` | Spare parts list |
+| `/inventory/create/` | Create spare part |
+| `/inventory/<id>/` | Spare part detail |
+| `/inventory/stock-adjust/` | Stock movement |
+| `/inventory/low-stock/` | Low stock parts |
+| `/inventory/reorder/` | Reorder suggestions |
+| `/inventory/export/csv/` | Export inventory CSV |
+| `/inventory/suppliers/` | Supplier list |
+| `/inventory/suppliers/<id>/` | Supplier detail |
+| `/inventory/suppliers/compare/` | Compare supplier prices |
+
+### Sensors and GPS (FR18, FR19)
+
+| Route | Description |
+|-------|-------------|
+| `/vehicles/<id>/sensors/` | Sensor dashboard (Chart.js) |
+| `/vehicles/<id>/sensors/add/` | Manual sensor entry |
+| `/vehicles/<id>/sensors/upload/` | CSV sensor upload |
+| `/vehicles/<id>/sensors/export/` | Export sensor CSV |
+| `/vehicles/<id>/gps/` | GPS map (Leaflet.js) |
+| `/vehicles/<id>/driving/` | Driving analysis |
+| `/vehicles/<id>/mileage/` | Mileage report |
+
+### Dashboard customization (FR28)
+
+| Route | Description |
+|-------|-------------|
+| `/dashboard/customize/` | Customize dashboard layout |
+| `/dashboard/reset/` | Reset to default layout |
 
 ### Users (administrator only)
 

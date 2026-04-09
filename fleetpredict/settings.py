@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'apps.maintenance',
     'apps.dashboard',
     'apps.reports',
+    'apps.routes',
+    'apps.inventory',
 ]
 try:
     import daphne  # noqa: F401

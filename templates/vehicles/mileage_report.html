@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Mileage Report - {{ vehicle.display_name }}{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}">{{ vehicle.display_name }}</a></li>
+  <li class="breadcrumb-item active">Mileage report</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h2 class="page-title"><i class="bi bi-signpost-2 me-2"></i>Mileage Report</h2>
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-lg-4"><div class="card card-fp kpi-card"><div class="kpi-label">Current odometer</div><div class="kpi-value">{{ current_mileage|default:"N/A" }} km</div></div></div>
+</div>
+<div class="card card-fp"><div class="card-header">Daily Mileage</div><div class="card-body"><div class="chart-container"><canvas id="mileageChart"></canvas></div></div></div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+(function(){
+  var d=JSON.parse('{{ mileage_json|escapejs }}');
+  if(!d.labels.length)return;
+  new Chart(document.getElementById('mileageChart'),{type:'bar',data:{labels:d.labels,datasets:[{label:'km',data:d.values,backgroundColor:'#0d6efd99',borderColor:'#0d6efd',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxTicksLimit:15}}}}});
+})();
+</script>
+{% endblock %}

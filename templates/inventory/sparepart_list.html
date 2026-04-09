@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Spare Parts - FleetPredict Pro{% endblock %}
+{% block meta_description %}Browse spare parts inventory, search, filter by category, and export.{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Spare parts</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Spare parts</h2>
+  <div class="d-flex flex-wrap gap-2">
+    {% if can_manage %}
+    <a href="{% url 'inventory:sparepart_create' %}" class="btn btn-primary">Create new</a>
+    <a href="{% url 'inventory:inventory_export_csv' %}" class="btn btn-primary">Export CSV</a>
+    {% endif %}
+    <a href="{% url 'inventory:low_stock' %}" class="btn btn-primary">Low stock</a>
+    <a href="{% url 'inventory:reorder_suggestions' %}" class="btn btn-primary">Reorder</a>
+  </div>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="get" class="row g-3 mb-3">
+      <div class="col-md-4">
+        <label for="id_search" class="form-label visually-hidden">Search</label>
+        <input type="search" name="search" id="id_search" class="form-control" placeholder="Search name or part #" value="{{ request.GET.search|default:'' }}" aria-label="Search">
+      </div>
+      <div class="col-md-3">
+        <label for="id_category" class="form-label visually-hidden">Category</label>
+        <select name="category" id="id_category" class="form-select" aria-label="Category">
+          <option value="">All categories</option>
+          {% for value, label in categories %}
+          <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="low_stock" value="1" id="id_low_stock" {% if request.GET.low_stock == '1' %}checked{% endif %}>
+          <label class="form-check-label" for="id_low_stock">Low stock only</label>
+        </div>
+      </div>
+      <div class="col-md-2 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+    <div class="table-responsive">
+      <table class="table table-fp table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Part#</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Stock</th>
+            <th>Reorder point</th>
+            <th>Cost</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in parts %}
+          <tr>
+            <td><a href="{% url 'inventory:sparepart_detail' p.pk %}" class="text-decoration-none fw-medium">{{ p.part_number }}</a></td>
+            <td><a href="{% url 'inventory:sparepart_detail' p.pk %}" class="text-decoration-none">{{ p.name }}</a></td>
+            <td>{{ p.get_category_display }}</td>
+            <td>{{ p.current_stock }}</td>
+            <td>{{ p.reorder_point }}</td>
+            <td>{{ p.unit_cost }}</td>
+            <td>
+              {% if p.is_low_stock %}
+              <span class="badge bg-danger">Low stock</span>
+              {% else %}
+              <span class="badge bg-success">OK</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">No data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if is_paginated %}
+    <nav class="mt-3 d-flex justify-content-center">
+      <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category|urlencode }}{% endif %}{% if request.GET.low_stock %}&low_stock={{ request.GET.low_stock|urlencode }}{% endif %}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search|urlencode }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category|urlencode }}{% endif %}{% if request.GET.low_stock %}&low_stock={{ request.GET.low_stock|urlencode }}{% endif %}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -20,6 +20,10 @@
     <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">History</a>
     <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal">Delete</button>
     {% endif %}
+    <a href="{% url 'vehicles:sensor_dashboard' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer2 me-1"></i>Sensors</a>
+    <a href="{% url 'vehicles:gps_map' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-geo-alt me-1"></i>GPS</a>
+    <a href="{% url 'vehicles:driving_analysis' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer me-1"></i>Driving</a>
+    <a href="{% url 'vehicles:mileage_report' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-signpost-2 me-1"></i>Mileage</a>
     {% if user.can_view_reports %}
     <a href="{% url 'reports:vehicle_pdf' vehicle.pk %}" class="btn btn-outline-success" target="_blank" rel="noopener">Exportar reporte PDF</a>
     {% endif %}

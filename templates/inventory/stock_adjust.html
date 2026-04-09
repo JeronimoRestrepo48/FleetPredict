@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Stock Adjustment - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Stock adjustment</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Stock Adjustment</h2>
+  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Back</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="post" action="" class="fp-validate">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% for field in form %}
+      <div class="mb-3">
+        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors }}</div>{% endif %}
+        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary">Save movement</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -563,6 +563,86 @@ class ComplianceRequirement(models.Model):
         return delta.days
 
 
+class SensorReading(models.Model):
+    """
+    FR18: Sensor data integration.
+    Individual sensor readings from vehicles.
+    """
+
+    class SensorType(models.TextChoices):
+        TEMPERATURE = 'temperature', 'Temperature (C)'
+        VIBRATION = 'vibration', 'Vibration (mm/s)'
+        PRESSURE = 'pressure', 'Pressure (PSI)'
+        OIL_LEVEL = 'oil_level', 'Oil Level (%)'
+        BATTERY_VOLTAGE = 'battery_voltage', 'Battery Voltage (V)'
+        TIRE_PRESSURE = 'tire_pressure', 'Tire Pressure (PSI)'
+
+    class Source(models.TextChoices):
+        API = 'api', 'API'
+        CSV = 'csv', 'CSV Upload'
+        MANUAL = 'manual', 'Manual Entry'
+
+    vehicle = models.ForeignKey(
+        Vehicle, on_delete=models.CASCADE, related_name='sensor_readings',
+    )
+    sensor_type = models.CharField(max_length=20, choices=SensorType.choices)
+    value = models.DecimalField(max_digits=10, decimal_places=3)
+    timestamp = models.DateTimeField(db_index=True)
+    source = models.CharField(max_length=10, choices=Source.choices, default=Source.MANUAL)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['vehicle', 'sensor_type', 'timestamp'], name='sensor_veh_type_ts_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.vehicle_id} {self.sensor_type} = {self.value} @ {self.timestamp}'
+
+
+class GPSReading(models.Model):
+    """FR19: GPS readings from vehicles."""
+    vehicle = models.ForeignKey(
+        Vehicle, on_delete=models.CASCADE, related_name='gps_readings',
+    )
+    latitude = models.DecimalField(max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6)
+    speed_kmh = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    heading = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    timestamp = models.DateTimeField(db_index=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['vehicle', 'timestamp'], name='gps_veh_ts_idx'),
+        ]
+
+    def __str__(self):
+        return f'{self.vehicle_id} ({self.latitude}, {self.longitude}) @ {self.timestamp}'
+
+
+class DrivingPattern(models.Model):
+    """FR19: Aggregated driving patterns for a period."""
+    vehicle = models.ForeignKey(
+        Vehicle, on_delete=models.CASCADE, related_name='driving_patterns',
+    )
+    period_start = models.DateTimeField()
+    period_end = models.DateTimeField()
+    total_km = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    driving_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    idle_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    avg_speed_kmh = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    max_speed_kmh = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    aggressive_events = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['-period_end']
+
+    def __str__(self):
+        return f'{self.vehicle_id} driving {self.period_start.date()} - {self.period_end.date()}'
+
+
 class VehicleManager(models.Manager):
     """Custom manager for Vehicle model."""
 

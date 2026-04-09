@@ -19,9 +19,12 @@
 </nav>
 {% endblock %}
 {% block content %}
-<div class="dashboard-hero">
-  <h1 class="mb-1">Dashboard</h1>
-  <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
+<div class="dashboard-hero d-flex flex-wrap justify-content-between align-items-start gap-2">
+  <div>
+    <h1 class="mb-1">Dashboard</h1>
+    <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
+  </div>
+  <a href="{% url 'dashboard:dashboard_customize' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-grid-1x2 me-1"></i>Customize</a>
 </div>
 
 {% if compliance_expired or compliance_expiring %}
@@ -30,7 +33,9 @@
     <strong>Compliance:</strong>
     {% if compliance_expired %}<span class="text-danger">{{ compliance_expired }} expired</span>{% endif %}
     {% if compliance_expired and compliance_expiring %} · {% endif %}
-    {% if compliance_expiring %}<span>{{ compliance_expiring }} expiring in 30 days</span>{% endif %}
+    {% if compliance_expiring %}
+      <span>{{ compliance_expiring }} expiring in {{ compliance_window_days }} days</span>
+    {% endif %}
   </span>
   {% if user.can_manage_vehicles %}
   <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-sm btn-outline-dark">View compliance</a>

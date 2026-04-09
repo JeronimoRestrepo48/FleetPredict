@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Supplier Comparison - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Supplier comparison</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Supplier Comparison</h2>
+  <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">Suppliers</a>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <form method="get" action="" class="row g-3 align-items-end mb-4">
+      <div class="col-md-6 col-lg-4">
+        <label for="id_part" class="form-label">Spare part</label>
+        <select name="part" id="id_part" class="form-select">
+          <option value="">— Select a part —</option>
+          {% for p in parts %}
+          <option value="{{ p.pk }}" {% if selected_part == p.pk|stringformat:"d" %}selected{% endif %}>{{ p.name }} ({{ p.part_number }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Compare</button>
+      </div>
+    </form>
+    <div class="table-responsive">
+      <table class="table table-fp mb-0">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Price</th>
+            <th>Lead time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for link in links %}
+          <tr>
+            <td><a href="{% url 'inventory:supplier_detail' link.supplier.pk %}">{{ link.supplier.name }}</a></td>
+            <td>{{ link.unit_price }}</td>
+            <td>{{ link.lead_time_days }} days</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="3" class="text-center text-muted py-4">No data.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

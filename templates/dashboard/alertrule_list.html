@@ -31,16 +31,20 @@
           <td>
             <span class="fw-medium">{{ rule.get_name_display }}</span>
             {% if rule.name == 'maintenance_due_days' %}
-              <small class="text-muted d-block">Alert when maintenance is due within N days</small>
+              <small class="text-muted d-block">Maintenance: alert when a task is due within N days</small>
             {% elif rule.name == 'maintenance_overdue' %}
-              <small class="text-muted d-block">Alert when maintenance is overdue</small>
+              <small class="text-muted d-block">Maintenance: alert when a task is overdue</small>
+            {% elif rule.name == 'compliance_expiring_days' %}
+              <small class="text-muted d-block">Compliance: show banner when requirements expire within N days</small>
+            {% elif rule.name == 'workorder_due_days' %}
+              <small class="text-muted d-block">Work orders: (reserved) due within N days window</small>
             {% endif %}
           </td>
           <td>
             <form method="post" id="rule-form-{{ rule.pk }}">
               {% csrf_token %}
               <input type="hidden" name="rule_id" value="{{ rule.pk }}">
-              {% if rule.name == 'maintenance_due_days' %}
+              {% if rule.name == 'maintenance_due_days' or rule.name == 'compliance_expiring_days' or rule.name == 'workorder_due_days' %}
                 <div class="d-inline-flex align-items-center gap-2">
                   <input type="number" name="value_int" value="{{ rule.value_int|default:7 }}" min="1" max="365"
                          class="form-control form-control-sm" style="width: 4.5rem;">

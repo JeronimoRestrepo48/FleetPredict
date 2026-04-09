@@ -21,6 +21,13 @@ from .views import (
     ComplianceCreateView,
     ComplianceUpdateView,
     ComplianceDeleteView,
+    SensorDashboardView,
+    SensorManualEntryView,
+    SensorCSVUploadView,
+    SensorExportCsvView,
+    GPSMapView,
+    DrivingAnalysisView,
+    MileageReportView,
 )
 
 app_name = 'vehicles'
@@ -43,4 +50,13 @@ urlpatterns = [
     path('compliance/create/', ComplianceCreateView.as_view(), name='compliance_create'),
     path('compliance/<int:pk>/edit/', ComplianceUpdateView.as_view(), name='compliance_update'),
     path('compliance/<int:pk>/delete/', ComplianceDeleteView.as_view(), name='compliance_delete'),
+    # FR18: Sensor Data
+    path('<int:pk>/sensors/', SensorDashboardView.as_view(), name='sensor_dashboard'),
+    path('<int:pk>/sensors/add/', SensorManualEntryView.as_view(), name='sensor_add'),
+    path('<int:pk>/sensors/upload/', SensorCSVUploadView.as_view(), name='sensor_upload'),
+    path('<int:pk>/sensors/export/', SensorExportCsvView.as_view(), name='sensor_export'),
+    # FR19: GPS and Driving Data
+    path('<int:pk>/gps/', GPSMapView.as_view(), name='gps_map'),
+    path('<int:pk>/driving/', DrivingAnalysisView.as_view(), name='driving_analysis'),
+    path('<int:pk>/mileage/', MileageReportView.as_view(), name='mileage_report'),
 ]

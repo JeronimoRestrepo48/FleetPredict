@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Route History - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item active">Route History</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0"><i class="bi bi-clock-history me-2"></i>Route History</h2>
+  <a href="{% url 'routes:planner' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Plan route</a>
+</div>
+<div class="card card-fp"><div class="card-body p-0"><div class="table-responsive">
+  <table class="table table-fp mb-0">
+    <thead><tr><th>Date</th><th>Vehicle</th><th>Origin</th><th>Destination</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for r in routes %}
+      <tr>
+        <td>{{ r.created_at|date:"Y-m-d H:i" }}</td>
+        <td>{{ r.vehicle.display_name }}</td>
+        <td>{{ r.origin }}</td>
+        <td>{{ r.destination }}</td>
+        <td>{{ r.get_optimization_priority_display }}</td>
+        <td><span class="badge bg-{% if r.status == 'selected' %}primary{% elif r.status == 'completed' %}success{% else %}secondary{% endif %}">{{ r.get_status_display }}</span></td>
+        <td><a href="{% url 'routes:suggestions' r.pk %}" class="btn btn-sm btn-outline-primary">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted py-4">No routes planned yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div></div></div>
+{% endblock %}
