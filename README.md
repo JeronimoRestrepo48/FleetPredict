@@ -260,11 +260,13 @@ From the `dev/` folder you can run a single script that:
 
 **Stop everything:** press **Ctrl+C** in the same terminal.
 
+For a short operational reference (commands, variables, and notes), see `scripts/README.md`.
+
 ### Linux / macOS
 
 ```bash
 cd dev
-./start_all.sh
+./scripts/start_all.sh
 ```
 
 If you use a virtualenv, the script will activate it automatically when `venv/` exists in `dev/`.
@@ -274,13 +276,13 @@ If you use a virtualenv, the script will activate it automatically when `venv/` 
 From a terminal in the `dev/` folder:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File start_all.ps1
+powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1
 ```
 
 Or run the batch file (double-click or from CMD):
 
 ```cmd
-start_all.bat
+scripts\start_all.bat
 ```
 
 The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
