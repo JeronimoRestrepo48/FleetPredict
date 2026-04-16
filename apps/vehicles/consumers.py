@@ -8,13 +8,14 @@ Optional auth via query string token (TELEMETRY_WS_TOKEN in settings).
 import json
 import logging
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from django.utils import timezone
+from django.db.models import Avg, Max
 
-from .models import Vehicle, VehicleTelemetry
+from .models import Vehicle, VehicleTelemetry, GPSReading, DrivingPattern
 from .services.telemetry_patterns import evaluate_and_save_alerts
 
 logger = logging.getLogger(__name__)
@@ -66,21 +67,37 @@ def _save_telemetry(vehicle, payload):
             return None
         return bool(v)
 
+    def _bounded(value, min_v=None, max_v=None):
+        if value is None:
+            return None
+        if min_v is not None and value < Decimal(str(min_v)):
+            return None
+        if max_v is not None and value > Decimal(str(max_v)):
+            return None
+        return value
+
+    lat = _bounded(_decimal(payload.get('latitude') or payload.get('lat')), -90, 90)
+    lng = _bounded(_decimal(payload.get('longitude') or payload.get('lng')), -180, 180)
+    speed = _bounded(_decimal(payload.get('speed_kmh')), 0, 300)
+    fuel = _bounded(_decimal(payload.get('fuel_level_pct')), 0, 100)
+    throttle = _bounded(_decimal(payload.get('throttle_pct')), 0, 100)
+
     telemetry = VehicleTelemetry(
         vehicle=vehicle,
         timestamp=ts,
-        speed_kmh=_decimal(payload.get('speed_kmh')),
-        fuel_level_pct=_decimal(payload.get('fuel_level_pct')),
+        speed_kmh=speed,
+        fuel_level_pct=fuel,
         engine_temperature_c=_decimal(payload.get('engine_temperature_c')),
-        latitude=_decimal(payload.get('latitude') or payload.get('lat')),
-        longitude=_decimal(payload.get('longitude') or payload.get('lng')),
+        latitude=lat,
+        longitude=lng,
         rpm=_int(payload.get('rpm')),
         mileage=_int(payload.get('mileage')),
         voltage=_decimal(payload.get('voltage')),
-        throttle_pct=_decimal(payload.get('throttle_pct')),
+        throttle_pct=throttle,
         brake_status=_bool(payload.get('brake_status')),
     )
     telemetry.save()
+    _upsert_fr19_derivations(vehicle, telemetry)
 
     # Update vehicle current_mileage and last_telemetry_at
     if telemetry.mileage is not None and telemetry.mileage > vehicle.current_mileage:
@@ -94,6 +111,61 @@ def _save_telemetry(vehicle, payload):
     )
     evaluate_and_save_alerts(vehicle.pk, readings)
     return telemetry
+
+
+def _upsert_fr19_derivations(vehicle, telemetry):
+    """Keep FR19 models in sync with telemetry ingestion."""
+    if telemetry.latitude is not None and telemetry.longitude is not None:
+        GPSReading.objects.create(
+            vehicle=vehicle,
+            latitude=telemetry.latitude,
+            longitude=telemetry.longitude,
+            speed_kmh=telemetry.speed_kmh,
+            timestamp=telemetry.timestamp,
+        )
+
+    # Derive/update a daily driving pattern from telemetry points.
+    ts = telemetry.timestamp
+    day_start = ts.replace(hour=0, minute=0, second=0, microsecond=0)
+    day_end = day_start + timedelta(days=1)
+    day_qs = VehicleTelemetry.objects.filter(
+        vehicle=vehicle,
+        timestamp__gte=day_start,
+        timestamp__lt=day_end,
+    ).order_by("timestamp")
+    if not day_qs.exists():
+        return
+
+    first_with_mileage = day_qs.exclude(mileage__isnull=True).first()
+    last_with_mileage = day_qs.exclude(mileage__isnull=True).last()
+    total_km = 0
+    if first_with_mileage and last_with_mileage:
+        total_km = max(0, (last_with_mileage.mileage or 0) - (first_with_mileage.mileage or 0))
+
+    agg = day_qs.aggregate(
+        avg_speed=Avg("speed_kmh"),
+        max_speed=Max("speed_kmh"),
+    )
+    total_points = day_qs.count()
+    moving_points = day_qs.filter(speed_kmh__gte=5).count()
+    idle_points = max(0, total_points - moving_points)
+    driving_hours = (moving_points * 2.0) / 3600.0
+    idle_hours = (idle_points * 2.0) / 3600.0
+    aggressive_events = day_qs.filter(speed_kmh__gte=90).count()
+
+    DrivingPattern.objects.update_or_create(
+        vehicle=vehicle,
+        period_start=day_start,
+        period_end=day_end,
+        defaults={
+            "total_km": total_km,
+            "driving_hours": round(driving_hours, 2),
+            "idle_hours": round(idle_hours, 2),
+            "avg_speed_kmh": agg["avg_speed"] or 0,
+            "max_speed_kmh": agg["max_speed"] or 0,
+            "aggressive_events": aggressive_events,
+        },
+    )
 
 
 def _telemetry_payload_for_broadcast(vehicle, payload, ts):
@@ -136,6 +208,9 @@ class TelemetryConsumer(AsyncWebsocketConsumer):
                     break
         from django.conf import settings
         expected = getattr(settings, 'TELEMETRY_WS_TOKEN', None)
+        if not settings.DEBUG and not expected:
+            await self.close(code=4002)
+            return
         if expected and token != expected:
             await self.close(code=4001)
             return

@@ -11,6 +11,7 @@ Requires: backend running with ASGI (e.g. daphne fleetpredict.asgi:application) 
 import argparse
 import asyncio
 import json
+import math
 import random
 import sys
 from datetime import datetime, timezone
@@ -47,8 +48,43 @@ PROFILES = {
     'Ambulance': {'speed': (0, 110), 'fuel_drain': 0.055, 'temp': (90, 104), 'rpm_idle': 650, 'rpm_drive': (1600, 3500), 'idle_prob': 0.2},
 }
 
-# Base coordinates (Bogotá area) - each vehicle drifts slightly
-BASE_LAT, BASE_LNG = 4.7110, -74.0721
+# Colombian logistics hubs / operation zones (lat, lng)
+# One default zone per simulated vehicle to make the GPS map look like a real nationwide fleet.
+LOGISTICS_ZONES = {
+    'SIM-001': (4.7110, -74.0721),   # Bogotá
+    'SIM-002': (6.2442, -75.5812),   # Medellín
+    'SIM-003': (3.4516, -76.5320),   # Cali
+    'SIM-004': (10.9685, -74.7813),  # Barranquilla
+    'SIM-005': (10.3910, -75.4794),  # Cartagena
+    'SIM-006': (7.1193, -73.1227),   # Bucaramanga
+    'SIM-007': (4.4389, -75.2322),   # Ibagué
+    'SIM-008': (11.2408, -74.1990),  # Santa Marta
+    'SIM-009': (5.0703, -75.5138),   # Manizales
+    'SIM-010': (8.7500, -75.8800),   # Montería
+}
+
+
+def _next_position(state: dict, speed: float) -> tuple[float, float]:
+    """
+    Move around a city hub in small loops with slight noise.
+    Produces realistic local movement for logistics routes.
+    """
+    center_lat = state['center_lat']
+    center_lng = state['center_lng']
+
+    if 'phase' not in state:
+        state['phase'] = random.uniform(0, 2 * math.pi)
+    if 'radius_deg' not in state:
+        state['radius_deg'] = random.uniform(0.004, 0.020)
+
+    # Faster vehicles advance phase more quickly.
+    step = 0.01 + (speed / 1000.0)
+    state['phase'] = (state['phase'] + step) % (2 * math.pi)
+
+    # Main circular path plus minor perturbation.
+    lat = center_lat + state['radius_deg'] * math.sin(state['phase']) + random.uniform(-0.0002, 0.0002)
+    lng = center_lng + state['radius_deg'] * math.cos(state['phase']) + random.uniform(-0.0002, 0.0002)
+    return lat, lng
 
 
 def get_state(license_plate: str, profile_name: str, state: dict) -> dict:
@@ -63,10 +99,13 @@ def get_state(license_plate: str, profile_name: str, state: dict) -> dict:
         state['fuel'] = round(random.uniform(30, 95), 2)
     if 'mileage' not in state:
         state['mileage'] = random.randint(5000, 80000)
-    if 'lat' not in state:
-        state['lat'] = BASE_LAT + random.uniform(-0.01, 0.01)
-    if 'lng' not in state:
-        state['lng'] = BASE_LNG + random.uniform(-0.01, 0.01)
+    if 'center_lat' not in state or 'center_lng' not in state:
+        base_lat, base_lng = LOGISTICS_ZONES.get(license_plate, LOGISTICS_ZONES['SIM-001'])
+        state['center_lat'] = base_lat
+        state['center_lng'] = base_lng
+    if 'lat' not in state or 'lng' not in state:
+        state['lat'] = state['center_lat'] + random.uniform(-0.005, 0.005)
+        state['lng'] = state['center_lng'] + random.uniform(-0.005, 0.005)
 
     # Idle vs driving (taxi/bus have high idle_prob)
     is_idle = random.random() < profile['idle_prob']
@@ -82,9 +121,8 @@ def get_state(license_plate: str, profile_name: str, state: dict) -> dict:
     # Fuel drain
     state['fuel'] = max(5, state['fuel'] - profile['fuel_drain'] * (1 + speed / 80))
     state['mileage'] += max(0, int(speed * 0.001))  # tiny increment per tick
-    # Slight position drift
-    state['lat'] += random.uniform(-0.0001, 0.0001)
-    state['lng'] += random.uniform(-0.0001, 0.0001)
+    # Vehicle movement near assigned Colombian logistics hub
+    state['lat'], state['lng'] = _next_position(state, speed)
 
     return {
         'license_plate': license_plate,

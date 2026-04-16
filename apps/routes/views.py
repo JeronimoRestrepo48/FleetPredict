@@ -9,6 +9,15 @@ from django.template.response import TemplateResponse
 from .models import Route, RouteSuggestion
 from .forms import RoutePlannerForm
 from .optimizer import generate_suggestions
+from apps.vehicles.visibility import visible_vehicle_queryset
+
+
+def _visible_routes_queryset(user):
+    qs = Route.objects.select_related('vehicle', 'created_by')
+    if user.is_administrator or user.is_fleet_manager:
+        return qs
+    vehicle_qs = visible_vehicle_queryset(user)
+    return qs.filter(vehicle__in=vehicle_qs)
 
 
 class RoutePlannerView(LoginRequiredMixin, View):
@@ -30,7 +39,7 @@ class RoutePlannerView(LoginRequiredMixin, View):
 
 class RouteSuggestionsView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        route = get_object_or_404(Route, pk=pk)
+        route = get_object_or_404(_visible_routes_queryset(request.user), pk=pk)
         suggestions = route.suggestions.all()
         return TemplateResponse(request, 'routes/suggestions.html', {
             'route': route, 'suggestions': suggestions,
@@ -39,7 +48,11 @@ class RouteSuggestionsView(LoginRequiredMixin, View):
 
 class RouteSelectView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        suggestion = get_object_or_404(RouteSuggestion, pk=pk)
+        suggestion = get_object_or_404(
+            RouteSuggestion.objects.select_related('route'),
+            pk=pk,
+            route__in=_visible_routes_queryset(request.user),
+        )
         route = suggestion.route
         route.status = Route.Status.SELECTED
         route.save(update_fields=['status'])
@@ -57,7 +70,4 @@ class RouteHistoryView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Route.objects.select_related('vehicle', 'created_by')
-        if self.request.user.is_driver:
-            qs = qs.filter(vehicle__assigned_driver=self.request.user)
-        return qs
+        return _visible_routes_queryset(self.request.user)

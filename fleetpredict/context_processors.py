@@ -4,6 +4,7 @@ Adds alerts_unread_count and recent_alerts_inbox for nav badge and dropdown.
 """
 
 from apps.vehicles.models import Vehicle, VehicleAlert
+from apps.vehicles.visibility import visible_vehicle_queryset
 
 
 def alerts_unread_count(request):
@@ -12,9 +13,7 @@ def alerts_unread_count(request):
     if not getattr(request, 'user', None) or not request.user.is_authenticated:
         return out
     user = request.user
-    vehicle_ids = Vehicle.objects.filter(is_deleted=False)
-    if user.is_driver:
-        vehicle_ids = vehicle_ids.filter(assigned_driver=user)
+    vehicle_ids = visible_vehicle_queryset(user)
     vehicle_ids = list(vehicle_ids.values_list('id', flat=True))
     if not vehicle_ids:
         return out

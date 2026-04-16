@@ -17,6 +17,7 @@ from datetime import timedelta
 from collections import OrderedDict
 
 from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement
+from apps.vehicles.visibility import visible_vehicle_queryset
 from apps.maintenance.models import MaintenanceTask
 from django.contrib.auth import get_user_model
 from .models import AlertRule, AlertThreshold, AuditLog, DashboardLayout
@@ -194,13 +195,10 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             chart_start = today - timedelta(days=6)
 
         if fleet_scope:
-            vehicles_qs = Vehicle.objects.filter(is_deleted=False)
+            vehicles_qs = visible_vehicle_queryset(user)
             tasks_qs = MaintenanceTask.objects.all()
         else:
-            vehicles_qs = Vehicle.objects.filter(
-                is_deleted=False,
-                assigned_driver=user
-            )
+            vehicles_qs = visible_vehicle_queryset(user)
             tasks_qs = MaintenanceTask.objects.filter(
                 vehicle__assigned_driver=user
             )

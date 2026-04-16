@@ -13,15 +13,13 @@ from django.views.generic import TemplateView
 from django.db.models import Count, Sum
 
 from apps.vehicles.models import Vehicle
+from apps.vehicles.visibility import visible_vehicle_ids, visible_vehicle_queryset
 from apps.maintenance.models import MaintenanceTask
 from .pdf_utils import generate_vehicle_pdf, generate_fleet_pdf
 
 
 def _user_vehicle_ids(user):
-    qs = Vehicle.objects.filter(is_deleted=False)
-    if user.is_driver:
-        qs = qs.filter(assigned_driver=user)
-    return set(qs.values_list('id', flat=True))
+    return visible_vehicle_ids(user)
 
 
 class CanViewReportsMixin(UserPassesTestMixin):
@@ -51,9 +49,7 @@ class FleetReportPDFView(LoginRequiredMixin, CanViewReportsMixin, View):
 
     def get(self, request):
         user = request.user
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            qs = qs.filter(assigned_driver=user)
+        qs = visible_vehicle_queryset(user)
         vehicles = list(qs.order_by('license_plate'))
         if not vehicles:
             return HttpResponse('No vehicles to report.', status=404)

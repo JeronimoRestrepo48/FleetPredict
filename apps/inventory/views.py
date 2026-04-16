@@ -9,6 +9,8 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.template.response import TemplateResponse
+from django.db import transaction
+from django.db.models import F
 
 from .models import SparePart, StockMovement, PartUsage, Supplier, SupplierPart
 from .forms import SparePartForm, StockMovementForm, SupplierForm, SupplierPartForm
@@ -97,17 +99,22 @@ class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
     template_name = 'inventory/stock_adjust.html'
 
     def form_valid(self, form):
-        mov = form.save(commit=False)
-        mov.created_by = self.request.user
-        mov.save()
-        part = mov.spare_part
-        if mov.movement_type == 'in':
-            part.current_stock += mov.quantity
-        elif mov.movement_type == 'out':
-            part.current_stock = max(0, part.current_stock - mov.quantity)
-        else:
-            part.current_stock = max(0, part.current_stock + mov.quantity)
-        part.save(update_fields=['current_stock'])
+        with transaction.atomic():
+            mov = form.save(commit=False)
+            mov.created_by = self.request.user
+            part = SparePart.objects.select_for_update().get(pk=mov.spare_part_id)
+            mov.spare_part = part
+            mov.save()
+            current_stock = part.current_stock
+            if mov.movement_type == 'in':
+                SparePart.objects.filter(pk=part.pk).update(current_stock=F('current_stock') + mov.quantity)
+            elif mov.movement_type == 'out':
+                new_stock = max(0, current_stock - mov.quantity)
+                SparePart.objects.filter(pk=part.pk).update(current_stock=new_stock)
+            else:
+                new_stock = max(0, current_stock + mov.quantity)
+                SparePart.objects.filter(pk=part.pk).update(current_stock=new_stock)
+            part.refresh_from_db(fields=['current_stock'])
         messages.success(self.request, f'Stock updated: {part.name} -> {part.current_stock}')
         return redirect('inventory:sparepart_detail', pk=part.pk)
 

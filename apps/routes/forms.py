@@ -1,5 +1,6 @@
 from django import forms
 from apps.vehicles.models import Vehicle
+from apps.vehicles.visibility import visible_vehicle_queryset
 from .models import Route
 
 
@@ -14,9 +15,7 @@ class RoutePlannerForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if user and getattr(user, 'is_driver', False):
-            qs = qs.filter(assigned_driver=user)
+        qs = visible_vehicle_queryset(user) if user else Vehicle.objects.filter(is_deleted=False)
         self.fields['vehicle'].queryset = qs
         for field in self.fields.values():
             field.widget.attrs.setdefault('class', 'form-control')

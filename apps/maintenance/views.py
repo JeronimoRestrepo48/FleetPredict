@@ -102,10 +102,6 @@ class MaintenanceTaskListView(LoginRequiredMixin, ListView):
         if vehicle_id:
             queryset = queryset.filter(vehicle_id=vehicle_id)
 
-        # Check overdue
-        for task in queryset.filter(status=MaintenanceTask.Status.SCHEDULED):
-            task.check_overdue()
-
         return queryset.order_by('-scheduled_date')
 
     def get_context_data(self, **kwargs):

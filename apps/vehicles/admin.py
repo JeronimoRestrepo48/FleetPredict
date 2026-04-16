@@ -4,7 +4,7 @@ Admin configuration for Vehicles app.
 
 from django.contrib import admin
 
-from .models import Vehicle, VehicleType, VehicleTelemetry, VehicleAlert, Playbook, Runbook
+from .models import Vehicle, VehicleType, VehicleTelemetry, VehicleAlert, Playbook, Runbook, GPSReading, DrivingPattern
 
 
 @admin.register(VehicleType)
@@ -62,3 +62,21 @@ class PlaybookAdmin(admin.ModelAdmin):
 class RunbookAdmin(admin.ModelAdmin):
     list_display = ['name', 'alert_type', 'action_type', 'is_active', 'created_at']
     list_filter = ['action_type', 'alert_type', 'is_active']
+
+
+@admin.register(GPSReading)
+class GPSReadingAdmin(admin.ModelAdmin):
+    list_display = ['vehicle', 'timestamp', 'latitude', 'longitude', 'speed_kmh']
+    list_filter = ['vehicle']
+    search_fields = ['vehicle__license_plate']
+    date_hierarchy = 'timestamp'
+    ordering = ['-timestamp']
+
+
+@admin.register(DrivingPattern)
+class DrivingPatternAdmin(admin.ModelAdmin):
+    list_display = ['vehicle', 'period_start', 'period_end', 'total_km', 'avg_speed_kmh', 'aggressive_events']
+    list_filter = ['vehicle']
+    search_fields = ['vehicle__license_plate']
+    date_hierarchy = 'period_start'
+    ordering = ['-period_end']

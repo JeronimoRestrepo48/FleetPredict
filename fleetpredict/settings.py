@@ -13,6 +13,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-dev-key-change
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+ENVIRONMENT = os.environ.get('DJANGO_ENV', 'development').lower()
 
 _allowed = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 ALLOWED_HOSTS = [h.strip() for h in _allowed if h.strip()]
@@ -157,21 +158,30 @@ if os.environ.get('EMAIL_BACKEND', '').lower() not in ('', 'console', 'django.co
 
 # Security hardening when not in DEBUG (production)
 if not DEBUG:
+    if SECRET_KEY == 'django-insecure-dev-key-change-in-production':
+        raise RuntimeError('DJANGO_SECRET_KEY must be set in production mode.')
     SECURE_SSL_REDIRECT = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '31536000'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
     X_FRAME_OPTIONS = 'DENY'
+    if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['testserver']:
+        raise RuntimeError('DJANGO_ALLOWED_HOSTS must be explicitly set in production mode.')
+    _csrf_trusted = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_trusted if o.strip()]
 # Session expiry (default 2 weeks)
 SESSION_COOKIE_AGE = int(os.environ.get('SESSION_COOKIE_AGE', 1209600))  # 14 days
 SESSION_SAVE_EVERY_REQUEST = False
 
 # Optional WebSocket telemetry auth (query ?token=...). Leave unset to allow anonymous.
-# TELEMETRY_WS_TOKEN = os.environ.get('TELEMETRY_WS_TOKEN', '')
+TELEMETRY_WS_TOKEN = os.environ.get('TELEMETRY_WS_TOKEN', '')
 # Optional pattern thresholds (see apps.vehicles.services.telemetry_patterns.DEFAULTS)
 # TELEMETRY_PATTERNS_ENGINE_TEMP_HIGH_C = 105
 # TELEMETRY_PATTERNS_FUEL_DROP_PCT_PER_WINDOW = 8
@@ -191,3 +201,25 @@ ML_TRAINING_DATA_JSON = os.environ.get(
 )
 # Minimum samples required to train the first model (when none exists).
 ML_MIN_SAMPLES_TO_TRAIN = int(os.environ.get('ML_MIN_SAMPLES_TO_TRAIN', 80))
+
+LOG_LEVEL = os.environ.get('LOG_LEVEL', 'INFO')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'standard': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'standard',
+        },
+    },
+    'loggers': {
+        '': {'handlers': ['console'], 'level': LOG_LEVEL},
+        'django': {'handlers': ['console'], 'level': LOG_LEVEL, 'propagate': False},
+        'apps.vehicles.consumers': {'handlers': ['console'], 'level': LOG_LEVEL, 'propagate': False},
+    },
+}

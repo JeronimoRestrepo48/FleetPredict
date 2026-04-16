@@ -305,6 +305,8 @@ The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
 | `python manage.py seed_simulated_fleet` | Creates vehicle types, 10 vehicles SIM-001…SIM-010 and 10 drivers. Use `--clear` to remove only SIM-* vehicles and recreate. |
 | `python manage.py seed_playbooks_runbooks` | Creates playbooks and runbooks per alert type (mark read, create maintenance task, etc.) for the dashboard SOC. |
 | `python manage.py seed_maintenance_tasks` | Creates sample maintenance tasks (completed and scheduled) for each SIM-* vehicle. Use `--clear` to remove only seed-created tasks (title prefix `[Seed] `). |
+| `python manage.py seed_gps_readings` | Inserts demo `GPSReading` points so **GPS Map** shows a track (telemetry simulator does not create GPS rows). Use `--vehicle-id`, `--hours`, `--points`, `--clear`. |
+| `python manage.py seed_driving_patterns` | Inserts demo `DrivingPattern` rows for **Driving Analysis** and mileage charts. Use `--vehicle-id`, `--weeks`, `--clear`. |
 | `python manage.py build_ml_dataset` | Build ML dataset CSV from telemetry and alerts (`--output`, `--days`, `--window-size`). |
 | `python manage.py train_failure_predictor` | Train Scikit-learn failure predictor from CSV and save joblib to `ML_FAILURE_PREDICTOR_PATH`. |
 
