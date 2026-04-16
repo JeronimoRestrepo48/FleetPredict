@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Help center{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item active">Help center</li>
+</ol></nav>
+{% endblock %}
+{% block content %}
+<h2 class="page-title"><i class="bi bi-life-preserver me-2"></i>Help center</h2>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-4">
+    <div class="card card-fp h-100">
+      <div class="card-header">1. Quick navigation</div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Use breadcrumbs on each page to know where you are.</li>
+          <li>Use the quick bar buttons: <strong>Go back</strong>, <strong>Go to dashboard</strong>, and <strong>Help center</strong>.</li>
+          <li>Fleet features are under <strong>Fleet</strong>, maintenance and stock under <strong>Maintenance</strong>.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card card-fp h-100">
+      <div class="card-header">2. Preventing mistakes</div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>Dangerous actions ask for confirmation before continuing.</li>
+          <li>Forms validate fields and highlight invalid values.</li>
+          <li>If you edit a form and try to leave, the app warns about unsaved changes.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card card-fp h-100">
+      <div class="card-header">3. Error recovery</div>
+      <div class="card-body">
+        <ul class="mb-0">
+          <li>System messages (top-right) explain successful or failed actions.</li>
+          <li>On permission errors, check your role or try a route available to your profile.</li>
+          <li>If telemetry pages look empty, verify live telemetry is running and date filters are correct.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card card-fp">
+  <div class="card-header">Recommended user flows</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6 class="mb-2">Fleet manager flow</h6>
+        <ol class="mb-0">
+          <li>Open <strong>Fleet → Vehicles</strong> and select a vehicle.</li>
+          <li>Review Sensors, GPS, Driving and Mileage panels.</li>
+          <li>Open <strong>Maintenance → Tasks</strong> to schedule work.</li>
+          <li>Use <strong>Maintenance → Spare parts</strong> to adjust stock if needed.</li>
+        </ol>
+      </div>
+      <div class="col-md-6">
+        <h6 class="mb-2">Reports and decisions flow</h6>
+        <ol class="mb-0">
+          <li>Open <strong>Reports &amp; predictions</strong>.</li>
+          <li>Check failure predictions and suggested maintenance.</li>
+          <li>Download PDF reports from <strong>Reports</strong>.</li>
+          <li>Go to <strong>Settings → Alert rules</strong> for threshold tuning.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

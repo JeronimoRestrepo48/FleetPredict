@@ -35,6 +35,9 @@
                     <li class="nav-item">
                         <a class="nav-link position-relative {% if request.resolver_match.url_name == 'alerts' %}active{% endif %}" href="{% url 'dashboard:alerts' %}"><span data-i18n="alerts">Alerts</span>{% if alerts_unread_count %}<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ alerts_unread_count }}</span>{% endif %}</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'help_center' %}active{% endif %}" href="{% url 'dashboard:help_center' %}" data-i18n="help">Help</a>
+                    </li>
                     {% if user.can_manage_vehicles %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if request.resolver_match.namespace == 'vehicles' %}active{% endif %}" href="#" id="navFleet" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-i18n="fleet">Fleet</a>
@@ -134,6 +137,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{% url 'users:profile' %}" data-i18n="profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard:help_center' %}" data-i18n="help_center">Help center</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form method="post" action="{% url 'users:logout' %}" class="d-inline">
@@ -158,6 +162,16 @@
 
     <main class="container-fluid" id="main-content">
         {% block breadcrumb %}{% endblock %}
+        {% if user.is_authenticated %}
+        <div class="fp-usability-bar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3" aria-label="Quick actions">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-secondary btn-sm" id="fp-back-btn" type="button" data-i18n="go_back">Go back</button>
+                <a class="btn btn-outline-primary btn-sm" href="{% url 'dashboard:index' %}" data-i18n="go_dashboard">Go to dashboard</a>
+                <a class="btn btn-outline-info btn-sm" href="{% url 'dashboard:help_center' %}" data-i18n="help_center">Help center</a>
+            </div>
+            <small class="text-muted" data-i18n="usability_hint">Tip: Use breadcrumbs and quick actions to avoid getting lost.</small>
+        </div>
+        {% endif %}
         {% if messages %}
         <div class="fp-toast-container" id="toast-container" aria-live="polite">
             {% for message in messages %}
@@ -197,6 +211,9 @@
         en: {
           notifications: 'Notifications', view_all_alerts: 'View all alerts',
           no_notifications: 'No notifications', profile: 'Profile', logout: 'Logout',
+          help: 'Help', help_center: 'Help center',
+          go_back: 'Go back', go_dashboard: 'Go to dashboard',
+          usability_hint: 'Tip: Use breadcrumbs and quick actions to avoid getting lost.',
           login: 'Login', register: 'Register',
           dashboard: 'Dashboard', alerts: 'Alerts', vehicles: 'Vehicles',
           maintenance: 'Maintenance', fleet: 'Fleet', compliance: 'Compliance',
@@ -210,6 +227,9 @@
         es: {
           notifications: 'Notificaciones', view_all_alerts: 'Ver todas las alertas',
           no_notifications: 'Sin notificaciones', profile: 'Perfil', logout: 'Cerrar sesión',
+          help: 'Ayuda', help_center: 'Centro de ayuda',
+          go_back: 'Volver', go_dashboard: 'Ir al panel',
+          usability_hint: 'Consejo: usa las migas y acciones rápidas para no perderte.',
           login: 'Iniciar sesión', register: 'Registrarse',
           dashboard: 'Panel', alerts: 'Alertas', vehicles: 'Vehículos',
           maintenance: 'Mantenimiento', fleet: 'Flota', compliance: 'Cumplimiento',
@@ -239,6 +259,48 @@
       applyLang(lang);
       if (btn) btn.addEventListener('click', function() {
         applyLang(lang === 'en' ? 'es' : 'en');
+      });
+    })();
+    </script>
+    <script>
+    (function() {
+      var backBtn = document.getElementById('fp-back-btn');
+      if (backBtn) {
+        if (!document.referrer || document.referrer.indexOf(window.location.origin) !== 0) {
+          backBtn.style.display = 'none';
+        } else {
+          backBtn.addEventListener('click', function() { window.history.back(); });
+        }
+      }
+
+      // Confirm potentially destructive actions.
+      document.querySelectorAll('form').forEach(function(form) {
+        var action = (form.getAttribute('action') || '').toLowerCase();
+        var hasDangerBtn = !!form.querySelector('.btn-danger, [data-confirm]');
+        var looksDestructive = action.includes('delete') || action.includes('reset') || action.includes('dismiss');
+        if (!hasDangerBtn && !looksDestructive) return;
+        form.addEventListener('submit', function(ev) {
+          var ok = window.confirm('Are you sure you want to continue? This action may be hard to undo.');
+          if (!ok) {
+            ev.preventDefault();
+          }
+        });
+      });
+
+      // Warn user before leaving with unsaved form changes.
+      var dirty = false;
+      document.querySelectorAll('form').forEach(function(form) {
+        var method = (form.getAttribute('method') || 'get').toLowerCase();
+        if (method === 'get') return;
+        form.querySelectorAll('input, textarea, select').forEach(function(field) {
+          field.addEventListener('change', function() { dirty = true; });
+        });
+        form.addEventListener('submit', function() { dirty = false; });
+      });
+      window.addEventListener('beforeunload', function(e) {
+        if (!dirty) return;
+        e.preventDefault();
+        e.returnValue = '';
       });
     })();
     </script>

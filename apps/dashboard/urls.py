@@ -22,6 +22,7 @@ from .views import (
     AuditLogListView,
     DashboardCustomizeView,
     DashboardResetView,
+    HelpCenterView,
 )
 
 app_name = 'dashboard'
@@ -44,4 +45,5 @@ urlpatterns = [
     path('audit-log/', AuditLogListView.as_view(), name='auditlog_list'),
     path('dashboard/customize/', DashboardCustomizeView.as_view(), name='dashboard_customize'),
     path('dashboard/reset/', DashboardResetView.as_view(), name='dashboard_reset'),
+    path('help/', HelpCenterView.as_view(), name='help_center'),
 ]

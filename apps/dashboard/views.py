@@ -373,6 +373,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         return context
 
 
+class HelpCenterView(LoginRequiredMixin, TemplateView):
+    """Global help and usability guide page."""
+
+    template_name = 'dashboard/help_center.html'
+
+
 class ExecuteRunbookView(LoginRequiredMixin, View):
     """POST: execute a runbook for an alert (SOC)."""
     http_method_names = ['post']

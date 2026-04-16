@@ -457,6 +457,14 @@ footer.fp-footer {
   color: var(--fp-secondary);
 }
 
+.fp-usability-bar {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--fp-radius);
+  padding: 0.65rem 0.85rem;
+  box-shadow: var(--fp-card-shadow);
+}
+
 /* Toast container */
 .fp-toast-container {
   position: fixed;
