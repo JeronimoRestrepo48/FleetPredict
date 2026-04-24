@@ -465,6 +465,15 @@ footer.fp-footer {
   box-shadow: var(--fp-card-shadow);
 }
 
+.fp-filter-active {
+  border-left: 4px solid var(--fp-primary);
+}
+
+.fp-rating-stars {
+  letter-spacing: 0.1em;
+  color: #f59f00;
+}
+
 /* Toast container */
 .fp-toast-container {
   position: fixed;

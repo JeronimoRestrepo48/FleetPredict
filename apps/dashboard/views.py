@@ -15,8 +15,9 @@ from django.utils import timezone
 from django.db.models import Count, Q, Sum
 from datetime import timedelta
 from collections import OrderedDict
+import math
 
-from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement
+from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement, GPSReading
 from apps.vehicles.visibility import visible_vehicle_queryset
 from apps.maintenance.models import MaintenanceTask
 from django.contrib.auth import get_user_model
@@ -24,6 +25,30 @@ from .models import AlertRule, AlertThreshold, AuditLog, DashboardLayout
 from .audit import log_audit
 
 User = get_user_model()
+
+SOC_LOCATION_HUBS = [
+    ('Bogota', 4.7110, -74.0721),
+    ('Medellin', 6.2442, -75.5812),
+    ('Cali', 3.4516, -76.5320),
+    ('Barranquilla', 10.9685, -74.7813),
+    ('Cartagena', 10.3910, -75.4794),
+    ('Bucaramanga', 7.1193, -73.1227),
+    ('Santa Marta', 11.2408, -74.1990),
+    ('Pereira', 4.8143, -75.6946),
+]
+
+
+def _nearest_city_label(lat, lng):
+    if lat is None or lng is None:
+        return 'Unknown'
+    best_name = 'Unknown'
+    best_dist = float('inf')
+    for city, c_lat, c_lng in SOC_LOCATION_HUBS:
+        dist = math.dist([float(lat), float(lng)], [c_lat, c_lng])
+        if dist < best_dist:
+            best_dist = dist
+            best_name = city
+    return best_name
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
@@ -319,13 +344,52 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             summary = " · ".join(parts) + "."
 
         # SOC: high/critical alerts (unread), playbooks and runbooks
-        vehicle_ids = vehicles_qs.values_list('id', flat=True)
+        soc_days = int(self.request.GET.get('soc_days', '7'))
+        soc_vehicle = self.request.GET.get('soc_vehicle', '').strip()
+        soc_reason = self.request.GET.get('soc_reason', '').strip()
+        soc_place = self.request.GET.get('soc_place', '').strip()
+        soc_search = self.request.GET.get('soc_search', '').strip()
+        soc_limit = int(self.request.GET.get('soc_limit', '20'))
+        soc_days = soc_days if soc_days in (1, 7, 30) else 7
+        soc_limit = soc_limit if soc_limit in (20, 50, 100) else 20
+        soc_since = timezone.now() - timedelta(days=soc_days)
+
+        vehicle_ids = list(vehicles_qs.values_list('id', flat=True))
         soc_alerts_qs = VehicleAlert.objects.filter(
             vehicle_id__in=vehicle_ids,
             severity__in=[VehicleAlert.Severity.HIGH, VehicleAlert.Severity.CRITICAL],
             read_at__isnull=True,
-        ).select_related('vehicle').order_by('-created_at')[:50]
-        soc_alerts = list(soc_alerts_qs)
+            created_at__gte=soc_since,
+        ).select_related('vehicle').order_by('-created_at')
+        if soc_vehicle:
+            soc_alerts_qs = soc_alerts_qs.filter(vehicle_id=soc_vehicle)
+        if soc_reason:
+            soc_alerts_qs = soc_alerts_qs.filter(alert_type=soc_reason)
+        if soc_search:
+            soc_alerts_qs = soc_alerts_qs.filter(message__icontains=soc_search)
+
+        soc_alerts = list(soc_alerts_qs[:300])
+        soc_vehicle_ids = sorted({a.vehicle_id for a in soc_alerts})
+        latest_location_by_vehicle = {}
+        if soc_vehicle_ids:
+            gps_rows = (
+                GPSReading.objects.filter(vehicle_id__in=soc_vehicle_ids)
+                .order_by('vehicle_id', '-timestamp')
+                .values('vehicle_id', 'latitude', 'longitude')
+            )
+            for row in gps_rows:
+                if row['vehicle_id'] not in latest_location_by_vehicle:
+                    latest_location_by_vehicle[row['vehicle_id']] = _nearest_city_label(
+                        row['latitude'],
+                        row['longitude'],
+                    )
+        for alert in soc_alerts:
+            alert.location_label = latest_location_by_vehicle.get(alert.vehicle_id, 'Unknown')
+        if soc_place:
+            soc_alerts = [a for a in soc_alerts if a.location_label == soc_place]
+        soc_place_options = sorted({a.location_label for a in soc_alerts if a.location_label})
+        soc_total_count = len(soc_alerts)
+        soc_alerts = soc_alerts[:soc_limit]
         playbooks_by_type = {pb.alert_type: pb for pb in Playbook.objects.all()}
         soc_alerts_with_playbook = [(a, playbooks_by_type.get(a.alert_type)) for a in soc_alerts]
         runbooks_list = list(Runbook.objects.filter(is_active=True).order_by('name'))
@@ -350,6 +414,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             'soc_alerts': soc_alerts,
             'soc_alerts_with_playbook': soc_alerts_with_playbook,
             'runbooks_list': runbooks_list,
+            'soc_filter_days': soc_days,
+            'soc_filter_vehicle': soc_vehicle,
+            'soc_filter_reason': soc_reason,
+            'soc_filter_place': soc_place,
+            'soc_filter_search': soc_search,
+            'soc_filter_limit': soc_limit,
+            'soc_vehicle_options': list(vehicles_qs.order_by('license_plate')),
+            'soc_reason_options': VehicleAlert.AlertType.choices,
+            'soc_place_options': soc_place_options,
+            'soc_total_count': soc_total_count,
             'total_vehicles': total_vehicles,
             'fleet_availability': round(fleet_availability, 1),
             'vehicle_status_dict': vehicle_status_dict,

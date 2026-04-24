@@ -5,7 +5,7 @@ from .views import (
     StockAdjustView, LowStockListView, ReorderSuggestionsView,
     InventoryExportCsvView,
     SupplierListView, SupplierDetailView, SupplierCreateView,
-    SupplierUpdateView, SupplierDeleteView, SupplierComparisonView,
+    SupplierUpdateView, SupplierDeleteView, SupplierComparisonView, SupplierReviewCreateView,
 )
 
 app_name = 'inventory'
@@ -25,5 +25,6 @@ urlpatterns = [
     path('suppliers/<int:pk>/', SupplierDetailView.as_view(), name='supplier_detail'),
     path('suppliers/<int:pk>/edit/', SupplierUpdateView.as_view(), name='supplier_update'),
     path('suppliers/<int:pk>/delete/', SupplierDeleteView.as_view(), name='supplier_delete'),
+    path('suppliers/<int:pk>/review/', SupplierReviewCreateView.as_view(), name='supplier_review_create'),
     path('suppliers/compare/', SupplierComparisonView.as_view(), name='supplier_comparison'),
 ]

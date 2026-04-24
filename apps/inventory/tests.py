@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from apps.users.models import User
-from .models import SparePart
+from .models import SparePart, Supplier, SupplierReview
 
 
 class InventoryStockAdjustTests(TestCase):
@@ -30,6 +30,7 @@ class InventoryStockAdjustTests(TestCase):
             current_stock=10,
             created_by=self.manager,
         )
+        self.supplier = Supplier.objects.create(name="Proveedor Uno")
 
     def test_fleet_manager_can_adjust_stock_out(self):
         self.client.force_login(self.manager)
@@ -65,3 +66,44 @@ class InventoryStockAdjustTests(TestCase):
         self.client.force_login(self.driver)
         resp = self.client.get(reverse("inventory:stock_adjust"))
         self.assertEqual(resp.status_code, 403)
+
+    def test_stock_in_can_capture_supplier_review(self):
+        self.client.force_login(self.manager)
+        resp = self.client.post(
+            reverse("inventory:stock_adjust"),
+            data={
+                "spare_part": self.part.pk,
+                "movement_type": "in",
+                "quantity": 2,
+                "notes": "Delivery received",
+                "supplier_id": self.supplier.pk,
+                "supplier_rating": 5,
+                "supplier_comment": "Fast and complete delivery",
+            },
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(SupplierReview.objects.filter(supplier=self.supplier, rating=5).exists())
+
+
+class SupplierReviewTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.manager = User.objects.create_user(
+            email="manager2@test.local",
+            password="TestPass123!",
+            first_name="Fleet",
+            last_name="Manager",
+            role=User.Role.FLEET_MANAGER,
+        )
+        self.supplier = Supplier.objects.create(name="Proveedor Dos")
+
+    def test_can_create_review_from_supplier_detail(self):
+        self.client.force_login(self.manager)
+        resp = self.client.post(
+            reverse("inventory:supplier_review_create", kwargs={"pk": self.supplier.pk}),
+            data={"rating": 4, "comment": "Reliable in last delivery"},
+        )
+        self.assertEqual(resp.status_code, 302)
+        self.assertEqual(self.supplier.reviews.count(), 1)
+        self.supplier.refresh_from_db()
+        self.assertEqual(self.supplier.rating_count, 1)

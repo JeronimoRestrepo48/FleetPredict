@@ -29,6 +29,36 @@
         {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
       </div>
       {% endfor %}
+      <div class="border rounded p-3 mb-3">
+        <h3 class="h6 mb-3">Post-delivery supplier rating (optional for Stock In)</h3>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label" for="id_supplier_id">Supplier</label>
+            <select id="id_supplier_id" name="supplier_id" class="form-select">
+              <option value="">Select supplier</option>
+              {% for supplier in supplier_options %}
+              <option value="{{ supplier.pk }}">{{ supplier.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label" for="id_supplier_rating">Stars</label>
+            <select id="id_supplier_rating" name="supplier_rating" class="form-select">
+              <option value="">-</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label" for="id_supplier_comment">Comment</label>
+            <input id="id_supplier_comment" name="supplier_comment" type="text" class="form-control" placeholder="Optional feedback about this delivery">
+          </div>
+        </div>
+        <div class="form-text">This review is only saved when movement type is Stock In.</div>
+      </div>
       <button type="submit" class="btn btn-primary">Save movement</button>
     </form>
   </div>

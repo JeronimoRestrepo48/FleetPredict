@@ -544,6 +544,7 @@ class GPSMapView(LoginRequiredMixin, DetailView):
         from django.utils import timezone
         from datetime import timedelta
         import json
+        import math
         ctx = super().get_context_data(**kwargs)
         days = int(self.request.GET.get('days', 1))
         since = timezone.now() - timedelta(days=days)
@@ -553,15 +554,35 @@ class GPSMapView(LoginRequiredMixin, DetailView):
             .values('latitude', 'longitude', 'speed_kmh', 'timestamp')
         )
         points = []
+        prev_pair = None
+        distance_km = 0.0
         for r in readings:
+            lat = float(r['latitude'])
+            lng = float(r['longitude'])
+            if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+                continue
+            pair = (round(lat, 6), round(lng, 6))
+            if pair == prev_pair:
+                continue
+            if prev_pair is not None:
+                dx = pair[0] - prev_pair[0]
+                dy = pair[1] - prev_pair[1]
+                distance_km += math.sqrt((dx * 111.0) ** 2 + (dy * 111.0) ** 2)
             points.append({
-                'lat': float(r['latitude']),
-                'lng': float(r['longitude']),
+                'lat': lat,
+                'lng': lng,
                 'speed': float(r['speed_kmh'] or 0),
                 'time': r['timestamp'].strftime('%Y-%m-%d %H:%M'),
+                'iso_time': r['timestamp'].isoformat(),
             })
+            prev_pair = pair
         ctx['gps_points_json'] = json.dumps(points)
         ctx['selected_days'] = days
+        ctx['gps_summary'] = {
+            'points': len(points),
+            'distance_km': round(distance_km, 1),
+            'last_seen': points[-1]['time'] if points else None,
+        }
         return ctx
 
 

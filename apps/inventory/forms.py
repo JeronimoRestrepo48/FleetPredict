@@ -1,5 +1,5 @@
 from django import forms
-from .models import SparePart, StockMovement, Supplier, SupplierPart
+from .models import SparePart, StockMovement, Supplier, SupplierPart, SupplierReview
 
 
 class SparePartForm(forms.ModelForm):
@@ -33,7 +33,7 @@ class StockMovementForm(forms.ModelForm):
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
-        fields = ('name', 'contact_name', 'email', 'phone', 'address', 'delivery_terms', 'rating')
+        fields = ('name', 'contact_name', 'email', 'phone', 'address', 'delivery_terms')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,3 +54,16 @@ class SupplierPartForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.setdefault('class', 'form-control')
+
+
+class SupplierReviewForm(forms.ModelForm):
+    class Meta:
+        model = SupplierReview
+        fields = ('rating', 'comment')
+        widgets = {
+            'rating': forms.Select(
+                choices=[(1, '1 star'), (2, '2 stars'), (3, '3 stars'), (4, '4 stars'), (5, '5 stars')],
+                attrs={'class': 'form-select'},
+            ),
+            'comment': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Optional feedback'}),
+        }

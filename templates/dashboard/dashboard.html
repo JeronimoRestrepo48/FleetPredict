@@ -168,6 +168,63 @@
         <span>Operations center (SOC) – High and critical alerts</span>
       </div>
       <div class="card-body">
+        <form method="get" class="row g-2 mb-3 p-2 border rounded bg-light-subtle fp-filter-active">
+          <input type="hidden" name="period" value="{{ period }}">
+          <div class="col-md-2">
+            <label class="form-label small mb-1">Time</label>
+            <select name="soc_days" class="form-select form-select-sm">
+              <option value="1" {% if soc_filter_days == 1 %}selected{% endif %}>Last 24h</option>
+              <option value="7" {% if soc_filter_days == 7 %}selected{% endif %}>Last 7 days</option>
+              <option value="30" {% if soc_filter_days == 30 %}selected{% endif %}>Last 30 days</option>
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small mb-1">Vehicle</label>
+            <select name="soc_vehicle" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for v in soc_vehicle_options %}
+              <option value="{{ v.id }}" {% if soc_filter_vehicle == v.id|stringformat:'s' %}selected{% endif %}>{{ v.license_plate }} · {{ v.display_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small mb-1">Reason</label>
+            <select name="soc_reason" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for value, label in soc_reason_options %}
+              <option value="{{ value }}" {% if soc_filter_reason == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small mb-1">Place</label>
+            <select name="soc_place" class="form-select form-select-sm">
+              <option value="">All</option>
+              {% for place in soc_place_options %}
+              <option value="{{ place }}" {% if soc_filter_place == place %}selected{% endif %}>{{ place }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label small mb-1">Contains</label>
+            <input type="text" name="soc_search" class="form-control form-control-sm" value="{{ soc_filter_search }}" placeholder="Message text">
+          </div>
+          <div class="col-md-1">
+            <label class="form-label small mb-1">Show</label>
+            <select name="soc_limit" class="form-select form-select-sm">
+              <option value="20" {% if soc_filter_limit == 20 %}selected{% endif %}>20</option>
+              <option value="50" {% if soc_filter_limit == 50 %}selected{% endif %}>50</option>
+              <option value="100" {% if soc_filter_limit == 100 %}selected{% endif %}>100</option>
+            </select>
+          </div>
+          <div class="col-md-1 d-flex align-items-end gap-1">
+            <button class="btn btn-sm btn-primary w-100" type="submit">Apply</button>
+          </div>
+        </form>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <p class="text-muted small mb-0">Filtered alerts: <strong>{{ soc_total_count }}</strong></p>
+          <a href="?period={{ period }}" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+        </div>
         {% if soc_alerts %}
         <p class="text-muted small mb-3">Suggested actions (playbooks) and runnable runbooks for each alert.</p>
         <div class="accordion" id="socAccordion">
@@ -176,7 +233,7 @@
             <h2 class="accordion-header">
               <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#soc-{{ alert.id }}" aria-expanded="false" aria-controls="soc-{{ alert.id }}">
                 <span class="badge bg-{% if alert.severity == 'critical' %}danger{% else %}warning text-dark{% endif %} me-2">{{ alert.get_severity_display }}</span>
-                {{ alert.get_alert_type_display }} · {{ alert.vehicle.display_name }} ({{ alert.vehicle.license_plate }}) · {{ alert.created_at|date:"M d, H:i" }}
+                {{ alert.get_alert_type_display }} · {{ alert.vehicle.display_name }} ({{ alert.vehicle.license_plate }}) · {{ alert.created_at|date:"M d, H:i" }} · {{ alert.location_label }}
               </button>
             </h2>
             <div id="soc-{{ alert.id }}" class="accordion-collapse collapse" data-bs-parent="#socAccordion">

@@ -12,8 +12,8 @@ from django.template.response import TemplateResponse
 from django.db import transaction
 from django.db.models import F
 
-from .models import SparePart, StockMovement, PartUsage, Supplier, SupplierPart
-from .forms import SparePartForm, StockMovementForm, SupplierForm, SupplierPartForm
+from .models import SparePart, StockMovement, PartUsage, Supplier, SupplierPart, SupplierReview
+from .forms import SparePartForm, StockMovementForm, SupplierForm, SupplierPartForm, SupplierReviewForm
 
 
 class CanManageInventoryMixin(UserPassesTestMixin):
@@ -115,8 +115,31 @@ class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
                 new_stock = max(0, current_stock + mov.quantity)
                 SparePart.objects.filter(pk=part.pk).update(current_stock=new_stock)
             part.refresh_from_db(fields=['current_stock'])
+            if mov.movement_type == 'in':
+                supplier_id = self.request.POST.get('supplier_id', '').strip()
+                rating = self.request.POST.get('supplier_rating', '').strip()
+                comment = self.request.POST.get('supplier_comment', '').strip()
+                if supplier_id and rating:
+                    try:
+                        supplier = Supplier.objects.get(pk=supplier_id)
+                        rating_value = int(rating)
+                    except (Supplier.DoesNotExist, ValueError):
+                        supplier = None
+                        rating_value = None
+                    if supplier and rating_value in (1, 2, 3, 4, 5):
+                        SupplierReview.objects.create(
+                            supplier=supplier,
+                            rating=rating_value,
+                            comment=comment,
+                            created_by=self.request.user,
+                        )
         messages.success(self.request, f'Stock updated: {part.name} -> {part.current_stock}')
         return redirect('inventory:sparepart_detail', pk=part.pk)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['supplier_options'] = Supplier.objects.order_by('name')
+        return ctx
 
 
 class LowStockListView(LoginRequiredMixin, ListView):
@@ -164,7 +187,26 @@ class SupplierDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['supplied_parts'] = self.object.supplied_parts.select_related('spare_part')
+        ctx['review_form'] = SupplierReviewForm()
+        ctx['reviews'] = self.object.reviews.select_related('created_by')[:20]
         return ctx
+
+
+class SupplierReviewCreateView(LoginRequiredMixin, CanManageInventoryMixin, View):
+    http_method_names = ['post']
+
+    def post(self, request, pk):
+        supplier = get_object_or_404(Supplier, pk=pk)
+        form = SupplierReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.supplier = supplier
+            review.created_by = request.user
+            review.save()
+            messages.success(request, 'Supplier review saved.')
+        else:
+            messages.error(request, 'Please provide a valid rating between 1 and 5.')
+        return redirect('inventory:supplier_detail', pk=supplier.pk)
 
 
 class SupplierCreateView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):

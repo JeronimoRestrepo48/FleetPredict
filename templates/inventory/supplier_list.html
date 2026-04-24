@@ -37,7 +37,14 @@
             <td>{{ s.contact_name|default:"—" }}</td>
             <td>{% if s.email %}<a href="mailto:{{ s.email }}">{{ s.email }}</a>{% else %}—{% endif %}</td>
             <td>{{ s.phone|default:"—" }}</td>
-            <td>{% if s.rating is not None %}{{ s.rating }}{% else %}—{% endif %}</td>
+            <td>
+              {% if s.rating_avg is not None %}
+                <span class="fw-semibold">{{ s.rating_avg|floatformat:1 }}/5</span>
+                <span class="text-muted small">({{ s.rating_count }} reviews)</span>
+              {% else %}
+                —
+              {% endif %}
+            </td>
           </tr>
           {% empty %}
           <tr><td colspan="5" class="text-center text-muted py-4">No data.</td></tr>

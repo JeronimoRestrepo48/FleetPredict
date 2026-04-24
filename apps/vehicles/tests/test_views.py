@@ -1,9 +1,10 @@
 """Tests for vehicle views: list/detail access by role (driver sees only assigned)."""
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.users.models import User
-from apps.vehicles.models import Vehicle, VehicleType
+from apps.vehicles.models import Vehicle, VehicleType, GPSReading
 
 
 class VehicleListAccessTest(TestCase):
@@ -138,3 +139,34 @@ class VehicleComplianceAndExportTest(TestCase):
         resp = self.client.get(reverse('vehicles:vehicles_export_csv'))
         self.assertEqual(resp.status_code, 200)
         self.assertIn('text/csv', resp.get('Content-Type', ''))
+
+
+class VehicleGpsMapViewTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.vt = VehicleType.objects.create(name='Van', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.manager = User.objects.create_user(
+            email='gpsmanager@test.local',
+            password='TestPass123!',
+            role=User.Role.FLEET_MANAGER,
+        )
+        self.vehicle = Vehicle.objects.create(
+            license_plate='GPS-201',
+            vin='1HGBH41JXMN109187',
+            make='Renault',
+            model='Kangoo',
+            year=2021,
+            vehicle_type=self.vt,
+            status='active',
+            is_deleted=False,
+            created_by=self.manager,
+        )
+
+    def test_gps_map_summary_is_visible(self):
+        now = timezone.now()
+        GPSReading.objects.create(vehicle=self.vehicle, latitude=4.650000, longitude=-74.100000, speed_kmh=20, timestamp=now)
+        GPSReading.objects.create(vehicle=self.vehicle, latitude=4.660000, longitude=-74.090000, speed_kmh=30, timestamp=now)
+        self.client.force_login(self.manager)
+        resp = self.client.get(reverse('vehicles:gps_map', args=[self.vehicle.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'Track summary')

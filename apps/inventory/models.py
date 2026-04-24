@@ -4,6 +4,7 @@ FR26: Supplier Management.
 """
 from django.db import models
 from django.conf import settings
+from django.db.models import Avg
 
 
 class SparePart(models.Model):
@@ -102,6 +103,31 @@ class Supplier(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def rating_avg(self):
+        avg = self.reviews.aggregate(v=Avg('rating'))['v']
+        return float(avg) if avg is not None else None
+
+    @property
+    def rating_count(self):
+        return self.reviews.count()
+
+
+class SupplierReview(models.Model):
+    """Post-delivery supplier rating with optional comment."""
+
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveSmallIntegerField(help_text='1-5 stars')
+    comment = models.TextField(blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.supplier.name} - {self.rating}/5'
 
 
 class SupplierPart(models.Model):

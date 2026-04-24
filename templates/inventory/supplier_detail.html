@@ -29,8 +29,50 @@
       <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ supplier.phone|default:"—" }}</dd>
       <dt class="col-sm-3">Address</dt><dd class="col-sm-9">{{ supplier.address|default:"—"|linebreaksbr }}</dd>
       <dt class="col-sm-3">Delivery terms</dt><dd class="col-sm-9">{{ supplier.delivery_terms|default:"—"|linebreaksbr }}</dd>
-      <dt class="col-sm-3">Rating</dt><dd class="col-sm-9">{% if supplier.rating is not None %}{{ supplier.rating }}{% else %}—{% endif %}</dd>
+      <dt class="col-sm-3">Rating</dt>
+      <dd class="col-sm-9">
+        {% if supplier.rating_avg is not None %}
+          {{ supplier.rating_avg|floatformat:1 }}/5 ({{ supplier.rating_count }} reviews)
+        {% else %}
+          —
+        {% endif %}
+      </dd>
     </dl>
+  </div>
+</div>
+<div class="card card-fp mb-4">
+  <div class="card-body">
+    <h3 class="h6 mb-3">Rate after delivery</h3>
+    <form method="post" action="{% url 'inventory:supplier_review_create' supplier.pk %}" class="fp-validate">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Stars</label>
+          {{ review_form.rating }}
+        </div>
+        <div class="col-md-9">
+          <label class="form-label">Comment</label>
+          {{ review_form.comment }}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm mt-3">Save review</button>
+    </form>
+    {% if reviews %}
+    <hr>
+    <h4 class="h6 mb-2">Recent reviews</h4>
+    <div class="list-group list-group-flush">
+      {% for review in reviews %}
+      <div class="list-group-item px-0">
+        <div class="d-flex justify-content-between">
+          <strong>{{ review.rating }}/5</strong>
+          <span class="text-muted small">{{ review.created_at|date:"M d, Y H:i" }}</span>
+        </div>
+        <div class="text-muted small">By {{ review.created_by.get_full_name|default:review.created_by.email|default:"Unknown" }}</div>
+        {% if review.comment %}<p class="mb-0 mt-1">{{ review.comment }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
   </div>
 </div>
 <div class="card card-fp">

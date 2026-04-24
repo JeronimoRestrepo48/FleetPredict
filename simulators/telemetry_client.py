@@ -148,10 +148,17 @@ async def run_vehicle_client(license_plate: str, profile_name: str, url: str, in
         print('Install websockets: pip install websockets', file=sys.stderr)
         return
     full_url = url if not token else f"{url}?token={token}"
+    # Required when AllowedHostsOriginValidator is enabled in ASGI.
+    origin = 'http://127.0.0.1:8000'
     state = {}
     while True:
         try:
-            async with websockets.connect(full_url, ping_interval=20, ping_timeout=10) as ws:
+            async with websockets.connect(
+                full_url,
+                ping_interval=20,
+                ping_timeout=10,
+                origin=origin,
+            ) as ws:
                 print(f'[{license_plate}] connected', flush=True)
                 while True:
                     payload = get_state(license_plate, profile_name, state)

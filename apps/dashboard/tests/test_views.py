@@ -1,9 +1,10 @@
 """Tests for dashboard views: index, execute_runbook, predictions, alerts by role."""
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.users.models import User
-from apps.vehicles.models import Vehicle, VehicleType, VehicleAlert, Runbook
+from apps.vehicles.models import Vehicle, VehicleType, VehicleAlert, Runbook, GPSReading
 
 
 class DashboardAccessTest(TestCase):
@@ -136,3 +137,22 @@ class DashboardAccessTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertIn('my_assigned_count', resp.context)
         self.assertIn('unassigned_count', resp.context)
+
+    def test_dashboard_soc_filters(self):
+        self.client.force_login(self.manager)
+        GPSReading.objects.create(
+            vehicle=self.vehicle,
+            latitude=4.7110,
+            longitude=-74.0721,
+            speed_kmh=20,
+            timestamp=timezone.now(),
+        )
+        resp = self.client.get(reverse('dashboard:index'), data={
+            'soc_days': 7,
+            'soc_vehicle': str(self.vehicle.pk),
+            'soc_reason': VehicleAlert.AlertType.HIGH_ENGINE_TEMP,
+            'soc_search': 'test',
+        })
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('soc_total_count', resp.context)
+        self.assertGreaterEqual(resp.context['soc_total_count'], 1)
