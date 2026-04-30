@@ -8,6 +8,24 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fleetpredict
+          POSTGRES_USER: fleetpredict
+          POSTGRES_PASSWORD: fleetpredict
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +42,22 @@ jobs:
       - name: Django checks
         run: python manage.py check
 
+      - name: Django deployment checks
+        env:
+          DJANGO_DEBUG: "False"
+          DJANGO_SECRET_KEY: "ci-secret-key-for-deploy-check"
+          DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,testserver"
+          DATABASE_URL: "postgres://fleetpredict:fleetpredict@127.0.0.1:5432/fleetpredict"
+          CHANNEL_LAYERS_USE_REDIS: "1"
+          REDIS_URL: "redis://127.0.0.1:6379/0"
+          TELEMETRY_WS_TOKEN: "ci-token"
+        run: python manage.py check --deploy
+
       - name: Django tests
+        env:
+          DATABASE_URL: "postgres://fleetpredict:fleetpredict@127.0.0.1:5432/fleetpredict"
+          CHANNEL_LAYERS_USE_REDIS: "1"
+          REDIS_URL: "redis://127.0.0.1:6379/0"
         run: python manage.py test
 
       - name: Setup Node
@@ -42,4 +75,7 @@ jobs:
         run: python manage.py create_e2e_user
 
       - name: Playwright smoke E2E
-        run: npx playwright test e2e/auth.spec.ts
+        run: npx playwright test e2e/auth.spec.ts e2e/navigation.spec.ts
+
+      - name: Health endpoint smoke
+        run: python manage.py check

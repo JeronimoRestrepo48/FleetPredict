@@ -4,6 +4,7 @@ Django settings for FleetPredict Pro project.
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +46,7 @@ except ImportError:
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -89,9 +91,31 @@ if os.environ.get('CHANNEL_LAYERS_USE_REDIS', '').lower() not in ('1', 'true', '
         'default': {'BACKEND': 'channels.layers.InMemoryChannelLayer'}
     }
 
-# Database (SQLite only)
+# Database: SQLite for development, DATABASE_URL for commercial deployments.
+DATABASE_URL = os.environ.get('DATABASE_URL', '')
+
+
+def _database_from_url(url):
+    parsed = urlparse(url)
+    if parsed.scheme in ('postgres', 'postgresql'):
+        return {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': parsed.path.lstrip('/'),
+            'USER': parsed.username or '',
+            'PASSWORD': parsed.password or '',
+            'HOST': parsed.hostname or '',
+            'PORT': parsed.port or '',
+        }
+    if parsed.scheme == 'sqlite':
+        return {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': parsed.path,
+        }
+    raise RuntimeError('Unsupported DATABASE_URL scheme. Use postgres://, postgresql://, or sqlite:///')
+
+
 DATABASES = {
-    'default': {
+    'default': _database_from_url(DATABASE_URL) if DATABASE_URL else {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
@@ -134,6 +158,11 @@ LOGOUT_REDIRECT_URL = '/login/'
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG else 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
 
 # Media files
 MEDIA_URL = '/media/'

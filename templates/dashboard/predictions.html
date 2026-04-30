@@ -13,7 +13,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Failure predictions</h2>
 </div>
-<p class="text-muted">Vehicle, type, message, confidence and timeframe. Runbook actions available. FR10: filter by severity.</p>
+<p class="text-muted">Vehicle, type, confidence, timeframe and explainable criticality. FR10 is now actionable and auditable.</p>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto">
     <select name="severity" class="form-select form-select-sm">
@@ -21,6 +21,12 @@
       {% for val, label in severity_choices %}
       <option value="{{ val }}" {% if request.GET.severity == val %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <select name="sort" class="form-select form-select-sm">
+      <option value="">Newest first</option>
+      <option value="criticality" {% if sort == 'criticality' %}selected{% endif %}>Criticality first</option>
     </select>
   </div>
   <div class="col-auto">
@@ -38,6 +44,7 @@
             <th>Type</th>
             <th>Severity</th>
             <th>Message</th>
+            <th>Why</th>
             <th>Confidence</th>
             <th>Timeframe</th>
             <th>Date</th>
@@ -51,6 +58,7 @@
             <td>{{ alert.get_alert_type_display }}</td>
             <td><span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ alert.get_severity_display }}</span></td>
             <td>{{ alert.message|truncatewords:12 }}</td>
+            <td class="small text-muted">{{ alert.criticality_reason|default:alert.build_criticality_reason|truncatewords:16 }}</td>
             <td>{% if alert.confidence %}{{ alert.confidence }}{% else %}—{% endif %}</td>
             <td>{{ alert.timeframe_text|default:"—" }}</td>
             <td>{{ alert.created_at|date:"M d, H:i" }}</td>
@@ -66,6 +74,22 @@
                 </form>
                 {% endif %}
               {% endfor %}
+              {% if user.can_manage_maintenance %}
+              <details class="mt-1">
+                <summary class="small text-primary">Override</summary>
+                <form method="post" action="{% url 'dashboard:override_criticality' %}" class="mt-2">
+                  {% csrf_token %}
+                  <input type="hidden" name="alert_id" value="{{ alert.id }}">
+                  <select name="severity" class="form-select form-select-sm mb-1">
+                    {% for val, label in severity_choices %}
+                    <option value="{{ val }}" {% if alert.severity == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <input type="text" name="reason" class="form-control form-control-sm mb-1" placeholder="Reason required">
+                  <button class="btn btn-sm btn-outline-warning" type="submit">Save override</button>
+                </form>
+              </details>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}

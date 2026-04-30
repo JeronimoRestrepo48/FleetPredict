@@ -400,6 +400,19 @@ class VehicleAlert(models.Model):
         blank=True,
         help_text='e.g. "Próximos 7 días", "En 500 km"',
     )
+    criticality_reason = models.TextField(
+        blank=True,
+        help_text='Human-readable reason for the assigned criticality.',
+    )
+    severity_overridden_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='severity_overrides',
+    )
+    severity_override_reason = models.TextField(blank=True)
+    severity_overridden_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     read_at = models.DateTimeField(null=True, blank=True)
     # FR11: Suggested maintenance - accept (create task) or dismiss
@@ -414,6 +427,27 @@ class VehicleAlert(models.Model):
         blank=True,
         db_index=True,
     )
+    suggestion_scheduled_date = models.DateField(null=True, blank=True)
+    suggestion_priority = models.CharField(max_length=16, blank=True)
+    suggestion_dismiss_reason = models.TextField(blank=True)
+    suggestion_handled_at = models.DateTimeField(null=True, blank=True)
+
+    def build_criticality_reason(self):
+        """Return a concise explanation for why this alert has its severity."""
+        factors = [f'{self.get_severity_display()} severity']
+        if self.confidence is not None:
+            factors.append(f'{self.confidence} confidence')
+        if self.timeframe_text:
+            factors.append(f'timeframe: {self.timeframe_text}')
+        if self.alert_type in {
+            self.AlertType.HIGH_ENGINE_TEMP,
+            self.AlertType.STATISTICAL_ANOMALY,
+            self.AlertType.THRESHOLD_EXCEEDED,
+        }:
+            factors.append('vehicle risk signal')
+        if self.severity in {self.Severity.HIGH, self.Severity.CRITICAL}:
+            factors.append('requires prioritized review')
+        return '; '.join(factors)
 
     class Meta:
         verbose_name = 'Vehicle Alert'

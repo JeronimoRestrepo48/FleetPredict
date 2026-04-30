@@ -13,9 +13,10 @@ from django import forms
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Count, Q, Sum
-from datetime import timedelta
+from datetime import datetime, timedelta
 from collections import OrderedDict
 import math
+import csv
 
 from apps.vehicles.models import Vehicle, VehicleAlert, VehicleType, Playbook, Runbook, ComplianceRequirement, GPSReading
 from apps.vehicles.visibility import visible_vehicle_queryset
@@ -508,18 +509,72 @@ class PredictionsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         qs = (
             VehicleAlert.objects.filter(vehicle_id__in=vehicle_ids)
             .select_related('vehicle')
-            .order_by('-created_at')
         )
         severity = self.request.GET.get('severity')
         if severity and severity in dict(VehicleAlert.Severity.choices):
             qs = qs.filter(severity=severity)
+        sort = self.request.GET.get('sort')
+        severity_order = {
+            VehicleAlert.Severity.CRITICAL: 0,
+            VehicleAlert.Severity.HIGH: 1,
+            VehicleAlert.Severity.MEDIUM: 2,
+            VehicleAlert.Severity.LOW: 3,
+        }
+        rows = list(qs.order_by('-created_at')[:300])
+        for alert in rows:
+            if not alert.criticality_reason:
+                alert.criticality_reason = alert.build_criticality_reason()
+        if sort == 'criticality':
+            rows.sort(key=lambda a: (severity_order.get(a.severity, 9), -a.created_at.timestamp()))
+        return rows
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['runbooks_list'] = list(Runbook.objects.filter(is_active=True).order_by('name'))
         context['severity_choices'] = VehicleAlert.Severity.choices
+        context['sort'] = self.request.GET.get('sort', '')
         return context
+
+
+class OverrideCriticalityView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """FR10: controlled severity override with audit trail."""
+    http_method_names = ['post']
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_maintenance()
+
+    def post(self, request):
+        alert = get_object_or_404(VehicleAlert, pk=request.POST.get('alert_id'))
+        new_severity = request.POST.get('severity')
+        reason = request.POST.get('reason', '').strip()
+        if new_severity not in dict(VehicleAlert.Severity.choices):
+            messages.error(request, 'Invalid criticality level.')
+            return redirect('dashboard:predictions')
+        if not reason:
+            messages.error(request, 'A reason is required to override criticality.')
+            return redirect('dashboard:predictions')
+        old_values = {'severity': alert.severity, 'criticality_reason': alert.criticality_reason}
+        alert.severity = new_severity
+        alert.criticality_reason = f'Overridden by {request.user.get_full_name() or request.user.email}: {reason}'
+        alert.severity_overridden_by = request.user
+        alert.severity_override_reason = reason
+        alert.severity_overridden_at = timezone.now()
+        alert.save(update_fields=[
+            'severity', 'criticality_reason', 'severity_overridden_by',
+            'severity_override_reason', 'severity_overridden_at',
+        ])
+        log_audit(
+            request,
+            'override',
+            'VehicleAlert',
+            alert.pk,
+            f'Criticality overridden for {alert.vehicle.display_name}',
+            old_values=old_values,
+            new_values={'severity': alert.severity, 'criticality_reason': alert.criticality_reason},
+        )
+        messages.success(request, 'Criticality updated and audited.')
+        return redirect('dashboard:predictions')
 
 
 class SuggestedMaintenanceView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -538,14 +593,23 @@ class SuggestedMaintenanceView(LoginRequiredMixin, UserPassesTestMixin, ListView
         if user.is_driver:
             vehicle_ids = vehicle_ids.filter(assigned_driver=user)
         vehicle_ids = vehicle_ids.values_list('id', flat=True)
-        return (
+        suggestions = list(
             VehicleAlert.objects.filter(
                 vehicle_id__in=vehicle_ids,
             )
             .filter(Q(suggestion_status__isnull=True) | Q(suggestion_status='pending'))
             .select_related('vehicle')
-            .order_by('-created_at')
+            .order_by('-created_at')[:300]
         )
+        for suggestion in suggestions:
+            if not suggestion.criticality_reason:
+                suggestion.criticality_reason = suggestion.build_criticality_reason()
+            if not suggestion.suggestion_scheduled_date:
+                days = 3 if suggestion.severity == VehicleAlert.Severity.CRITICAL else 7
+                suggestion.suggestion_scheduled_date = (timezone.now() + timedelta(days=days)).date()
+            if not suggestion.suggestion_priority:
+                suggestion.suggestion_priority = 'critical' if suggestion.severity == VehicleAlert.Severity.CRITICAL else 'high'
+        return suggestions
 
 
 class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -572,19 +636,37 @@ class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
         if alert.suggestion_status not in (None, 'pending'):
             messages.warning(request, 'Suggestion already handled.')
             return redirect('dashboard:suggested_maintenance')
-        from datetime import timedelta
+        scheduled_date_raw = request.POST.get('scheduled_date')
+        priority = request.POST.get('priority') or ('critical' if alert.severity == 'critical' else 'high')
+        title = request.POST.get('title') or f"Suggested: {alert.get_alert_type_display()}"
+        description = request.POST.get('description') or alert.message
+        try:
+            scheduled_date = datetime.strptime(scheduled_date_raw, '%Y-%m-%d').date() if scheduled_date_raw else (timezone.now() + timedelta(days=7)).date()
+        except ValueError:
+            scheduled_date = (timezone.now() + timedelta(days=7)).date()
         task = MaintenanceTask.objects.create(
             vehicle=alert.vehicle,
-            title=f"Suggested: {alert.get_alert_type_display()}",
-            description=alert.message,
+            title=title,
+            description=description,
             maintenance_type='preventive',
-            scheduled_date=(timezone.now() + timedelta(days=7)).date(),
+            scheduled_date=scheduled_date,
             status=MaintenanceTask.Status.SCHEDULED,
-            priority='high' if alert.severity in ('high', 'critical') else 'medium',
+            priority=priority,
             created_by=user,
         )
         alert.suggestion_status = 'accepted'
-        alert.save(update_fields=['suggestion_status'])
+        alert.suggestion_scheduled_date = scheduled_date
+        alert.suggestion_priority = priority
+        alert.suggestion_handled_at = timezone.now()
+        alert.save(update_fields=['suggestion_status', 'suggestion_scheduled_date', 'suggestion_priority', 'suggestion_handled_at'])
+        log_audit(
+            request,
+            'create',
+            'MaintenanceTask',
+            task.pk,
+            f'Accepted suggestion from alert {alert.pk}',
+            new_values={'scheduled_date': scheduled_date.isoformat(), 'priority': priority, 'source_alert': alert.pk},
+        )
         messages.success(request, f'Maintenance task created: {task.title}')
         return redirect('dashboard:suggested_maintenance')
 
@@ -612,8 +694,19 @@ class DismissSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
         if alert.suggestion_status not in (None, 'pending'):
             messages.warning(request, 'Suggestion already handled.')
             return redirect('dashboard:suggested_maintenance')
+        reason = request.POST.get('dismiss_reason', '').strip()
         alert.suggestion_status = 'dismissed'
-        alert.save(update_fields=['suggestion_status'])
+        alert.suggestion_dismiss_reason = reason
+        alert.suggestion_handled_at = timezone.now()
+        alert.save(update_fields=['suggestion_status', 'suggestion_dismiss_reason', 'suggestion_handled_at'])
+        log_audit(
+            request,
+            'update',
+            'VehicleAlert',
+            alert.pk,
+            'Dismissed maintenance suggestion',
+            new_values={'suggestion_status': 'dismissed', 'reason': reason},
+        )
         messages.success(request, 'Suggestion dismissed.')
         return redirect('dashboard:suggested_maintenance')
 
@@ -877,13 +970,55 @@ class AuditLogListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
             qs = qs.filter(action=action)
         model_name = self.request.GET.get('model')
         if model_name:
-            qs = qs.filter(model_name=model_name)
+            qs = qs.filter(model_name__icontains=model_name)
+        user_query = self.request.GET.get('user')
+        if user_query:
+            qs = qs.filter(Q(user__email__icontains=user_query) | Q(user__first_name__icontains=user_query) | Q(user__last_name__icontains=user_query))
+        search = self.request.GET.get('search')
+        if search:
+            qs = qs.filter(Q(message__icontains=search) | Q(object_id__icontains=search) | Q(model_name__icontains=search))
+        start = self.request.GET.get('start')
+        end = self.request.GET.get('end')
+        if start:
+            qs = qs.filter(created_at__date__gte=start)
+        if end:
+            qs = qs.filter(created_at__date__lte=end)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['action_choices'] = AuditLog.ACTION_CHOICES
         return context
+
+
+class AuditLogExportView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """FR27: export filtered audit log as CSV."""
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.can_manage_platform()
+
+    def get(self, request):
+        view = AuditLogListView()
+        view.request = request
+        qs = view.get_queryset()
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="audit_log.csv"'
+        writer = csv.writer(response)
+        writer.writerow(['created_at', 'user', 'action', 'model', 'object_id', 'message', 'old_values', 'new_values', 'ip'])
+        for entry in qs:
+            writer.writerow([
+                entry.created_at.isoformat(),
+                entry.user.email if entry.user else '',
+                entry.action,
+                entry.model_name,
+                entry.object_id,
+                entry.message,
+                entry.old_values,
+                entry.new_values,
+                entry.ip_address or '',
+            ])
+        log_audit(request, 'export', 'AuditLog', '', 'Exported audit log', metadata={'rows': qs.count()})
+        return response
 
 
 # ============== FR28: Dashboard Customization ==============

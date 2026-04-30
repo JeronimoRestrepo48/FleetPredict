@@ -126,6 +126,9 @@ class AuditLog(models.Model):
         ('delete', 'Delete'),
         ('login', 'Login'),
         ('logout', 'Logout'),
+        ('export', 'Export'),
+        ('override', 'Override'),
+        ('system', 'System event'),
     ]
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -138,6 +141,9 @@ class AuditLog(models.Model):
     model_name = models.CharField(max_length=64, blank=True, db_index=True)
     object_id = models.CharField(max_length=64, blank=True)
     message = models.CharField(max_length=500, blank=True)
+    old_values = models.JSONField(default=dict, blank=True)
+    new_values = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

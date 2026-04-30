@@ -6,7 +6,7 @@ Call log_audit() from views after create/update/delete.
 from .models import AuditLog
 
 
-def log_audit(request, action, model_name='', object_id='', message=''):
+def log_audit(request, action, model_name='', object_id='', message='', old_values=None, new_values=None, metadata=None):
     """Record an audit log entry. request can be None (e.g. management command)."""
     user = request.user if request and hasattr(request, 'user') else None
     ip = None
@@ -20,5 +20,8 @@ def log_audit(request, action, model_name='', object_id='', message=''):
         model_name=model_name,
         object_id=str(object_id) if object_id else '',
         message=message[:500] if message else '',
+        old_values=old_values or {},
+        new_values=new_values or {},
+        metadata=metadata or {},
         ip_address=ip,
     )

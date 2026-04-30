@@ -13,7 +13,7 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Suggested Maintenance</h2>
 </div>
-<p class="text-muted">Recommendations from predictions. Accept to create a maintenance task, or dismiss.</p>
+<p class="text-muted">Recommendations from predictions. Review the evidence, adjust the plan, then accept or dismiss with a reason.</p>
 <div class="card card-fp">
   <div class="card-body p-0">
     {% if suggestions %}
@@ -25,6 +25,7 @@
             <th>Type</th>
             <th>Severity</th>
             <th>Message</th>
+            <th>Reasoning</th>
             <th>Confidence</th>
             <th>Timeframe</th>
             <th>Date</th>
@@ -38,20 +39,33 @@
             <td>{{ s.get_alert_type_display }}</td>
             <td><span class="badge bg-{% if s.severity == 'critical' %}danger{% elif s.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ s.get_severity_display }}</span></td>
             <td>{{ s.message|truncatewords:12 }}</td>
+            <td class="small text-muted">{{ s.criticality_reason|truncatewords:14 }}</td>
             <td>{{ s.confidence|default:"—" }}</td>
             <td>{{ s.timeframe_text|default:"—" }}</td>
             <td>{{ s.created_at|date:"M d, H:i" }}</td>
             <td>
               {% if user.can_manage_maintenance %}
-              <form method="post" action="{% url 'dashboard:accept_suggestion' %}" class="d-inline">
+              <details class="mb-2">
+                <summary class="small text-success">Review and accept</summary>
+                <form method="post" action="{% url 'dashboard:accept_suggestion' %}" class="mt-2">
                 {% csrf_token %}
                 <input type="hidden" name="alert_id" value="{{ s.id }}">
-                <button type="submit" class="btn btn-sm btn-success">Accept</button>
-              </form>
+                <input type="text" name="title" class="form-control form-control-sm mb-1" value="Suggested: {{ s.get_alert_type_display }}">
+                <input type="date" name="scheduled_date" class="form-control form-control-sm mb-1" value="{{ s.suggestion_scheduled_date|date:'Y-m-d' }}">
+                <select name="priority" class="form-select form-select-sm mb-1">
+                  <option value="medium" {% if s.suggestion_priority == 'medium' %}selected{% endif %}>Medium</option>
+                  <option value="high" {% if s.suggestion_priority == 'high' %}selected{% endif %}>High</option>
+                  <option value="critical" {% if s.suggestion_priority == 'critical' %}selected{% endif %}>Critical</option>
+                </select>
+                <textarea name="description" class="form-control form-control-sm mb-1" rows="2">{{ s.message }}</textarea>
+                <button type="submit" class="btn btn-sm btn-success">Create task</button>
+                </form>
+              </details>
               {% endif %}
               <form method="post" action="{% url 'dashboard:dismiss_suggestion' %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="alert_id" value="{{ s.id }}">
+                <input type="text" name="dismiss_reason" class="form-control form-control-sm mb-1" placeholder="Dismiss reason">
                 <button type="submit" class="btn btn-sm btn-outline-secondary">Dismiss</button>
               </form>
             </td>

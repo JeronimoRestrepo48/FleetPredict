@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Export Center - FleetPredict Pro{% endblock %}
+{% block breadcrumb %}
+<nav aria-label="breadcrumb" class="breadcrumb-fp">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Export Center</li>
+  </ol>
+</nav>
+{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+  <h2 class="page-title mb-0">Export Center</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to reports</a>
+</div>
+<div class="card card-fp fp-operational-panel mb-4">
+  <div class="card-body">
+    <p class="text-muted">Export operational data with role-aware visibility. Files are CSV and open directly in Excel or Google Sheets.</p>
+    <form method="post" class="row g-3">
+      {% csrf_token %}
+      <div class="col-md-3">
+        <label class="form-label">Dataset</label>
+        <select name="dataset" class="form-select">
+          {% for value, label in datasets %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Format</label>
+        <select name="export_format" class="form-select">
+          {% for value, label in formats %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Vehicle filter</label>
+        <select name="vehicle" class="form-select">
+          <option value="">All visible vehicles</option>
+          {% for vehicle in vehicles %}
+          <option value="{{ vehicle.pk }}">{{ vehicle.license_plate }} - {{ vehicle.display_name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Start</label>
+        <input type="date" name="start" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">End</label>
+        <input type="date" name="end" class="form-control">
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary">Generate export</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card card-fp">
+  <div class="card-body">
+    <h3 class="h6 mb-3">Recent export history</h3>
+    <div class="table-responsive">
+      <table class="table table-fp table-sm mb-0">
+        <thead><tr><th>Date</th><th>Dataset</th><th>Format</th><th>Rows</th><th>Status</th><th>Expires</th></tr></thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr>
+            <td>{{ job.created_at|date:"Y-m-d H:i" }}</td>
+            <td>{{ job.get_dataset_display }}</td>
+            <td>{{ job.get_export_format_display }}</td>
+            <td>{{ job.row_count }}</td>
+            <td>{{ job.get_status_display }}</td>
+            <td>{{ job.expires_at|date:"Y-m-d"|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-muted text-center py-3">No exports yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

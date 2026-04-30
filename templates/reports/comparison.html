@@ -7,6 +7,19 @@
   <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to Reports</a>
 </div>
 <p class="text-muted">Vehicles compared by number of completed tasks and total cost.</p>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-3">
+    <select name="vehicle" class="form-select form-select-sm">
+      <option value="">All vehicles</option>
+      {% for vehicle in vehicles %}
+      <option value="{{ vehicle.pk }}" {% if request.GET.vehicle == vehicle.pk|stringformat:'s' %}selected{% endif %}>{{ vehicle.license_plate }} - {{ vehicle.display_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2"><input type="date" name="start" class="form-control form-control-sm" value="{{ request.GET.start }}"></div>
+  <div class="col-md-2"><input type="date" name="end" class="form-control form-control-sm" value="{{ request.GET.end }}"></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-primary">Apply filters</button></div>
+</form>
 <div class="card card-fp">
   <div class="card-body p-0">
     <div class="table-responsive">

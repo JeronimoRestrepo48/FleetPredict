@@ -187,6 +187,11 @@ You can use a `.env` file or export variables. Useful ones:
 DJANGO_SECRET_KEY=your-long-random-secret-key
 DJANGO_DEBUG=False
 DJANGO_ALLOWED_HOSTS=your-domain.com,www.your-domain.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://your-domain.com
+DATABASE_URL=postgres://user:password@host:5432/fleetpredict
+CHANNEL_LAYERS_USE_REDIS=1
+REDIS_URL=redis://redis:6379/0
+TELEMETRY_WS_TOKEN=secret-token
 
 # Development (defaults if not set)
 DJANGO_DEBUG=True
@@ -198,8 +203,8 @@ EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend   # Console email (
 DEFAULT_FROM_EMAIL=FleetPredict <noreply@example.com>
 # For real SMTP: EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 
-# WebSocket telemetry (optional)
-TELEMETRY_WS_TOKEN=secret-token   # If set, /ws/telemetry/ requires ?token=...
+# WebSocket telemetry
+TELEMETRY_WS_TOKEN=secret-token   # Required for production ingest when DEBUG=False
 ```
 
 ### Create superuser
@@ -261,6 +266,26 @@ From the `dev/` folder you can run a single script that:
 **Stop everything:** press **Ctrl+C** in the same terminal.
 
 For a short operational reference (commands, variables, and notes), see `scripts/README.md`.
+
+## Production-like deployment
+
+Sprint 4 adds a production-ready baseline:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+The compose stack runs Django ASGI, PostgreSQL, and Redis. In production, set a strong `DJANGO_SECRET_KEY`, real `DJANGO_ALLOWED_HOSTS`, HTTPS `DJANGO_CSRF_TRUSTED_ORIGINS`, SMTP variables, and a secure `TELEMETRY_WS_TOKEN`.
+
+Useful checks:
+
+```bash
+python manage.py check
+DJANGO_DEBUG=False DJANGO_SECRET_KEY=change-me DJANGO_ALLOWED_HOSTS=localhost TELEMETRY_WS_TOKEN=token python manage.py check --deploy
+curl http://localhost:8000/healthz/
+curl http://localhost:8000/readyz/
+```
 
 ### Linux / macOS
 
@@ -332,9 +357,11 @@ The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
 | `/soc/runbook/` | POST: execute runbook on an alert (mark read, create task, etc.) |
 | `/alerts/` | Notification center: alert list with filters and runbook actions. Unread badge in nav. |
 | `/predictions/` | Failure predictions: recommendations with timeframe and confidence. Report permission required. |
+| `/predictions/override-criticality/` | POST: FR10 controlled criticality override with audit trail. |
 | `/suggested-maintenance/` | FR11: accept or dismiss suggested maintenance from predictions. |
 | `/alert-rules/` | FR8: configurable alert thresholds. |
 | `/audit-log/` | FR27: audit log list (administrator only). |
+| `/audit-log/export/` | FR27: export filtered audit log as CSV (administrator only). |
 
 ### Vehicles
 
@@ -369,6 +396,8 @@ The script activates `venv` automatically if `venv\Scripts\Activate.ps1` exists.
 | Route | Description |
 |-------|-------------|
 | `/reports/` | Reports page: fleet report and per-vehicle report; analytics (trends, cost, comparison). |
+| `/reports/schedules/create/` | Save report schedule metadata for weekly/monthly operational reviews. |
+| `/reports/exports/` | FR16: Export Center for vehicles, maintenance, predictions, inventory, suppliers, sensors, GPS and audit. |
 | `/reports/vehicle/<id>/` | Download PDF for one vehicle. |
 | `/reports/fleet/` | Download fleet PDF. |
 | `/reports/trends/` | FR12: maintenance trends. |

@@ -12,6 +12,7 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Reports</h2>
+  <a href="{% url 'reports:export_center' %}" class="btn btn-outline-primary">Export Center</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -34,6 +35,44 @@
     <a href="{% url 'reports:trends' %}" class="btn btn-outline-primary me-2">Trends</a>
     <a href="{% url 'reports:cost' %}" class="btn btn-outline-primary me-2">Cost</a>
     <a href="{% url 'reports:comparison' %}" class="btn btn-outline-primary">Comparison</a>
+  </div>
+</div>
+<div class="card card-fp mt-3">
+  <div class="card-body">
+    <h5 class="card-title">Commercial report schedule</h5>
+    <p class="card-text text-muted">Save report delivery metadata for weekly or monthly operational reviews.</p>
+    <form method="post" action="{% url 'reports:schedule_create' %}" class="row g-2">
+      {% csrf_token %}
+      <div class="col-md-3"><input name="name" class="form-control" placeholder="Schedule name" required></div>
+      <div class="col-md-2">
+        <select name="report_type" class="form-select">
+          <option value="fleet">Fleet</option>
+          <option value="trends">Trends</option>
+          <option value="cost">Cost</option>
+          <option value="comparison">Comparison</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select name="frequency" class="form-select">
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <div class="col-md-3"><input name="recipients" class="form-control" placeholder="ops@example.com"></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100">Save</button></div>
+    </form>
+    {% if schedules %}
+    <div class="table-responsive mt-3">
+      <table class="table table-sm table-fp mb-0">
+        <thead><tr><th>Name</th><th>Type</th><th>Frequency</th><th>Recipients</th></tr></thead>
+        <tbody>
+          {% for schedule in schedules %}
+          <tr><td>{{ schedule.name }}</td><td>{{ schedule.report_type }}</td><td>{{ schedule.frequency }}</td><td>{{ schedule.recipients|default:"—" }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

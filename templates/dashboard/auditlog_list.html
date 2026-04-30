@@ -4,7 +4,10 @@
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">Audit Log</h2>
-  <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+  <div class="d-flex gap-2">
+    <a href="{% url 'dashboard:auditlog_export' %}?{{ request.GET.urlencode }}" class="btn btn-outline-primary">Export CSV</a>
+    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+  </div>
 </div>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto">
@@ -18,6 +21,14 @@
   <div class="col-auto">
     <input type="text" name="model" class="form-control form-control-sm" placeholder="Model name" value="{{ request.GET.model }}">
   </div>
+  <div class="col-auto">
+    <input type="text" name="user" class="form-control form-control-sm" placeholder="User email/name" value="{{ request.GET.user }}">
+  </div>
+  <div class="col-auto">
+    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search message/object" value="{{ request.GET.search }}">
+  </div>
+  <div class="col-auto"><input type="date" name="start" class="form-control form-control-sm" value="{{ request.GET.start }}"></div>
+  <div class="col-auto"><input type="date" name="end" class="form-control form-control-sm" value="{{ request.GET.end }}"></div>
   <div class="col-auto">
     <button type="submit" class="btn btn-sm btn-primary">Filter</button>
   </div>
@@ -34,6 +45,7 @@
             <th>Model</th>
             <th>Object ID</th>
             <th>Message</th>
+            <th>Changes</th>
             <th>IP</th>
           </tr>
         </thead>
@@ -41,15 +53,20 @@
           {% for e in audit_logs %}
           <tr>
             <td>{{ e.created_at|date:"Y-m-d H:i:s" }}</td>
-            <td>{{ e.user.get_full_name|default:e.user.email|default:"—" }}</td>
+            <td>{% if e.user %}{{ e.user.get_full_name|default:e.user.email }}{% else %}—{% endif %}</td>
             <td>{{ e.get_action_display }}</td>
             <td>{{ e.model_name|default:"—" }}</td>
             <td>{{ e.object_id|default:"—" }}</td>
             <td>{{ e.message|truncatewords:10 }}</td>
+            <td class="small">
+              {% if e.old_values or e.new_values %}
+              <details><summary>View</summary><pre class="mb-0 fp-code-diff">{{ e.old_values }} → {{ e.new_values }}</pre></details>
+              {% else %}—{% endif %}
+            </td>
             <td>{{ e.ip_address|default:"—" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="7">No audit log entries.</td></tr>
+          <tr><td colspan="8">No audit log entries.</td></tr>
           {% endfor %}
         </tbody>
       </table>

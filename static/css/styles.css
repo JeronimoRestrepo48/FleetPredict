@@ -474,6 +474,27 @@ footer.fp-footer {
   color: #f59f00;
 }
 
+.fp-operational-panel {
+  border: 1px solid rgba(13, 110, 253, 0.12);
+  background: linear-gradient(180deg, rgba(13, 110, 253, 0.04), #fff);
+  border-radius: var(--fp-radius-lg);
+}
+
+.fp-help-text {
+  color: var(--fp-secondary);
+  font-size: var(--fp-text-sm);
+}
+
+.fp-inline-form {
+  min-width: 220px;
+}
+
+.fp-code-diff {
+  white-space: pre-wrap;
+  max-width: 420px;
+  overflow-x: auto;
+}
+
 /* Toast container */
 .fp-toast-container {
   position: fixed;
