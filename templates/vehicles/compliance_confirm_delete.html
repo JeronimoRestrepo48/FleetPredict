@@ -1,18 +1,18 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Delete Compliance - FleetPredict Pro{% endblock %}
+{% block title %}{% trans "Delete Compliance - FleetPredict Pro" %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Delete compliance requirement</h2>
-  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">Back to list</a>
+  <h2 class="page-title mb-0">{% trans "Delete compliance requirement" %}</h2>
+  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <p>Are you sure you want to remove <strong>{{ compliance.name }}</strong> ({{ compliance.get_requirement_type_display }}) for {{ compliance.vehicle.display_name }}?</p>
+    <p>{% blocktrans with name=compliance.name rtype=compliance.get_requirement_type_display vehicle=compliance.vehicle.display_name %}Are you sure you want to remove <strong>{{ name }}</strong> ({{ rtype }}) for {{ vehicle }}?{% endblocktrans %}</p>
     <form method="post">
       {% csrf_token %}
-      <button type="submit" class="btn btn-danger">Delete</button>
-      <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+      <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
     </form>
   </div>
 </div>

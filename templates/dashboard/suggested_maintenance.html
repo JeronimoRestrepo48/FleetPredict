@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Suggested Maintenance - FleetPredict Pro{% endblock %}
-{% block meta_description %}Accept or dismiss suggested maintenance from predictions.{% endblock %}
+{% block title %}{% trans "Suggested Maintenance - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Accept or dismiss suggested maintenance from predictions." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Suggested maintenance</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Suggested maintenance" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
+{% trans "—" as emdash %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Suggested Maintenance</h2>
+  <h2 class="page-title mb-0">{% trans "Suggested Maintenance" %}</h2>
 </div>
-<p class="text-muted">Recommendations from predictions. Review the evidence, adjust the plan, then accept or dismiss with a reason.</p>
+<p class="text-muted">{% trans "Recommendations from predictions. Review the evidence, adjust the plan, then accept or dismiss with a reason." %}</p>
 <div class="card card-fp">
   <div class="card-body p-0">
     {% if suggestions %}
@@ -22,15 +23,15 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Vehicle</th>
-            <th>Type</th>
-            <th>Severity</th>
-            <th>Message</th>
-            <th>Reasoning</th>
-            <th>Confidence</th>
-            <th>Timeframe</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th>{% trans "Vehicle" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Severity" %}</th>
+            <th>{% trans "Message" %}</th>
+            <th>{% trans "Reasoning" %}</th>
+            <th>{% trans "Confidence" %}</th>
+            <th>{% trans "Timeframe" %}</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Actions" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,33 +42,33 @@
             <td><span class="badge bg-{% if s.severity == 'critical' %}danger{% elif s.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ s.get_severity_display }}</span></td>
             <td>{{ s.message|truncatewords:12 }}</td>
             <td class="small text-muted">{{ s.criticality_reason|truncatewords:14 }}</td>
-            <td>{{ s.confidence|default:"—" }}</td>
-            <td>{{ s.timeframe_text|default:"—" }}</td>
+            <td>{{ s.confidence|default:emdash }}</td>
+            <td>{{ s.timeframe_text|default:emdash }}</td>
             <td>{{ s.created_at|date:"M d, H:i" }}</td>
             <td>
               {% if user.can_manage_maintenance %}
               <details class="mb-2">
-                <summary class="small text-success">Review and accept</summary>
+                <summary class="small text-success">{% trans "Review and accept" %}</summary>
                 <form method="post" action="{% url 'dashboard:accept_suggestion' %}" class="mt-2">
                 {% csrf_token %}
                 <input type="hidden" name="alert_id" value="{{ s.id }}">
-                <input type="text" name="title" class="form-control form-control-sm mb-1" value="Suggested: {{ s.get_alert_type_display }}">
+                <input type="text" name="title" class="form-control form-control-sm mb-1" value="{% trans "Suggested" %}: {{ s.get_alert_type_display }}">
                 <input type="date" name="scheduled_date" class="form-control form-control-sm mb-1" value="{{ s.suggestion_scheduled_date|date:'Y-m-d' }}">
                 <select name="priority" class="form-select form-select-sm mb-1">
-                  <option value="medium" {% if s.suggestion_priority == 'medium' %}selected{% endif %}>Medium</option>
-                  <option value="high" {% if s.suggestion_priority == 'high' %}selected{% endif %}>High</option>
-                  <option value="critical" {% if s.suggestion_priority == 'critical' %}selected{% endif %}>Critical</option>
+                  <option value="medium" {% if s.suggestion_priority == 'medium' %}selected{% endif %}>{% trans "Medium" %}</option>
+                  <option value="high" {% if s.suggestion_priority == 'high' %}selected{% endif %}>{% trans "High" %}</option>
+                  <option value="critical" {% if s.suggestion_priority == 'critical' %}selected{% endif %}>{% trans "Critical" %}</option>
                 </select>
                 <textarea name="description" class="form-control form-control-sm mb-1" rows="2">{{ s.message }}</textarea>
-                <button type="submit" class="btn btn-sm btn-success">Create task</button>
+                <button type="submit" class="btn btn-sm btn-success">{% trans "Create task" %}</button>
                 </form>
               </details>
               {% endif %}
               <form method="post" action="{% url 'dashboard:dismiss_suggestion' %}" class="d-inline">
                 {% csrf_token %}
                 <input type="hidden" name="alert_id" value="{{ s.id }}">
-                <input type="text" name="dismiss_reason" class="form-control form-control-sm mb-1" placeholder="Dismiss reason">
-                <button type="submit" class="btn btn-sm btn-outline-secondary">Dismiss</button>
+                <input type="text" name="dismiss_reason" class="form-control form-control-sm mb-1" placeholder="{% trans 'Dismiss reason' %}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">{% trans "Dismiss" %}</button>
               </form>
             </td>
           </tr>
@@ -79,17 +80,17 @@
     <nav class="p-3">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with num=page_obj.number npages=page_obj.paginator.num_pages %}Page {{ num }} of {{ npages }}{% endblocktrans %}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a></li>
         {% endif %}
       </ul>
     </nav>
     {% endif %}
     {% else %}
-    <div class="p-4 text-muted text-center">No pending suggestions. Accepted and dismissed items no longer appear here.</div>
+    <div class="p-4 text-muted text-center">{% trans "No pending suggestions. Accepted and dismissed items no longer appear here." %}</div>
     {% endif %}
   </div>
 </div>

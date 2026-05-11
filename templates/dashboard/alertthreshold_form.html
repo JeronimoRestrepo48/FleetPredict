@@ -1,46 +1,46 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% if threshold %}Edit{% else %}Create{% endif %} threshold - FleetPredict Pro{% endblock %}
+{% block title %}{% if threshold %}{% trans "Edit threshold - FleetPredict Pro" %}{% else %}{% trans "Create threshold - FleetPredict Pro" %}{% endif %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if threshold %}Edit threshold{% else %}Create threshold{% endif %}</h2>
-  <a href="{% url 'dashboard:alertthreshold_list' %}" class="btn btn-outline-secondary">Back to thresholds</a>
+  <h2 class="page-title mb-0">{% if threshold %}{% trans "Edit threshold" %}{% else %}{% trans "Create threshold" %}{% endif %}</h2>
+  <a href="{% url 'dashboard:alertthreshold_list' %}" class="btn btn-outline-secondary">{% trans "Back to thresholds" %}</a>
 </div>
-<p class="text-muted mb-4">Define a trigger: select the telemetry attribute, comparison operator, threshold value, and severity. When the attribute crosses the threshold, an alert is created.</p>
+<p class="text-muted mb-4">{% trans "Define a trigger: select the telemetry attribute, comparison operator, threshold value, and severity. When the attribute crosses the threshold, an alert is created." %}</p>
 <div class="card card-fp">
   <div class="card-body">
     <form method="post">
       {% csrf_token %}
       <div class="row g-3">
         <div class="col-md-6">
-          <label for="id_attribute" class="form-label">Attribute</label>
+          <label for="id_attribute" class="form-label">{% trans "Attribute" %}</label>
           {{ form.attribute }}
         </div>
         <div class="col-md-3">
-          <label for="id_operator" class="form-label">Operator</label>
+          <label for="id_operator" class="form-label">{% trans "Operator" %}</label>
           {{ form.operator }}
         </div>
         <div class="col-md-3">
-          <label for="id_value_float" class="form-label">Threshold value</label>
+          <label for="id_value_float" class="form-label">{% trans "Threshold value" %}</label>
           {{ form.value_float }}
         </div>
         <div class="col-md-6">
-          <label for="id_severity" class="form-label">Severity</label>
+          <label for="id_severity" class="form-label">{% trans "Severity" %}</label>
           {{ form.severity }}
         </div>
         <div class="col-md-6">
-          <label for="id_description" class="form-label">Label (optional)</label>
+          <label for="id_description" class="form-label">{% trans "Label (optional)" %}</label>
           {{ form.description }}
         </div>
         <div class="col-12">
           <div class="form-check">
             {{ form.enabled }}
-            <label class="form-check-label" for="id_enabled">Enabled</label>
+            <label class="form-check-label" for="id_enabled">{% trans "Enabled" %}</label>
           </div>
         </div>
       </div>
       <div class="mt-4">
-        <button type="submit" class="btn btn-primary">{% if threshold %}Save{% else %}Create{% endif %}</button>
+        <button type="submit" class="btn btn-primary">{% if threshold %}{% trans "Save" %}{% else %}{% trans "Create" %}{% endif %}</button>
       </div>
     </form>
   </div>

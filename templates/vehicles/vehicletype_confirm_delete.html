@@ -1,21 +1,25 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Delete Vehicle Type - FleetPredict Pro{% endblock %}
+{% block title %}{% trans "Delete Vehicle Type - FleetPredict Pro" %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Delete vehicle type</h2>
-  <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">Back to types</a>
+  <h2 class="page-title mb-0">{% trans "Delete vehicle type" %}</h2>
+  <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">{% trans "Back to types" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <p>Are you sure you want to delete <strong>{{ vehicle_type.name }}</strong>?</p>
+    <p>{% blocktrans with name=vehicle_type.name %}Are you sure you want to delete <strong>{{ name }}</strong>?{% endblocktrans %}</p>
     {% if vehicle_type.vehicles.exists %}
-    <p class="text-danger">This type is used by {{ vehicle_type.vehicles.count }} vehicle(s). Reassign them before deleting.</p>
+      {% if vehicle_type.vehicles.count == 1 %}
+      <p class="text-danger">{% trans "This type is used by one vehicle. Reassign it before deleting." %}</p>
+      {% else %}
+      <p class="text-danger">{% blocktrans with c=vehicle_type.vehicles.count %}This type is used by {{ c }} vehicles. Reassign them before deleting.{% endblocktrans %}</p>
+      {% endif %}
     {% endif %}
     <form method="post">
       {% csrf_token %}
-      <button type="submit" class="btn btn-danger" {% if vehicle_type.vehicles.exists %}disabled{% endif %}>Delete</button>
-      <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-danger" {% if vehicle_type.vehicles.exists %}disabled{% endif %}>{% trans "Delete" %}</button>
+      <a href="{% url 'vehicles:vehicletype_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
     </form>
   </div>
 </div>

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-11 17:39+0000\n"
+"POT-Creation-Date: 2026-05-11 19:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -15,8 +15,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? "
-"1 : 2;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "Maintenance due within (days)"
 msgstr "Mantenimiento próximo a vencer (días)"
@@ -143,15 +142,16 @@ msgstr "Desconocido"
 
 #, python-brace-format
 msgid ""
-"Platform overview: {total_users} users, {vehicle_types_count} vehicle types, "
-"{total_vehicles} vehicles ({fleet_availability:.0f}% availability)."
+"Platform overview: {total_users} users, {vehicle_types_count} vehicle types,"
+" {total_vehicles} vehicles ({fleet_availability:.0f}% availability)."
 msgstr ""
-"Resumen de la plataforma: {total_users} usuarios, {vehicle_types_count} tipos de vehículo, "
-"{total_vehicles} vehículos ({fleet_availability:.0f}% de disponibilidad)."
-"Resumen de la plataforma: {total_users} usuarios, {vehicle_types_count} tipos de vehículo, "
-"{total_vehicles} vehículos ({fleet_availability:.0f}% de disponibilidad)."
 "Resumen de la plataforma: {total_users} usuarios, {vehicle_types_count} "
 "tipos de vehículo, {total_vehicles} vehículos ({fleet_availability:.0f}% de "
+"disponibilidad).Resumen de la plataforma: {total_users} usuarios, "
+"{vehicle_types_count} tipos de vehículo, {total_vehicles} vehículos "
+"({fleet_availability:.0f}% de disponibilidad).Resumen de la plataforma: "
+"{total_users} usuarios, {vehicle_types_count} tipos de vehículo, "
+"{total_vehicles} vehículos ({fleet_availability:.0f}% de "
 "disponibilidad).Resumen de la plataforma: {total_users} usuarios, "
 "{vehicle_types_count} tipos de vehículo, {total_vehicles} vehículos "
 "({fleet_availability:.0f}% de disponibilidad).Resumen de la plataforma: "
@@ -166,23 +166,27 @@ msgid ""
 "{assigned} tasks assigned to you, {unassigned} unassigned. {attention} need "
 "attention."
 msgstr ""
-"{assigned} tareas asignadas a ti, {unassigned} sin asignar. {attention} requieren "
-"atención."
-"{assigned} tareas asignadas a ti, {unassigned} sin asignar. {attention} requieren "
-"atención."
 "{assigned} tareas asignadas a ti, {unassigned} sin asignar. {attention} "
 "requieren atención.{assigned} tareas asignadas a ti, {unassigned} sin "
 "asignar. {attention} requieren atención.{assigned} tareas asignadas a ti, "
 "{unassigned} sin asignar. {attention} requieren atención.{assigned} tareas "
-"asignadas a ti, {unassigned} sin asignar. {attention} requieren atención."
+"asignadas a ti, {unassigned} sin asignar. {attention} requieren "
+"atención.{assigned} tareas asignadas a ti, {unassigned} sin asignar. "
+"{attention} requieren atención.{assigned} tareas asignadas a ti, "
+"{unassigned} sin asignar. {attention} requieren atención.{assigned} tareas "
+"asignadas a ti, {unassigned} sin asignar. {attention} requieren "
+"atención.{assigned} tareas asignadas a ti, {unassigned} sin asignar. "
+"{attention} requieren atención.{assigned} tareas asignadas a ti, "
+"{unassigned} sin asignar. {attention} requieren atención.{assigned} tareas "
+"asignadas a ti, {unassigned} sin asignar. {attention} requieren "
+"atención.{assigned} tareas asignadas a ti, {unassigned} sin asignar. "
+"{attention} requieren atención.{assigned} tareas asignadas a ti, "
+"{unassigned} sin asignar. {attention} requieren atención."
 
 msgid "No vehicles in the fleet yet. Add vehicles to start tracking."
-msgstr "Aún no hay vehículos en la flota. Agrega vehículos para comenzar a monitorear."
+msgstr ""
 "Aún no hay vehículos en la flota. Agrega vehículos para comenzar a "
-"monitorear.Aún no hay vehículos en la flota. Agrega vehículos para comenzar "
-"a monitorear.Aún no hay vehículos en la flota. Agrega vehículos para "
-"comenzar a monitorear.Aún no hay vehículos en la flota. Agrega vehículos "
-"para comenzar a monitorear."
+"monitorear."
 
 #, python-brace-format
 msgid "{available} of {total} vehicles active"
@@ -358,13 +362,13 @@ msgid "Emergency"
 msgstr "Emergencia"
 
 msgid "Scheduled"
-msgstr "Programado"
+msgstr "Programada"
 
 msgid "In Progress"
 msgstr "En curso"
 
 msgid "Completed"
-msgstr "Completado"
+msgstr "Completada"
 
 msgid "Cancelled"
 msgstr "Cancelado"
@@ -584,12 +588,8 @@ msgid "Vehicle type updated successfully."
 msgstr "Tipo de vehículo actualizado correctamente."
 
 msgid "Cannot delete: some vehicles use this type. Reassign them first."
-msgstr "No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos primero."
-"No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos "
-"primero.No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos "
-"primero.No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos "
-"primero.No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos "
-"primero."
+msgstr ""
+"No se puede eliminar: algunos vehículos usan este tipo. Reasígnalos primero."
 
 msgid "Vehicle type deleted."
 msgstr "Tipo de vehículo eliminado."
@@ -619,13 +619,10 @@ msgstr "Español"
 msgid "FleetPredict Pro"
 msgstr "FleetPredict Pro"
 
-msgid "FleetPredict Pro – Predictive fleet maintenance and vehicle management."
-msgstr "FleetPredict Pro: mantenimiento predictivo de flotas y gestión de vehículos."
-"FleetPredict Pro: mantenimiento predictivo de flotas y gestión de "
-"vehículos.FleetPredict Pro: mantenimiento predictivo de flotas y gestión de "
-"vehículos.FleetPredict Pro: mantenimiento predictivo de flotas y gestión de "
-"vehículos.FleetPredict Pro: mantenimiento predictivo de flotas y gestión de "
-"vehículos."
+msgid ""
+"FleetPredict Pro – Predictive fleet maintenance and vehicle management."
+msgstr ""
+"FleetPredict Pro: mantenimiento predictivo de flotas y gestión de vehículos."
 
 msgid "Toggle navigation"
 msgstr "Alternar navegación"
@@ -673,7 +670,7 @@ msgid "Reports & predictions"
 msgstr "Reportes y predicciones"
 
 msgid "Failure predictions"
-msgstr "Predicción de fallas"
+msgstr "Predicciones de fallo"
 
 msgid "Suggested maintenance"
 msgstr "Mantenimiento sugerido"
@@ -742,42 +739,355 @@ msgid "Go to dashboard"
 msgstr "Ir al panel"
 
 msgid "Tip: Use breadcrumbs and quick actions to avoid getting lost."
-msgstr "Consejo: usa las migas de pan y las acciones rápidas para no perderte."
+msgstr ""
+"Consejo: usa las migas de pan y las acciones rápidas para no perderte."
 
 msgid "Close"
 msgstr "Cerrar"
 
 msgid "Are you sure you want to continue? This action may be hard to undo."
-msgstr "¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
+msgstr ""
 "¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
 
-msgid "Fleet overview, vehicle status, maintenance tasks and key metrics."
-msgstr "Resumen de la flota, estado de vehículos, tareas de mantenimiento e indicadores clave."
-"Resumen de la flota, estado de vehículos, tareas de mantenimiento e "
-"indicadores clave.Resumen de la flota, estado de vehículos, tareas de "
-"mantenimiento e indicadores clave.Resumen de la flota, estado de vehículos, "
-"tareas de mantenimiento e indicadores clave."
+msgid "Create alert rule - FleetPredict Pro"
+msgstr "Crear regla de alerta - FleetPredict Pro"
 
-msgid "breadcrumb"
-msgstr "migas de pan"
+msgid "Create alert rule"
+msgstr "Crear regla de alerta"
 
-msgid "Customize"
-msgstr "Personalizar"
+msgid "Back to rules"
+msgstr "Volver a reglas"
 
-msgid "expired"
-msgstr "Retirado"
+msgid ""
+"Add a new alert rule. Select the rule type, set the value, and enable it."
+msgstr ""
+"Agrega una regla de alerta nueva. Elige el tipo, ajusta el valor y actívala."
 
-msgid "expiring in"
-msgstr "por vencer en"
+msgid "Create rule"
+msgstr "Crear regla"
+
+msgid "Edit alert rule - FleetPredict Pro"
+msgstr "Editar regla de alerta - FleetPredict Pro"
+
+msgid "Edit alert rule"
+msgstr "Editar regla de alerta"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Alert rules - FleetPredict Pro"
+msgstr "Reglas de alerta - FleetPredict Pro"
+
+msgid "Add rule"
+msgstr "Agregar regla"
+
+msgid "Back to dashboard"
+msgstr "Volver al panel"
+
+msgid "Configure when alerts are triggered."
+msgstr "Configura cuándo se generan las alertas."
+
+msgid "Add new rules with <strong>Add rule</strong>, or"
+msgstr "Agrega reglas nuevas con <strong>Agregar regla</strong>, o"
+
+msgid ""
+"adjust the values below and click <strong>Save</strong> to apply changes."
+msgstr ""
+"ajusta los valores siguientes y pulsa <strong>Guardar</strong> para aplicar "
+"los cambios."
+
+msgid "Rule"
+msgstr "Regla"
+
+msgid "Value"
+msgstr "Valor"
+
+msgid "Enabled"
+msgstr "Activado"
+
+msgid "Action"
+msgstr "Acción"
+
+msgid "Maintenance: alert when a task is due within N days"
+msgstr "Mantenimiento: alerta cuando una tarea vence en N días"
+
+msgid "Maintenance: alert when a task is overdue"
+msgstr "Mantenimiento: alerta cuando una tarea está vencida"
+
+msgid "Compliance: show banner when requirements expire within N days"
+msgstr "Cumplimiento: aviso cuando los requisitos vencen en N días"
+
+msgid "Work orders: (reserved) due within N days window"
+msgstr "Órdenes de trabajo: (reservado) ventana de vencimiento en N días"
 
 msgid "days"
 msgstr "días"
 
+msgid "—"
+msgstr "—"
+
+msgid "On"
+msgstr "Encendido"
+
+msgid "Off"
+msgstr "Apagado"
+
+msgid "No rules. Default rules are created on first load."
+msgstr "No hay reglas. Se crean reglas predeterminadas en la primera carga."
+
+msgid "My alerts - FleetPredict Pro"
+msgstr "Mis alertas - FleetPredict Pro"
+
+msgid "Notification center."
+msgstr "Centro de notificaciones."
+
+msgid "My alerts"
+msgstr "Mis alertas"
+
+msgid "Severity"
+msgstr "Gravedad"
+
+msgid "All severities"
+msgstr "Todas las gravedades"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "All"
+msgstr "Todos"
+
+msgid "Unread"
+msgstr "No leídas"
+
+msgid "Read"
+msgstr "Leídas"
+
+msgid "Filter"
+msgstr "Filtrar"
+
+msgid "Vehicle"
+msgstr "Vehículo"
+
+msgid "Type"
+msgstr "Tipo"
+
+msgid "Message"
+msgstr "Mensaje"
+
+msgid "Date"
+msgstr "Fecha"
+
+msgid "Actions"
+msgstr "Acciones"
+
+msgid "Previous"
+msgstr "Anterior"
+
+#, python-format
+msgid "Page %(num)s of %(npages)s"
+msgstr "Página %(num)s de %(npages)s"
+
+msgid "Next"
+msgstr "Siguiente"
+
+msgid "No alerts."
+msgstr "No hay alertas."
+
+msgid "Delete threshold - FleetPredict Pro"
+msgstr "Eliminar umbral - FleetPredict Pro"
+
+msgid "Delete threshold"
+msgstr "Eliminar umbral"
+
+msgid "Back"
+msgstr "Volver"
+
+msgid "Are you sure you want to delete this threshold?"
+msgstr "¿Seguro que deseas eliminar este umbral?"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Edit threshold - FleetPredict Pro"
+msgstr "Editar umbral - FleetPredict Pro"
+
+msgid "Create threshold - FleetPredict Pro"
+msgstr "Crear umbral - FleetPredict Pro"
+
+msgid "Edit threshold"
+msgstr "Editar umbral"
+
+msgid "Create threshold"
+msgstr "Crear umbral"
+
+msgid "Back to thresholds"
+msgstr "Volver a umbrales"
+
+msgid ""
+"Define a trigger: select the telemetry attribute, comparison operator, "
+"threshold value, and severity. When the attribute crosses the threshold, an "
+"alert is created."
+msgstr ""
+"Define un disparador: elige el atributo de telemetría, el operador, el valor"
+" umbral y la gravedad. Cuando el atributo cruza el umbral, se crea una "
+"alerta."
+
+msgid "Attribute"
+msgstr "Atributo"
+
+msgid "Operator"
+msgstr "Operador"
+
+msgid "Threshold value"
+msgstr "Valor umbral"
+
+msgid "Label (optional)"
+msgstr "Etiqueta (opcional)"
+
+msgid "Telemetry thresholds - FleetPredict Pro"
+msgstr "Umbrales de telemetría - FleetPredict Pro"
+
+msgid "Add threshold"
+msgstr "Agregar umbral"
+
+#, python-format
+msgid ""
+"Create triggers and thresholds for telemetry attributes. When a value "
+"crosses the threshold, an alert is generated (e.g. engine temperature ≥ 105 "
+"°C, fuel level ≤ 15%%)."
+msgstr ""
+"Crea disparadores y umbrales para atributos de telemetría. Cuando un valor "
+"cruza el umbral, se genera una alerta (p. ej. temperatura del motor ≥ 105 "
+"°C, nivel de combustible ≤ 15 %%).Crea disparadores y umbrales para "
+"atributos de telemetría. Cuando un valor cruza el umbral, se genera una "
+"alerta (p. ej. temperatura del motor ≥ 105 °C, nivel de combustible ≤ 15 "
+"%%)."
+
+msgid "Condition"
+msgstr "Condición"
+
+msgid "Label"
+msgstr "Etiqueta"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "No"
+msgstr "No"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "No thresholds yet. Click <strong>Add threshold</strong> to create one."
+msgstr ""
+"Aún no hay umbrales. Pulsa <strong>Agregar umbral</strong> para crear uno."
+
+msgid "Audit Log - FleetPredict Pro"
+msgstr "Registro de auditoría - FleetPredict Pro"
+
+msgid "FR27: User action audit log."
+msgstr "FR27: registro de auditoría de acciones."
+
+msgid "Audit Log"
+msgstr "Registro de auditoría"
+
+msgid "Export CSV"
+msgstr "Exportar CSV"
+
+msgid "Back to Dashboard"
+msgstr "Volver al panel"
+
+msgid "All actions"
+msgstr "Todas las acciones"
+
+msgid "Model name"
+msgstr "Nombre del modelo"
+
+msgid "User email/name"
+msgstr "Correo o nombre de usuario"
+
+msgid "Search message/object"
+msgstr "Buscar en mensaje/objeto"
+
+msgid "Time"
+msgstr "Tiempo"
+
+msgid "User"
+msgstr "Usuario"
+
+msgid "Model"
+msgstr "Modelo"
+
+msgid "Object ID"
+msgstr "ID de objeto"
+
+msgid "Changes"
+msgstr "Cambios"
+
+msgid "IP"
+msgstr "IP"
+
+msgid "View"
+msgstr "Ver"
+
+msgid "No audit log entries."
+msgstr "No hay entradas en el registro de auditoría."
+
+msgid "Customize Dashboard - FleetPredict Pro"
+msgstr "Personalizar panel - FleetPredict Pro"
+
+msgid "Customize"
+msgstr "Personalizar"
+
+msgid "Customize Dashboard"
+msgstr "Personalizar panel"
+
+msgid "Save layout"
+msgstr "Guardar diseño"
+
+msgid "Reset to default"
+msgstr "Restablecer predeterminado"
+
+msgid "Available Widgets"
+msgstr "Widgets disponibles"
+
+msgid "Widget Size"
+msgstr "Tamaño del widget"
+
+msgid "Current Layout"
+msgstr "Diseño actual"
+
+msgid "Max 20 widgets."
+msgstr "Máximo 20 widgets."
+
+msgid "Layout saved."
+msgstr "Diseño guardado."
+
+msgid "widgets"
+msgstr "widgets"
+
+msgid "Error:"
+msgstr "Error:"
+
+msgid "unknown"
+msgstr "desconocido"
+
+msgid "Fleet overview, vehicle status, maintenance tasks and key metrics."
+msgstr ""
+"Resumen de la flota, estado de vehículos, tareas de mantenimiento e "
+"indicadores clave."
+
+msgid "breadcrumb"
+msgstr "migas de pan"
+
+msgid "expired"
+msgstr "vencidos"
+
+msgid "expiring in"
+msgstr "por vencer en"
+
 msgid "View compliance"
-msgstr "Cumplimiento"
+msgstr "Ver cumplimiento"
 
 msgid "Charts period:"
 msgstr "Período de gráficos:"
@@ -792,10 +1102,10 @@ msgid "This month"
 msgstr "Este mes"
 
 msgid "Total Vehicles"
-msgstr "Vehículos"
+msgstr "Total de vehículos"
 
 msgid "Fleet Availability"
-msgstr "{pct:.0f}% de disponibilidad"
+msgstr "Disponibilidad de la flota"
 
 msgid "Need Attention"
 msgstr "Requieren atención"
@@ -810,28 +1120,19 @@ msgid "Good"
 msgstr "Bueno"
 
 msgid "Caution"
-msgstr "Certificación"
-
-msgid "Vehicle"
-msgstr "Vehículos"
+msgstr "Precaución"
 
 msgid "Health"
 msgstr "Salud"
 
-msgid "On"
-msgstr "Abierto"
-
-msgid "Off"
-msgstr "Apagado"
-
 msgid "Vehicles by Status"
-msgstr "Tipos de vehículo"
+msgstr "Vehículos por estado"
 
 msgid "Maintenance Tasks by Status"
-msgstr "Mantenimiento por tiempo"
+msgstr "Tareas de mantenimiento por estado"
 
 msgid "Tasks by Priority (open)"
-msgstr "Prioridad de tareas"
+msgstr "Tareas por prioridad (abiertas)"
 
 #, python-format
 msgid "Completed Tasks & Cost (%(p)s)"
@@ -839,9 +1140,6 @@ msgstr "Tareas completadas y costo (%(p)s)"
 
 msgid "Operations center (SOC) – High and critical alerts"
 msgstr "Centro de operaciones (SOC): alertas altas y críticas"
-
-msgid "Time"
-msgstr "Tiempo"
 
 msgid "Last 24h"
 msgstr "Últimas 24 h"
@@ -851,9 +1149,6 @@ msgstr "Últimos 7 días"
 
 msgid "Last 30 days"
 msgstr "Últimos 30 días"
-
-msgid "All"
-msgstr "Todos"
 
 msgid "Reason"
 msgstr "Motivo"
@@ -880,11 +1175,8 @@ msgid "Clear filters"
 msgstr "Limpiar filtros"
 
 msgid "Suggested actions (playbooks) and runnable runbooks for each alert."
-msgstr "Acciones sugeridas (playbooks) y runbooks ejecutables para cada alerta."
-"Acciones sugeridas (playbooks) y runbooks ejecutables para cada "
-"alerta.Acciones sugeridas (playbooks) y runbooks ejecutables para cada "
-"alerta.Acciones sugeridas (playbooks) y runbooks ejecutables para cada "
-"alerta."
+msgstr ""
+"Acciones sugeridas (playbooks) y runbooks ejecutables para cada alerta."
 
 msgid "Playbook – Suggested steps:"
 msgstr "Playbook – Pasos sugeridos:"
@@ -900,9 +1192,6 @@ msgstr "Mantenimiento próximo (próximos 7 días)"
 
 msgid "Task"
 msgstr "Tarea"
-
-msgid "Date"
-msgstr "Fecha"
 
 msgid "Priority"
 msgstr "Prioridad"
@@ -925,540 +1214,724 @@ msgstr "Tareas completadas"
 msgid "Cost ($)"
 msgstr "Costo ($)"
 
-#| msgid "Login - FleetPredict Pro"
+msgid "Dashboard - FleetPredict Pro"
+msgstr "Panel - FleetPredict Pro"
+
+msgid "Platform overview: users, vehicle types, audit activity."
+msgstr ""
+"Resumen de la plataforma: usuarios, tipos de vehículo y actividad de "
+"auditoría."
+
+msgid "Platform Overview"
+msgstr "Resumen de la plataforma"
+
+msgid "Total Users"
+msgstr "Usuarios totales"
+
+msgid "Vehicle Types"
+msgstr "Tipos de vehículo"
+
+msgid "Fleet Vehicles"
+msgstr "Vehículos de la flota"
+
+msgid "Users by Role"
+msgstr "Usuarios por rol"
+
+msgid "Quick Links"
+msgstr "Enlaces rápidos"
+
+msgid "Manage Users"
+msgstr "Gestionar usuarios"
+
+msgid "Django Admin"
+msgstr "Administración Django"
+
+msgid "Recent Audit Activity"
+msgstr "Actividad reciente de auditoría"
+
+msgid "View full audit log"
+msgstr "Ver registro completo"
+
+msgid "No audit entries yet."
+msgstr "Aún no hay entradas de auditoría."
+
+msgid "Your assigned maintenance tasks and workload."
+msgstr "Tareas de mantenimiento asignadas y carga de trabajo."
+
+msgid "My Workload"
+msgstr "Mi carga de trabajo"
+
+msgid "Assigned to Me"
+msgstr "Asignadas a mí"
+
+msgid "Unassigned"
+msgstr "Sin asignar"
+
+msgid "Tasks by Status"
+msgstr "Tareas por estado"
+
+msgid "Recent Completions (Mine)"
+msgstr "Completadas recientes (mías)"
+
+msgid "No recent completions."
+msgstr "No hay completadas recientes."
+
+msgid "View all maintenance tasks"
+msgstr "Ver todas las tareas de mantenimiento"
+
+msgid "Help center - FleetPredict Pro"
+msgstr "Centro de ayuda - FleetPredict Pro"
+
+msgid "1. Quick navigation"
+msgstr "1. Navegación rápida"
+
+msgid "Use breadcrumbs on each page to know where you are."
+msgstr "Usa las migas de pan en cada página para saber dónde estás."
+
+msgid ""
+"Use the quick bar buttons: <strong>Go back</strong>, <strong>Go to "
+"dashboard</strong>, and <strong>Help center</strong>."
+msgstr ""
+"Usa los botones de la barra rápida: <strong>Volver</strong>, <strong>Ir al "
+"panel</strong> y <strong>Centro de ayuda</strong>."
+
+msgid ""
+"Fleet features are under <strong>Fleet</strong>, maintenance and stock under"
+" <strong>Maintenance</strong>."
+msgstr ""
+"Las funciones de flota están en <strong>Flota</strong>; el mantenimiento y "
+"el stock, en <strong>Mantenimiento</strong>."
+
+msgid "2. Preventing mistakes"
+msgstr "2. Evitar errores"
+
+msgid "Dangerous actions ask for confirmation before continuing."
+msgstr "Las acciones peligrosas piden confirmación antes de continuar."
+
+msgid "Forms validate fields and highlight invalid values."
+msgstr "Los formularios validan los campos y resaltan los valores no válidos."
+
+msgid ""
+"If you edit a form and try to leave, the app warns about unsaved changes."
+msgstr ""
+"Si editas un formulario e intentas salir, la aplicación avisa sobre cambios "
+"sin guardar."
+
+msgid "3. Error recovery"
+msgstr "3. Recuperación ante errores"
+
+msgid "System messages (top-right) explain successful or failed actions."
+msgstr ""
+"Los mensajes del sistema (arriba a la derecha) explican si las acciones "
+"tuvieron éxito o fallaron."
+
+msgid ""
+"On permission errors, check your role or try a route available to your "
+"profile."
+msgstr ""
+"Si hay errores de permisos, revisa tu rol o prueba una ruta disponible para "
+"tu perfil."
+
+msgid ""
+"If telemetry pages look empty, verify live telemetry is running and date "
+"filters are correct."
+msgstr ""
+"Si las páginas de telemetría se ven vacías, comprueba que la telemetría en "
+"vivo esté activa y que los filtros de fecha sean correctos."
+
+msgid "Recommended user flows"
+msgstr "Flujos de usuario recomendados"
+
+msgid "Fleet manager flow"
+msgstr "Flujo del gestor de flota"
+
+msgid "Open <strong>Fleet → Vehicles</strong> and select a vehicle."
+msgstr "Abre <strong>Flota → Vehículos</strong> y selecciona un vehículo."
+
+msgid "Review Sensors, GPS, Driving and Mileage panels."
+msgstr "Revisa los paneles de sensores, GPS, conducción y kilometraje."
+
+msgid "Open <strong>Maintenance → Tasks</strong> to schedule work."
+msgstr "Abre <strong>Mantenimiento → Tareas</strong> para programar trabajos."
+
+msgid ""
+"Use <strong>Maintenance → Spare parts</strong> to adjust stock if needed."
+msgstr ""
+"Usa <strong>Mantenimiento → Repuestos</strong> para ajustar el stock si hace"
+" falta."
+
+msgid "Reports and decisions flow"
+msgstr "Flujo de informes y decisiones"
+
+msgid "Open <strong>Reports &amp; predictions</strong>."
+msgstr "Abre <strong>Informes y predicciones</strong>."
+
+msgid ""
+"Check failure predictions, review criticality reasons, and override only "
+"with a clear reason."
+msgstr ""
+"Revisa predicciones de fallo, los motivos de criticidad y anula solo con un "
+"motivo claro."
+
+msgid ""
+"Review suggested maintenance, adjust the proposed date/priority, then create"
+" the task."
+msgstr ""
+"Revisa el mantenimiento sugerido, ajusta la fecha o prioridad propuesta y "
+"crea la tarea."
+
+msgid ""
+"Download PDF reports or use <strong>Export Center</strong> for spreadsheet-"
+"ready data."
+msgstr ""
+"Descarga informes PDF o usa el <strong>Centro de exportación</strong> para "
+"datos listos para hojas de cálculo."
+
+msgid ""
+"Administrators should review <strong>Settings → Audit log</strong> after "
+"critical operations."
+msgstr ""
+"Los administradores deberían revisar <strong>Configuración → Registro de "
+"auditoría</strong> tras operaciones críticas."
+
+msgid "Failure predictions - FleetPredict Pro"
+msgstr "Predicciones de fallo - FleetPredict Pro"
+
+msgid "Failure recommendations per vehicle."
+msgstr "Recomendaciones de fallo por vehículo."
+
+msgid ""
+"Vehicle, type, confidence, timeframe and explainable criticality. FR10 is "
+"now actionable and auditable."
+msgstr ""
+"Vehículo, tipo, confianza, plazo y criticidad explicable. FR10 es accionable"
+" y auditable."
+
+msgid "Newest first"
+msgstr "Más recientes primero"
+
+msgid "Criticality first"
+msgstr "Criticidad primero"
+
+msgid "Why"
+msgstr "Motivo"
+
+msgid "Confidence"
+msgstr "Confianza"
+
+msgid "Timeframe"
+msgstr "Plazo"
+
+msgid "Reason required"
+msgstr "Motivo obligatorio"
+
+msgid "Save override"
+msgstr "Guardar anulación"
+
+msgid "No prediction alerts."
+msgstr "No hay alertas de predicción."
+
+msgid "Suggested Maintenance - FleetPredict Pro"
+msgstr "Mantenimiento sugerido - FleetPredict Pro"
+
+msgid "Accept or dismiss suggested maintenance from predictions."
+msgstr "Acepta o descarta el mantenimiento sugerido a partir de predicciones."
+
+msgid "Suggested Maintenance"
+msgstr "Mantenimiento sugerido"
+
+msgid ""
+"Recommendations from predictions. Review the evidence, adjust the plan, then"
+" accept or dismiss with a reason."
+msgstr ""
+"Recomendaciones desde predicciones. Revisa la evidencia, ajusta el plan y "
+"acepta o descarta con un motivo."
+
+msgid "Reasoning"
+msgstr "Razonamiento"
+
+msgid "Review and accept"
+msgstr "Revisar y aceptar"
+
+msgid "Suggested"
+msgstr "Sugerido"
+
+msgid "Create task"
+msgstr "Crear tarea"
+
+msgid "Dismiss reason"
+msgstr "Motivo del descarte"
+
+msgid "Dismiss"
+msgstr "Descartar"
+
+msgid ""
+"No pending suggestions. Accepted and dismissed items no longer appear here."
+msgstr ""
+"No hay sugerencias pendientes. Las aceptadas o descartadas ya no aparecen "
+"aquí."
+
 msgid "Low Stock Alert - FleetPredict Pro"
-msgstr "Iniciar sesión - FleetPredict Pro"
+msgstr "Alerta de stock bajo - FleetPredict Pro"
 
 msgid "Inventory"
 msgstr "Inventario"
+
 msgid "Low stock alert"
 msgstr "Alerta de stock bajo"
+
 msgid "Low Stock Alert"
 msgstr "Alerta de stock bajo"
-#| msgid "Spare parts"
+
 msgid "Back to spare parts"
-msgstr "Repuestos"
+msgstr "Volver a repuestos"
 
 msgid "Part#"
 msgstr "N.º pieza"
+
 msgid "Name"
 msgstr "Nombre"
-#| msgid "Stock In"
+
 msgid "Stock"
-msgstr "Entrada de stock"
+msgstr "Stock"
 
 msgid "Reorder point"
 msgstr "Punto de reorden"
+
 msgid "No data."
 msgstr "Sin datos."
-#| msgid "Login - FleetPredict Pro"
+
 msgid "Reorder Suggestions - FleetPredict Pro"
-msgstr "Iniciar sesión - FleetPredict Pro"
+msgstr "Sugerencias de reorden - FleetPredict Pro"
 
 msgid "Reorder suggestions"
 msgstr "Sugerencias de reorden"
+
 msgid "Reorder Suggestions"
 msgstr "Sugerencias de reorden"
+
 msgid ""
 "Suggested order quantity = reorder point minus current stock (values shown "
 "separately)."
 msgstr ""
+"Cantidad sugerida = punto de reorden menos stock actual (valores mostrados "
+"por separado)."
 
 msgid "Suggested (reorder − stock)"
 msgstr "Sugerido (punto de reorden − stock)"
-#| msgid "Reset email sent - FleetPredict Pro"
+
 msgid "Delete spare part - FleetPredict Pro"
-msgstr "Correo de restablecimiento enviado - FleetPredict Pro"
+msgstr "Eliminar repuesto - FleetPredict Pro"
 
-#| msgid "Spare parts"
 msgid "Delete spare part"
-msgstr "Repuestos"
+msgstr "Eliminar repuesto"
 
-#| msgid "Are you sure you want to continue? This action may be hard to undo."
 msgid "Are you sure you want to delete this spare part?"
 msgstr "¿Seguro que deseas eliminar este repuesto?"
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
 
 msgid "This action cannot be undone."
 msgstr "Esta acción no se puede deshacer."
-#| msgid "Cancelled"
-msgid "Cancel"
-msgstr "Cancelado"
 
-msgid "Edit"
-msgstr "Editar"
-
-#| msgid "Adjustment"
 msgid "Adjust stock"
-msgstr "Ajuste"
+msgstr "Ajustar stock"
 
-#| msgid "Back to login"
 msgid "Back to list"
-msgstr "Volver al inicio de sesión"
+msgstr "Volver al listado"
 
 msgid "Part details"
 msgstr "Detalle del repuesto"
+
 msgid "Part number"
 msgstr "Número de pieza"
+
 msgid "Category"
 msgstr "Categoría"
-#| msgid "Registration"
+
 msgid "Description"
-msgstr "Matriculación"
+msgstr "Descripción"
 
 msgid "Unit cost"
 msgstr "Costo unitario"
+
 msgid "Current stock"
 msgstr "Stock actual"
-msgid "Status"
-msgstr "Estado"
 
 msgid "Low stock"
 msgstr "Stock bajo"
+
 msgid "OK"
 msgstr "OK"
-#| msgid "Create"
+
 msgid "Created"
-msgstr "Crear"
+msgstr "Creado"
 
-#| msgid "Update"
 msgid "Updated"
-msgstr "Actualizar"
+msgstr "Actualizado"
 
-#| msgid "Create"
 msgid "Created by"
-msgstr "Crear"
+msgstr "Creado por"
 
-#| msgid "Stock In"
 msgid "Stock movements"
-msgstr "Entrada de stock"
+msgstr "Movimientos de stock"
 
-msgid "Type"
-msgstr "Tipo"
 msgid "Quantity"
 msgstr "Cantidad"
-#| msgid "Users"
-msgid "User"
-msgstr "Usuarios"
 
-#| msgid "Suppliers"
 msgid "Supplier"
 msgstr "Proveedores"
 
 msgid "Price"
 msgstr "Precio"
+
 msgid "Lead time"
 msgstr "Plazo de entrega"
-#, fuzzy, python-format
-#| msgid "7 days"
+
+#, python-format
 msgid "%(d)s days"
-msgstr "7 días"
+msgstr "%(d)s días"
 
-#| msgid "Register - FleetPredict Pro"
 msgid "Edit Spare Part - FleetPredict Pro"
-msgstr "Registrarse - FleetPredict Pro"
+msgstr "Editar repuesto - FleetPredict Pro"
 
-#| msgid "Change Password - FleetPredict Pro"
 msgid "Create Spare Part - FleetPredict Pro"
-msgstr "Cambiar contraseña - FleetPredict Pro"
+msgstr "Crear repuesto - FleetPredict Pro"
 
-#| msgid "Spare parts"
 msgid "Edit spare part"
-msgstr "Repuestos"
+msgstr "Editar repuesto"
 
-#| msgid "Spare parts"
 msgid "Create spare part"
-msgstr "Repuestos"
+msgstr "Crear repuesto"
 
-#| msgid "Spare parts"
 msgid "Edit Spare Part"
-msgstr "Repuestos"
+msgstr "Editar repuesto"
 
-#| msgid "Spare parts"
 msgid "Create Spare Part"
-msgstr "Repuestos"
+msgstr "Crear repuesto"
 
-msgid "Save"
-msgstr "Guardar"
-#| msgid "Change Password - FleetPredict Pro"
 msgid "Spare Parts - FleetPredict Pro"
-msgstr "Cambiar contraseña - FleetPredict Pro"
+msgstr "Repuestos - FleetPredict Pro"
 
 msgid "Browse spare parts inventory, search, filter by category, and export."
-msgstr "Explora el inventario de repuestos, busca, filtra por categoría y exporta."
-#| msgid "Create"
-msgid "Create new"
-msgstr "Crear"
+msgstr ""
+"Explora el inventario de repuestos, busca, filtra por categoría y exporta."
 
-msgid "Export CSV"
-msgstr "Exportar CSV"
+msgid "Create new"
+msgstr "Crear nuevo"
 
 msgid "Reorder"
 msgstr "Reordenar"
+
 msgid "Search"
 msgstr "Buscar"
 
 msgid "Search name or part #"
 msgstr "Buscar por nombre o n.º de pieza"
-#| msgid "All statuses"
+
 msgid "All categories"
-msgstr "Todos los estados"
+msgstr "Todas las categorías"
 
 msgid "Low stock only"
 msgstr "Solo stock bajo"
-msgid "Filter"
-msgstr "Filtrar"
 
 msgid "Clear"
 msgstr "Limpiar"
 
-msgid "Previous"
-msgstr "Anterior"
-
-#, fuzzy, python-format
-#| msgid "Page %(num)s of %(npages)s (%(ntotal)s total)"
-msgid "Page %(num)s of %(npages)s"
-msgstr "Página %(num)s de %(npages)s (%(ntotal)s en total)"
-
-msgid "Next"
-msgstr "Siguiente"
-
-#| msgid "Reset email sent - FleetPredict Pro"
 msgid "Stock Adjustment - FleetPredict Pro"
-msgstr "Correo de restablecimiento enviado - FleetPredict Pro"
+msgstr "Ajuste de stock - FleetPredict Pro"
 
-#| msgid "Adjustment"
 msgid "Stock adjustment"
-msgstr "Ajuste"
+msgstr "Ajuste de stock"
 
-#| msgid "Adjustment"
 msgid "Stock Adjustment"
 msgstr "Ajuste"
 
-msgid "Back"
-msgstr "Volver"
 msgid "Post-delivery supplier rating (optional for Stock In)"
-msgstr "Valoración del proveedor tras la entrega (opcional para entrada de stock)"
-#| msgid "Suppliers"
+msgstr ""
+"Valoración del proveedor tras la entrega (opcional para entrada de stock)"
+
 msgid "Select supplier"
-msgstr "Proveedores"
+msgstr "Seleccionar proveedor"
 
 msgid "Stars"
 msgstr "Estrellas"
+
 msgid "Comment"
 msgstr "Comentario"
+
 msgid "Optional feedback about this delivery"
 msgstr "Comentario opcional sobre esta entrega"
+
 msgid "This review is only saved when movement type is Stock In."
 msgstr "Esta reseña solo se guarda cuando el movimiento es Entrada de stock."
+
 msgid "Save movement"
 msgstr "Guardar movimiento"
-#| msgid "Reset email sent - FleetPredict Pro"
+
 msgid "Supplier Comparison - FleetPredict Pro"
-msgstr "Correo de restablecimiento enviado - FleetPredict Pro"
+msgstr "Comparación de proveedores - FleetPredict Pro"
 
-#| msgid "Suppliers"
 msgid "Supplier comparison"
-msgstr "Proveedores"
+msgstr "Comparación de proveedores"
 
-#| msgid "Suppliers"
 msgid "Supplier Comparison"
-msgstr "Proveedores"
+msgstr "Comparación de proveedores"
 
-#| msgid "Spare parts"
 msgid "Spare part"
-msgstr "Repuestos"
+msgstr "Repuesto"
 
 msgid "— Select a part —"
 msgstr "— Selecciona una pieza —"
-#| msgid "Compliance"
-msgid "Compare"
-msgstr "Cumplimiento"
 
-#| msgid "Register - FleetPredict Pro"
+msgid "Compare"
+msgstr "Comparar"
+
 msgid "Delete supplier - FleetPredict Pro"
-msgstr "Registrarse - FleetPredict Pro"
+msgstr "Eliminar proveedor - FleetPredict Pro"
 
 msgid "Delete supplier"
 msgstr "Eliminar proveedor"
-#| msgid "Are you sure you want to continue? This action may be hard to undo."
+
 msgid "Are you sure you want to delete this supplier?"
 msgstr "¿Seguro que deseas eliminar este proveedor?"
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
 
-#| msgid "Supplier created."
 msgid "Supplier information"
-msgstr "Proveedor creado."
+msgstr "Información del proveedor"
 
-#| msgid "Contains"
 msgid "Contact"
-msgstr "Contiene"
+msgstr "Contacto"
 
 msgid "Email"
 msgstr "Correo electrónico"
 
 msgid "Phone"
 msgstr "Teléfono"
+
 msgid "Address"
 msgstr "Dirección"
+
 msgid "Delivery terms"
 msgstr "Condiciones de entrega"
+
 msgid "Rating"
 msgstr "Valoración"
-#| msgid "Previous"
+
 msgid "reviews"
-msgstr "Anterior"
+msgstr "reseñas"
 
 msgid "Rate after delivery"
 msgstr "Valorar tras la entrega"
-#| msgid "Health Overview"
-msgid "Save review"
-msgstr "Resumen de salud"
 
-#| msgid "Recent Alerts"
+msgid "Save review"
+msgstr "Guardar reseña"
+
 msgid "Recent reviews"
-msgstr "Alertas recientes"
+msgstr "Reseñas recientes"
 
 msgid "By"
 msgstr "Por"
-#| msgid "Suppliers"
+
 msgid "Supplied parts"
-msgstr "Proveedores"
+msgstr "Piezas suministradas"
 
-#| msgid "Register - FleetPredict Pro"
 msgid "Edit Supplier - FleetPredict Pro"
-msgstr "Registrarse - FleetPredict Pro"
+msgstr "Editar proveedor - FleetPredict Pro"
 
-#| msgid "Register - FleetPredict Pro"
 msgid "Create Supplier - FleetPredict Pro"
-msgstr "Registrarse - FleetPredict Pro"
+msgstr "Crear proveedor - FleetPredict Pro"
 
-#| msgid "Suppliers"
 msgid "Edit Supplier"
-msgstr "Proveedores"
+msgstr "Editar proveedor"
 
-#| msgid "Suppliers"
 msgid "Create Supplier"
-msgstr "Proveedores"
+msgstr "Crear proveedor"
 
-#| msgid "Vehicles - FleetPredict Pro"
 msgid "Suppliers - FleetPredict Pro"
-msgstr "Vehículos - FleetPredict Pro"
+msgstr "Proveedores - FleetPredict Pro"
 
-#| msgid "Reset email sent - FleetPredict Pro"
 msgid "Delete Maintenance Template - FleetPredict Pro"
-msgstr "Correo de restablecimiento enviado - FleetPredict Pro"
+msgstr "Eliminar plantilla de mantenimiento - FleetPredict Pro"
 
-#| msgid "Maintenance templates"
 msgid "Delete template"
-msgstr "Plantillas de mantenimiento"
+msgstr "Eliminar plantilla"
 
-#| msgid "Maintenance templates"
 msgid "Back to templates"
-msgstr "Plantillas de mantenimiento"
+msgstr "Volver a plantillas"
 
 msgid "Are you sure you want to delete the following maintenance template?"
 msgstr "¿Seguro que deseas eliminar la siguiente plantilla de mantenimiento?"
-#| msgid "Password reset complete - FleetPredict Pro"
+
 msgid "Edit Maintenance Template - FleetPredict Pro"
-msgstr "Contraseña restablecida - FleetPredict Pro"
+msgstr "Editar plantilla de mantenimiento - FleetPredict Pro"
 
-#| msgid "Password reset complete - FleetPredict Pro"
 msgid "Add Maintenance Template - FleetPredict Pro"
-msgstr "Contraseña restablecida - FleetPredict Pro"
+msgstr "Agregar plantilla de mantenimiento - FleetPredict Pro"
 
-#| msgid "Maintenance templates"
 msgid "Edit maintenance template."
-msgstr "Plantillas de mantenimiento"
+msgstr "Editar plantilla de mantenimiento."
 
-#| msgid "Create maintenance task"
 msgid "Create a maintenance template."
-msgstr "Crear tarea de mantenimiento"
+msgstr "Crear una plantilla de mantenimiento."
 
-#| msgid "Template deleted."
 msgid "Templates"
-msgstr "Plantilla eliminada."
+msgstr "Plantillas"
 
 msgid "Add"
 msgstr "Agregar"
+
 msgid "Edit Template"
 msgstr "Editar plantilla"
-#| msgid "Maintenance templates"
+
 msgid "Add Maintenance Template"
 msgstr "Plantillas de mantenimiento"
 
 msgid "Estimated duration (minutes)"
 msgstr "Duración estimada (minutos)"
+
 msgid "Steps (checklist)"
 msgstr "Pasos (lista de verificación)"
-#| msgid "Vehicles - FleetPredict Pro"
+
 msgid "Maintenance Templates - FleetPredict Pro"
-msgstr "Vehículos - FleetPredict Pro"
+msgstr "Plantillas de mantenimiento - FleetPredict Pro"
 
-#| msgid "Maintenance template created successfully."
 msgid "Manage maintenance templates. Apply when creating tasks."
-msgstr "Plantilla de mantenimiento creada correctamente."
+msgstr "Gestiona plantillas de mantenimiento. Aplícalas al crear tareas."
 
-#| msgid "Maintenance templates"
 msgid "Maintenance Templates"
 msgstr "Plantillas de mantenimiento"
 
-#| msgid "Add Vehicle"
 msgid "Add template"
-msgstr "Agregar vehículo"
+msgstr "Agregar plantilla"
 
-#| msgid "Maintenance"
 msgid "Back to Maintenance"
-msgstr "Mantenimiento"
+msgstr "Volver a mantenimiento"
 
-#| msgid "Vibration (mm/s)"
 msgid "Duration (min)"
-msgstr "Vibración (mm/s)"
+msgstr "Duración (min)"
 
 msgid "Steps"
 msgstr "Pasos"
+
 #, python-format
 msgid "%(n)s step(s)"
 msgstr "%(n)s paso(s)"
 
-#| msgid "Users"
 msgid "Use"
-msgstr "Usuarios"
+msgstr "Usar"
 
 msgid "No templates. Create one to prefill tasks."
 msgstr "No hay plantillas. Crea una para prellenar tareas."
-#, fuzzy, python-format
-#| msgid "Completed tasks"
-msgid "Complete Task: %(t)s"
-msgstr "Tareas completadas"
 
-#| msgid "Completed tasks"
+#, python-format
+msgid "Complete Task: %(t)s"
+msgstr "Completar tarea: %(t)s"
+
 msgid "Completion Notes"
-msgstr "Tareas completadas"
+msgstr "Notas de cierre"
 
 msgid "Actual Cost"
 msgstr "Costo real"
-#| msgid "Upcoming Maintenance"
+
 msgid "Mileage at Maintenance"
-msgstr "Mantenimiento próximo"
+msgstr "Kilometraje en el mantenimiento"
 
-#| msgid "Completed"
 msgid "Mark Complete"
-msgstr "Completado"
+msgstr "Marcar como completada"
 
-#| msgid "Reset email sent - FleetPredict Pro"
 msgid "Delete Maintenance Task - FleetPredict Pro"
-msgstr "Correo de restablecimiento enviado - FleetPredict Pro"
+msgstr "Eliminar tarea de mantenimiento - FleetPredict Pro"
 
-#| msgid "Create maintenance task"
 msgid "Delete Maintenance Task"
-msgstr "Crear tarea de mantenimiento"
+msgstr "Eliminar tarea de mantenimiento"
 
-#| msgid "Are you sure you want to continue? This action may be hard to undo."
 msgid "Are you sure you want to delete this maintenance task?"
 msgstr "¿Seguro que deseas eliminar esta tarea de mantenimiento?"
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
-"¿Seguro que deseas continuar? Esta acción puede ser difícil de deshacer."
 
-#| msgid "Maintenance task deleted successfully."
 msgid "Maintenance task details and documents."
-msgstr "Tarea de mantenimiento eliminada correctamente."
+msgstr "Detalle de la tarea de mantenimiento y documentos."
 
-#| msgid "Completed"
 msgid "Complete"
-msgstr "Completado"
+msgstr "Completar"
 
-#| msgid "Delete"
 msgid "Delete task"
-msgstr "Eliminar"
+msgstr "Eliminar tarea"
 
 msgid "Task Details"
 msgstr "Detalle de la tarea"
-#| msgid "Scheduled"
+
 msgid "Scheduled Date"
-msgstr "Programado"
+msgstr "Fecha programada"
 
 msgid "Assignee"
 msgstr "Asignado a"
-#| msgid "Work orders"
-msgid "Work order"
-msgstr "Órdenes de trabajo"
 
-#| msgid "Work orders"
+msgid "Work order"
+msgstr "Orden de trabajo"
+
 msgid "Create work order"
-msgstr "Órdenes de trabajo"
+msgstr "Crear orden de trabajo"
 
 msgid "Documents"
 msgstr "Documentos"
+
 msgid "Document"
 msgstr "Documento"
+
 msgid "Choose document file to upload"
 msgstr "Elegir archivo de documento para subir"
+
 msgid "Description (optional)"
 msgstr "Descripción (opcional)"
+
 msgid "Optional description for the document"
 msgstr "Descripción opcional del documento"
-#| msgid "CSV Upload"
+
 msgid "Upload"
-msgstr "Carga CSV"
+msgstr "Subir"
 
 msgid "No documents attached."
 msgstr "No hay documentos adjuntos."
-#| msgid "Set new password - FleetPredict Pro"
+
 msgid "Edit Maintenance Task - FleetPredict Pro"
-msgstr "Establecer nueva contraseña - FleetPredict Pro"
+msgstr "Editar tarea de mantenimiento - FleetPredict Pro"
 
-#| msgid "Vehicles - FleetPredict Pro"
 msgid "Add Maintenance Task - FleetPredict Pro"
-msgstr "Vehículos - FleetPredict Pro"
+msgstr "Agregar tarea de mantenimiento - FleetPredict Pro"
 
-#| msgid "Create maintenance task"
 msgid "Edit maintenance task."
-msgstr "Crear tarea de mantenimiento"
+msgstr "Editar tarea de mantenimiento."
 
-#| msgid "Create maintenance task"
 msgid "Create a new maintenance task."
-msgstr "Crear tarea de mantenimiento"
+msgstr "Crear una nueva tarea de mantenimiento."
 
-#| msgid "Create maintenance task"
 msgid "Edit Maintenance Task"
-msgstr "Crear tarea de mantenimiento"
+msgstr "Editar tarea de mantenimiento"
 
-#| msgid "Maintenance"
 msgid "Add Maintenance Task"
-msgstr "Mantenimiento"
+msgstr "Agregar tarea de mantenimiento"
 
 msgid "Apply template:"
 msgstr "Aplicar plantilla:"
+
 msgid "— None —"
 msgstr "— Ninguna —"
+
 msgid "Title"
 msgstr "Título"
+
 msgid "Estimated Cost"
 msgstr "Costo estimado"
-#| msgid "Login - FleetPredict Pro"
+
 msgid "Maintenance - FleetPredict Pro"
-msgstr "Iniciar sesión - FleetPredict Pro"
+msgstr "Mantenimiento - FleetPredict Pro"
 
-#| msgid "List and manage fleet vehicles. Search and filter by status."
 msgid "List and manage maintenance tasks. Filter by status."
-msgstr "Lista y gestiona los vehículos de la flota. Busca y filtra por estado."
+msgstr "Lista y gestiona las tareas de mantenimiento. Filtra por estado."
 
-#| msgid "Maintenance"
 msgid "Maintenance Tasks"
-msgstr "Mantenimiento"
+msgstr "Tareas de mantenimiento"
 
-#| msgid "Task"
 msgid "Add Task"
-msgstr "Tarea"
+msgstr "Agregar tarea"
 
 msgid "Filter by status"
 msgstr "Filtrar por estado"
@@ -1472,76 +1945,65 @@ msgstr "Por página"
 msgid "Results per page"
 msgstr "Resultados por página"
 
-msgid "View"
-msgstr "Ver"
-
-#| msgid "Create maintenance task"
 msgid "No maintenance tasks found."
-msgstr "Crear tarea de mantenimiento"
+msgstr "No se encontraron tareas de mantenimiento."
 
 #, python-format
 msgid "Page %(num)s of %(npages)s (%(ntotal)s total)"
 msgstr "Página %(num)s de %(npages)s (%(ntotal)s en total)"
 
-#, fuzzy, python-format
-#| msgid "Login - FleetPredict Pro"
+#, python-format
 msgid "Work Order %(num)s - FleetPredict Pro"
-msgstr "Iniciar sesión - FleetPredict Pro"
+msgstr "Orden de trabajo %(num)s - FleetPredict Pro"
 
-#, fuzzy, python-format
-#| msgid "Work orders"
+#, python-format
 msgid "Work Order %(num)s"
-msgstr "Órdenes de trabajo"
+msgstr "Orden de trabajo %(num)s"
 
 msgid "Due date"
 msgstr "Fecha de vencimiento"
-#| msgid "Completed"
+
 msgid "Completion date"
-msgstr "Completado"
+msgstr "Fecha de finalización"
 
 msgid "Notes"
 msgstr "Notas"
-#| msgid "Register - FleetPredict Pro"
+
 msgid "Edit Work Order - FleetPredict Pro"
-msgstr "Registrarse - FleetPredict Pro"
+msgstr "Editar orden de trabajo - FleetPredict Pro"
 
-#| msgid "Change Password - FleetPredict Pro"
 msgid "Create Work Order - FleetPredict Pro"
-msgstr "Cambiar contraseña - FleetPredict Pro"
+msgstr "Crear orden de trabajo - FleetPredict Pro"
 
-#| msgid "Work orders"
 msgid "Edit Work Order"
-msgstr "Órdenes de trabajo"
+msgstr "Editar orden de trabajo"
 
-#| msgid "Work orders"
 msgid "Create Work Order"
-msgstr "Órdenes de trabajo"
+msgstr "Crear orden de trabajo"
 
-#| msgid "Maintenance"
 msgid "Maintenance task"
-msgstr "Mantenimiento"
+msgstr "Tarea de mantenimiento"
 
-#| msgid "Login - FleetPredict Pro"
 msgid "Work Orders - FleetPredict Pro"
-msgstr "Iniciar sesión - FleetPredict Pro"
+msgstr "Órdenes de trabajo - FleetPredict Pro"
 
-#| msgid "Create maintenance task"
 msgid "Work orders for maintenance tasks."
-msgstr "Crear tarea de mantenimiento"
+msgstr "Órdenes de trabajo para tareas de mantenimiento."
 
-#| msgid "Work orders"
 msgid "Work Orders"
 msgstr "Órdenes de trabajo"
 
 msgid "Due from"
 msgstr "Vence desde"
+
 msgid "Due to"
 msgstr "Vence hasta"
+
 msgid "Number"
 msgstr "Número"
-#| msgid "Create maintenance task"
+
 msgid "No work orders. Create one from a maintenance task."
-msgstr "Crear tarea de mantenimiento"
+msgstr "No hay órdenes de trabajo. Crea una desde una tarea de mantenimiento."
 
 msgid "Login - FleetPredict Pro"
 msgstr "Iniciar sesión - FleetPredict Pro"
@@ -1580,7 +2042,7 @@ msgid "Password reset complete"
 msgstr "Contraseña restablecida"
 
 msgid "Your password has been set. You can now log in with your new password."
-msgstr "Tu contraseña quedó configurada. Ya puedes iniciar sesión con la nueva contraseña."
+msgstr ""
 "Tu contraseña quedó configurada. Ya puedes iniciar sesión con la nueva "
 "contraseña."
 
@@ -1639,14 +2101,22 @@ msgid ""
 "(%(email_addr)s)."
 msgstr ""
 "Alguien solicitó un restablecimiento de contraseña para tu cuenta "
-"FleetPredict Pro (%(email_addr)s)."
-"Alguien solicitó un restablecimiento de contraseña para tu cuenta "
-"FleetPredict Pro (%(email_addr)s)."
-"Alguien solicitó un restablecimiento de contraseña para tu cuenta "
-"FleetPredict Pro (%(email_addr)s)."
+"FleetPredict Pro (%(email_addr)s).Alguien solicitó un restablecimiento de "
+"contraseña para tu cuenta FleetPredict Pro (%(email_addr)s).Alguien solicitó"
+" un restablecimiento de contraseña para tu cuenta FleetPredict Pro "
+"(%(email_addr)s).Alguien solicitó un restablecimiento de contraseña para tu "
+"cuenta FleetPredict Pro (%(email_addr)s).Alguien solicitó un "
+"restablecimiento de contraseña para tu cuenta FleetPredict Pro "
+"(%(email_addr)s).Alguien solicitó un restablecimiento de contraseña para tu "
+"cuenta FleetPredict Pro (%(email_addr)s).Alguien solicitó un "
+"restablecimiento de contraseña para tu cuenta FleetPredict Pro "
+"(%(email_addr)s).Alguien solicitó un restablecimiento de contraseña para tu "
+"cuenta FleetPredict Pro (%(email_addr)s).Alguien solicitó un "
+"restablecimiento de contraseña para tu cuenta FleetPredict Pro "
+"(%(email_addr)s)."
 
 msgid "If you requested this, follow the link below to set a new password:"
-msgstr "Si solicitaste esto, sigue el enlace de abajo para establecer una nueva contraseña:"
+msgstr ""
 "Si solicitaste esto, sigue el enlace de abajo para establecer una nueva "
 "contraseña:"
 
@@ -1654,10 +2124,6 @@ msgid ""
 "If you didn't request this, you can ignore this email. Your password will "
 "remain unchanged."
 msgstr ""
-"Si no lo solicitaste, puedes ignorar este correo. Tu contraseña no "
-"cambiará."
-"Si no lo solicitaste, puedes ignorar este correo. Tu contraseña no "
-"cambiará."
 "Si no lo solicitaste, puedes ignorar este correo. Tu contraseña no cambiará."
 
 msgid "Reset password - FleetPredict Pro"
@@ -1698,14 +2164,691 @@ msgstr "Confirmar contraseña"
 msgid "Already have an account?"
 msgstr "¿Ya tienes una cuenta?"
 
+msgid "Comparison Report - FleetPredict Pro"
+msgstr "Informe comparativo - FleetPredict Pro"
+
+msgid "FR14/15: Compare vehicles by maintenance count and cost."
+msgstr "FR14/15: compara vehículos por número de mantenimientos y costo."
+
+msgid "Comparison Report (FR14/15)"
+msgstr "Informe comparativo (FR14/15)"
+
+msgid "Back to Reports"
+msgstr "Volver a informes"
+
+msgid "Vehicles compared by number of completed tasks and total cost."
+msgstr "Vehículos comparados por tareas completadas y costo total."
+
+msgid "All vehicles"
+msgstr "Todos los vehículos"
+
+msgid "Apply filters"
+msgstr "Aplicar filtros"
+
+msgid "Total cost"
+msgstr "Costo total"
+
+msgid "Cost Report - FleetPredict Pro"
+msgstr "Informe de costos - FleetPredict Pro"
+
+msgid "FR13: Maintenance cost by vehicle."
+msgstr "FR13: costo de mantenimiento por vehículo."
+
+msgid "Cost Report"
+msgstr "Informe de costos"
+
+msgid "Actual cost of completed maintenance by vehicle."
+msgstr "Costo real del mantenimiento completado por vehículo."
+
+msgid "Grand total (all vehicles):"
+msgstr "Total general (todos los vehículos):"
+
+msgid "No completed maintenance with cost data."
+msgstr "No hay mantenimiento completado con datos de costo."
+
+msgid "Export Center - FleetPredict Pro"
+msgstr "Centro de exportación - FleetPredict Pro"
+
+msgid "Export Center"
+msgstr "Centro de exportación"
+
+msgid "Back to reports"
+msgstr "Volver a informes"
+
+msgid ""
+"Export operational data with role-aware visibility. Files are CSV and open "
+"directly in Excel or Google Sheets."
+msgstr ""
+"Exporta datos operativos según visibilidad por rol. Los archivos son CSV y "
+"se abren en Excel o Google Sheets."
+
+msgid "Dataset"
+msgstr "Conjunto de datos"
+
+msgid "Format"
+msgstr "Formato"
+
+msgid "Vehicle filter"
+msgstr "Filtro de vehículo"
+
+msgid "All visible vehicles"
+msgstr "Todos los vehículos visibles"
+
+msgid "Start"
+msgstr "Inicio"
+
+msgid "End"
+msgstr "Fin"
+
+msgid "Generate export"
+msgstr "Generar exportación"
+
+msgid "Recent export history"
+msgstr "Historial reciente de exportaciones"
+
+msgid "Rows"
+msgstr "Filas"
+
+msgid "Expires"
+msgstr "Caduca"
+
+msgid "No exports yet."
+msgstr "Aún no hay exportaciones."
+
+msgid "Reports - FleetPredict Pro"
+msgstr "Informes - FleetPredict Pro"
+
+msgid "Export PDF reports per vehicle or fleet."
+msgstr "Exporta informes PDF por vehículo o de toda la flota."
+
+msgid "Fleet report"
+msgstr "Informe de flota"
+
+msgid ""
+"Download a PDF summary of all visible vehicles (health, latest alert, "
+"upcoming maintenance, mileage)."
+msgstr ""
+"Descarga un PDF resumido de todos los vehículos visibles (salud, última "
+"alerta, mantenimiento próximo, kilometraje)."
+
+msgid "Download fleet report (PDF)"
+msgstr "Descargar informe de flota (PDF)"
+
+msgid "Per-vehicle report"
+msgstr "Informe por vehículo"
+
+msgid ""
+"For a detailed vehicle report (maintenance history, recent alerts, "
+"telemetry), open the vehicle detail and use the \"Export PDF report\" "
+"button."
+msgstr ""
+"Para un informe detallado del vehículo (historial de mantenimiento, alertas "
+"recientes, telemetría), abre el detalle del vehículo y usa el botón "
+"«Exportar informe PDF»."
+
+msgid "Go to vehicle list"
+msgstr "Ir a la lista de vehículos"
+
+msgid "Analytics reports (FR12–15)"
+msgstr "Informes analíticos (FR12–15)"
+
+msgid "Maintenance trends, cost by vehicle, and comparison."
+msgstr "Tendencias de mantenimiento, costo por vehículo y comparación."
+
+msgid "Trends"
+msgstr "Tendencias"
+
+msgid "Comparison"
+msgstr "Comparación"
+
+msgid "Commercial report schedule"
+msgstr "Programación de informes comerciales"
+
+msgid ""
+"Save report delivery metadata for weekly or monthly operational reviews."
+msgstr ""
+"Guarda metadatos de entrega de informes para revisiones operativas semanales"
+" o mensuales."
+
+msgid "Schedule name"
+msgstr "Nombre del programa"
+
+msgid "Weekly"
+msgstr "Semanal"
+
+msgid "Monthly"
+msgstr "Mensual"
+
+msgid "ops@example.com"
+msgstr "ops@example.com"
+
+msgid "Frequency"
+msgstr "Frecuencia"
+
+msgid "Recipients"
+msgstr "Destinatarios"
+
+msgid "Maintenance Trends - FleetPredict Pro"
+msgstr "Tendencias de mantenimiento - FleetPredict Pro"
+
+msgid "FR12: Maintenance completion trends."
+msgstr "FR12: tendencias de mantenimiento completado."
+
+msgid "Maintenance Trends"
+msgstr "Tendencias de mantenimiento"
+
+msgid "Completed maintenance tasks in the last 90 days by month."
+msgstr "Tareas de mantenimiento completadas en los últimos 90 días por mes."
+
+msgid "Total completed (90 days):"
+msgstr "Total completado (90 días):"
+
+msgid "Year"
+msgstr "Año"
+
+msgid "Month"
+msgstr "Mes"
+
+msgid "No completed tasks in the last 90 days."
+msgstr "No hay tareas completadas en los últimos 90 días."
+
+msgid "Route History - FleetPredict Pro"
+msgstr "Historial de rutas - FleetPredict Pro"
+
+msgid "Route History"
+msgstr "Historial de rutas"
+
+msgid "Plan route"
+msgstr "Planificar ruta"
+
+msgid "Origin"
+msgstr "Origen"
+
+msgid "Destination"
+msgstr "Destino"
+
+msgid "No routes planned yet."
+msgstr "Aún no hay rutas planificadas."
+
+msgid "Route Planner - FleetPredict Pro"
+msgstr "Planificador de rutas - FleetPredict Pro"
+
+msgid "Route Planner"
+msgstr "Planificador de rutas"
+
+msgid ""
+"Enter origin, destination, and select a vehicle. The system will suggest 3 "
+"route alternatives based on vehicle health and your optimization priority."
+msgstr ""
+"Indica origen, destino y selecciona un vehículo. El sistema sugerirá 3 "
+"alternativas de ruta según la salud del vehículo y tu prioridad de "
+"optimización."
+
+msgid "Get suggestions"
+msgstr "Obtener sugerencias"
+
+msgid "Route history"
+msgstr "Historial de rutas"
+
+msgid "Route Suggestions - FleetPredict Pro"
+msgstr "Sugerencias de ruta - FleetPredict Pro"
+
+msgid "Suggestions"
+msgstr "Sugerencias"
+
+msgid "Route Suggestions"
+msgstr "Sugerencias de ruta"
+
+#, python-format
+msgid "Alternative %(n)s"
+msgstr "Alternativa %(n)s"
+
+msgid "Recommended"
+msgstr "Recomendada"
+
+msgid "Distance:"
+msgstr "Distancia:"
+
+msgid "Time:"
+msgstr "Tiempo:"
+
+msgid "Fuel cost:"
+msgstr "Costo de combustible:"
+
+msgid "Select this route"
+msgstr "Seleccionar esta ruta"
+
+msgid "Plan another route"
+msgstr "Planificar otra ruta"
+
+msgid "Profile - FleetPredict Pro"
+msgstr "Perfil - FleetPredict Pro"
+
+msgid "Your FleetPredict Pro profile and notification preferences."
+msgstr "Tu perfil de FleetPredict Pro y preferencias de notificación."
+
+msgid "Notification preferences"
+msgstr "Preferencias de notificación"
+
+msgid "Email notifications"
+msgstr "Notificaciones por correo"
+
+msgid "Maintenance due alerts"
+msgstr "Alertas de mantenimiento próximo"
+
+msgid "Overdue maintenance alerts"
+msgstr "Alertas de mantenimiento vencido"
+
+msgid "Critical alerts"
+msgstr "Alertas críticas"
+
+msgid "Date joined"
+msgstr "Fecha de registro"
+
+msgid "Users - FleetPredict Pro"
+msgstr "Usuarios - FleetPredict Pro"
+
+msgid "Manage users and roles."
+msgstr "Gestiona usuarios y roles."
+
+msgid "Search by name or email"
+msgstr "Buscar por nombre o correo"
+
+msgid "Filter by role"
+msgstr "Filtrar por rol"
+
+msgid "All roles"
+msgstr "Todos los roles"
+
+msgid "No users found."
+msgstr "No se encontraron usuarios."
+
+msgid "Delete Compliance - FleetPredict Pro"
+msgstr "Eliminar cumplimiento - FleetPredict Pro"
+
+msgid "Delete compliance requirement"
+msgstr "Eliminar requisito de cumplimiento"
+
+#, python-format
+msgid ""
+"Are you sure you want to remove <strong>%(name)s</strong> (%(rtype)s) for "
+"%(vehicle)s?"
+msgstr ""
+"¿Seguro que deseas quitar <strong>%(name)s</strong> (%(rtype)s) de "
+"%(vehicle)s?¿Seguro que deseas quitar <strong>%(name)s</strong> (%(rtype)s) "
+"de %(vehicle)s?"
+
+msgid "Edit Compliance - FleetPredict Pro"
+msgstr "Editar cumplimiento - FleetPredict Pro"
+
+msgid "Add Compliance - FleetPredict Pro"
+msgstr "Agregar cumplimiento - FleetPredict Pro"
+
+msgid "Edit Compliance Requirement"
+msgstr "Editar requisito de cumplimiento"
+
+msgid "Add Compliance Requirement"
+msgstr "Agregar requisito de cumplimiento"
+
+msgid "Expiration date"
+msgstr "Fecha de vencimiento"
+
+msgid "Issuing authority"
+msgstr "Autoridad emisora"
+
+msgid "Document reference"
+msgstr "Referencia del documento"
+
+msgid "Compliance - FleetPredict Pro"
+msgstr "Cumplimiento - FleetPredict Pro"
+
+msgid "Regulatory compliance requirements."
+msgstr "Requisitos regulatorios de cumplimiento."
+
+msgid "Compliance Requirements"
+msgstr "Requisitos de cumplimiento"
+
+msgid "Add requirement"
+msgstr "Agregar requisito"
+
+msgid "Expired"
+msgstr "Vencido"
+
+msgid "Expiring (30 days)"
+msgstr "Por vencer (30 días)"
+
+msgid "Requirement"
+msgstr "Requisito"
+
+msgid "Expiration"
+msgstr "Vencimiento"
+
+msgid "Expiring"
+msgstr "Por vencer"
+
+msgid "No compliance requirements. Add one from Vehicles or here."
+msgstr "No hay requisitos de cumplimiento. Agrega uno desde Vehículos o aquí."
+
+msgid "Driving Analysis"
+msgstr "Análisis de conducción"
+
+msgid "Driving analysis"
+msgstr "Análisis de conducción"
+
+msgid "Total km"
+msgstr "Km totales"
+
+msgid "Avg speed"
+msgstr "Velocidad prom."
+
+msgid "km/h"
+msgstr "km/h"
+
+msgid "Driving hours"
+msgstr "Horas de conducción"
+
+msgid "Aggressive events"
+msgstr "Eventos agresivos"
+
+msgid "Recent Driving Patterns"
+msgstr "Patrones recientes de conducción"
+
+msgid "Period"
+msgstr "Período"
+
+msgid "Km"
+msgstr "Km"
+
+msgid "Driving h"
+msgstr "h conducción"
+
+msgid "Idle h"
+msgstr "h ralentí"
+
+msgid "Max speed"
+msgstr "Velocidad máx."
+
+msgid "Aggressive"
+msgstr "Agresivo"
+
+msgid "No driving pattern data yet."
+msgstr "Aún no hay datos de patrones de conducción."
+
+msgid "GPS Map"
+msgstr "Mapa GPS"
+
+msgid "N/A"
+msgstr "N/D"
+
+msgid "Track summary:"
+msgstr "Resumen del recorrido:"
+
+msgid "points"
+msgstr "puntos"
+
+msgid "km approx."
+msgstr "km aprox."
+
+msgid "Last update:"
+msgstr "Última actualización:"
+
+msgid "No GPS data for this period."
+msgstr "No hay datos GPS en este período."
+
+msgid "Latest"
+msgstr "Último"
+
+msgid "Speed:"
+msgstr "Velocidad:"
+
+msgid "Mileage Report"
+msgstr "Informe de kilometraje"
+
+msgid "Mileage report"
+msgstr "Informe de kilometraje"
+
+msgid "Current odometer"
+msgstr "Odómetro actual"
+
+msgid "km"
+msgstr "km"
+
+msgid "Daily Mileage"
+msgstr "Kilometraje diario"
+
+msgid "Sensors"
+msgstr "Sensores"
+
+msgid "Sensor Dashboard"
+msgstr "Panel de sensores"
+
+msgid "Add reading"
+msgstr "Agregar lectura"
+
+msgid "Upload CSV"
+msgstr "Subir CSV"
+
+msgid "1 day"
+msgstr "1 día"
+
+msgid "90 days"
+msgstr "90 días"
+
+msgid "Sensor type"
+msgstr "Tipo de sensor"
+
+msgid "No sensor readings for the selected period."
+msgstr "No hay lecturas de sensores en el período seleccionado."
+
+msgid "Add Sensor Reading - FleetPredict Pro"
+msgstr "Agregar lectura de sensor - FleetPredict Pro"
+
+msgid "Add sensor reading"
+msgstr "Agregar lectura de sensor"
+
+msgid "Add Sensor Reading"
+msgstr "Agregar lectura de sensor"
+
+msgid "Save reading"
+msgstr "Guardar lectura"
+
+msgid "Upload Sensor CSV"
+msgstr "Subir CSV de sensores"
+
+msgid "Upload Sensor Readings"
+msgstr "Subir lecturas de sensores"
+
+msgid "Import"
+msgstr "Importar"
+
+msgid "Delete Vehicle - FleetPredict Pro"
+msgstr "Eliminar vehículo - FleetPredict Pro"
+
+msgid "Delete Vehicle"
+msgstr "Eliminar vehículo"
+
+#, python-format
+msgid "Are you sure you want to delete <strong>%(name)s</strong> (%(plate)s)?"
+msgstr "¿Seguro que deseas eliminar <strong>%(name)s</strong> (%(plate)s)?"
+
+msgid ""
+"This will mark the vehicle as retired. Historical data will be preserved."
+msgstr ""
+"Esto marcará el vehículo como retirado. Los datos históricos se conservarán."
+
+msgid "Vehicle details and maintenance history."
+msgstr "Detalle del vehículo e historial de mantenimiento."
+
+msgid "History"
+msgstr "Historial"
+
+msgid "GPS"
+msgstr "GPS"
+
+msgid "Driving"
+msgstr "Conducción"
+
+msgid "Mileage"
+msgstr "Kilometraje"
+
+msgid "Export PDF report"
+msgstr "Exportar informe PDF"
+
+msgid "Delete vehicle"
+msgstr "Eliminar vehículo"
+
+msgid "Health indicator"
+msgstr "Indicador de salud"
+
+msgid "This vehicle has status"
+msgstr "Este vehículo tiene estado"
+
+msgid "because:"
+msgstr "porque:"
+
+msgid "Vehicle Information"
+msgstr "Información del vehículo"
+
+msgid "License Plate"
+msgstr "Placa"
+
+msgid "VIN"
+msgstr "VIN"
+
+msgid "Make / Model"
+msgstr "Marca / modelo"
+
+msgid "Color"
+msgstr "Color"
+
+msgid "Why this health status?"
+msgstr "¿Por qué este estado de salud?"
+
+msgid "Current Mileage"
+msgstr "Kilometraje actual"
+
+msgid "Fuel Type"
+msgstr "Tipo de combustible"
+
+msgid "Assigned Driver"
+msgstr "Conductor asignado"
+
+msgid "Total maintenance tasks:"
+msgstr "Total de tareas de mantenimiento:"
+
+msgid "Last maintenance:"
+msgstr "Último mantenimiento:"
+
+msgid "Never"
+msgstr "Nunca"
+
+msgid "View History"
+msgstr "Ver historial"
+
+#, python-format
+msgid "Expiring in %(d)s days"
+msgstr "Vence en %(d)s días"
+
+msgid "No compliance requirements."
+msgstr "No hay requisitos de cumplimiento."
+
+msgid "Add one to track inspections, licenses, etc."
+msgstr "Agrega uno para seguir inspecciones, licencias, etc."
+
+msgid "Live telemetry"
+msgstr "Telemetría en vivo"
+
+msgid "Connecting…"
+msgstr "Conectando…"
+
+msgid "Speed"
+msgstr "Velocidad"
+
+#, python-format
+msgid "Fuel %%"
+msgstr "Combustible %%"
+
+msgid "Engine temp °C"
+msgstr "Temp. motor °C"
+
+msgid "RPM"
+msgstr "RPM"
+
+msgid "Odometer km"
+msgstr "Odómetro km"
+
+msgid "Voltage"
+msgstr "Voltaje"
+
+msgid "Position"
+msgstr "Posición"
+
+msgid "Last reading"
+msgstr "Última lectura"
+
+msgid "Connected. Waiting for live data…"
+msgstr "Conectado. Esperando datos en tiempo real…"
+
+msgid "Disconnected. Reconnecting in 3 s…"
+msgstr "Desconectado. Reconectando en 3 s…"
+
+#, python-format
+msgid "%%"
+msgstr "%%"
+
+msgid "°C"
+msgstr "°C"
+
+msgid "V"
+msgstr "V"
+
+msgid "Edit Vehicle"
+msgstr "Editar vehículo"
+
+msgid "Add Vehicle"
+msgstr "Agregar vehículo"
+
+msgid "Edit vehicle details."
+msgstr "Editar datos del vehículo."
+
+msgid "Add a new vehicle to the fleet."
+msgstr "Agregar un vehículo nuevo a la flota."
+
+msgid "Make"
+msgstr "Marca"
+
+msgid "Vehicle Type"
+msgstr "Tipo de vehículo"
+
+msgid "Current Mileage (km)"
+msgstr "Kilometraje actual (km)"
+
+msgid "Fuel Capacity (L)"
+msgstr "Capacidad de combustible (L)"
+
+msgid "Maintenance History"
+msgstr "Historial de mantenimiento"
+
+#, python-format
+msgid "Maintenance history for %(name)s."
+msgstr "Historial de mantenimiento de %(name)s."
+
+#, python-format
+msgid "Maintenance History: %(name)s"
+msgstr "Historial de mantenimiento: %(name)s"
+
+msgid "Back to Vehicle"
+msgstr "Volver al vehículo"
+
+msgid "No maintenance history."
+msgstr "No hay historial de mantenimiento."
+
 msgid "Vehicles - FleetPredict Pro"
 msgstr "Vehículos - FleetPredict Pro"
 
 msgid "List and manage fleet vehicles. Search and filter by status."
-msgstr "Lista y gestiona los vehículos de la flota. Busca y filtra por estado."
-
-msgid "Add Vehicle"
-msgstr "Agregar vehículo"
+msgstr ""
+"Lista y gestiona los vehículos de la flota. Busca y filtra por estado."
 
 msgid "Search (plate, VIN, make, model)"
 msgstr "Buscar (placa, VIN, marca, modelo)"
@@ -1716,14 +2859,65 @@ msgstr "Filtrar por salud"
 msgid "All health"
 msgstr "Todos los niveles"
 
-msgid "License Plate"
-msgstr "Placa"
-
-msgid "Mileage"
-msgstr "Kilometraje"
-
-msgid "History"
-msgstr "Historial"
-
 msgid "No vehicles found."
 msgstr "No se encontraron vehículos."
+
+msgid "Delete Vehicle Type - FleetPredict Pro"
+msgstr "Eliminar tipo de vehículo - FleetPredict Pro"
+
+msgid "Delete vehicle type"
+msgstr "Eliminar tipo de vehículo"
+
+msgid "Back to types"
+msgstr "Volver a tipos"
+
+#, python-format
+msgid "Are you sure you want to delete <strong>%(name)s</strong>?"
+msgstr "¿Seguro que deseas eliminar <strong>%(name)s</strong>?"
+
+msgid "This type is used by one vehicle. Reassign it before deleting."
+msgstr "Este tipo está asignado a un vehículo. Reasígnalo antes de eliminar."
+
+#, python-format
+msgid "This type is used by %(c)s vehicles. Reassign them before deleting."
+msgstr ""
+"Este tipo está asignado a %(c)s vehículos. Reasígnalos antes de eliminar."
+
+msgid "Edit Vehicle Type - FleetPredict Pro"
+msgstr "Editar tipo de vehículo - FleetPredict Pro"
+
+msgid "Add Vehicle Type - FleetPredict Pro"
+msgstr "Agregar tipo de vehículo - FleetPredict Pro"
+
+msgid "Edit Vehicle Type"
+msgstr "Editar tipo de vehículo"
+
+msgid "Add Vehicle Type"
+msgstr "Agregar tipo de vehículo"
+
+msgid "Maintenance interval (days)"
+msgstr "Intervalo de mantenimiento (días)"
+
+msgid "Maintenance interval (km)"
+msgstr "Intervalo de mantenimiento (km)"
+
+msgid "Vehicle Types - FleetPredict Pro"
+msgstr "Tipos de vehículo - FleetPredict Pro"
+
+msgid "Manage vehicle types and maintenance intervals."
+msgstr "Gestiona tipos de vehículo e intervalos de mantenimiento."
+
+msgid "Add type"
+msgstr "Agregar tipo"
+
+msgid "Back to vehicles"
+msgstr "Volver a vehículos"
+
+msgid "Interval (days)"
+msgstr "Intervalo (días)"
+
+msgid "Interval (km)"
+msgstr "Intervalo (km)"
+
+msgid "No vehicle types. Add one to use in vehicles."
+msgstr "No hay tipos de vehículo. Agrega uno para usarlo en vehículos."

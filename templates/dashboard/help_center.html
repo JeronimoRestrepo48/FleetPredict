@@ -1,48 +1,48 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Help center{% endblock %}
+{% block title %}{% trans "Help center - FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
-  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-  <li class="breadcrumb-item active">Help center</li>
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+  <li class="breadcrumb-item active">{% trans "Help center" %}</li>
 </ol></nav>
 {% endblock %}
 {% block content %}
-<h2 class="page-title"><i class="bi bi-life-preserver me-2"></i>Help center</h2>
+<h2 class="page-title"><i class="bi bi-life-preserver me-2"></i>{% trans "Help center" %}</h2>
 
 <div class="row g-3 mb-3">
   <div class="col-lg-4">
     <div class="card card-fp h-100">
-      <div class="card-header">1. Quick navigation</div>
+      <div class="card-header">{% trans "1. Quick navigation" %}</div>
       <div class="card-body">
         <ul class="mb-0">
-          <li>Use breadcrumbs on each page to know where you are.</li>
-          <li>Use the quick bar buttons: <strong>Go back</strong>, <strong>Go to dashboard</strong>, and <strong>Help center</strong>.</li>
-          <li>Fleet features are under <strong>Fleet</strong>, maintenance and stock under <strong>Maintenance</strong>.</li>
+          <li>{% trans "Use breadcrumbs on each page to know where you are." %}</li>
+          <li>{% blocktrans %}Use the quick bar buttons: <strong>Go back</strong>, <strong>Go to dashboard</strong>, and <strong>Help center</strong>.{% endblocktrans %}</li>
+          <li>{% blocktrans %}Fleet features are under <strong>Fleet</strong>, maintenance and stock under <strong>Maintenance</strong>.{% endblocktrans %}</li>
         </ul>
       </div>
     </div>
   </div>
   <div class="col-lg-4">
     <div class="card card-fp h-100">
-      <div class="card-header">2. Preventing mistakes</div>
+      <div class="card-header">{% trans "2. Preventing mistakes" %}</div>
       <div class="card-body">
         <ul class="mb-0">
-          <li>Dangerous actions ask for confirmation before continuing.</li>
-          <li>Forms validate fields and highlight invalid values.</li>
-          <li>If you edit a form and try to leave, the app warns about unsaved changes.</li>
+          <li>{% trans "Dangerous actions ask for confirmation before continuing." %}</li>
+          <li>{% trans "Forms validate fields and highlight invalid values." %}</li>
+          <li>{% trans "If you edit a form and try to leave, the app warns about unsaved changes." %}</li>
         </ul>
       </div>
     </div>
   </div>
   <div class="col-lg-4">
     <div class="card card-fp h-100">
-      <div class="card-header">3. Error recovery</div>
+      <div class="card-header">{% trans "3. Error recovery" %}</div>
       <div class="card-body">
         <ul class="mb-0">
-          <li>System messages (top-right) explain successful or failed actions.</li>
-          <li>On permission errors, check your role or try a route available to your profile.</li>
-          <li>If telemetry pages look empty, verify live telemetry is running and date filters are correct.</li>
+          <li>{% trans "System messages (top-right) explain successful or failed actions." %}</li>
+          <li>{% trans "On permission errors, check your role or try a route available to your profile." %}</li>
+          <li>{% trans "If telemetry pages look empty, verify live telemetry is running and date filters are correct." %}</li>
         </ul>
       </div>
     </div>
@@ -50,26 +50,26 @@
 </div>
 
 <div class="card card-fp">
-  <div class="card-header">Recommended user flows</div>
+  <div class="card-header">{% trans "Recommended user flows" %}</div>
   <div class="card-body">
     <div class="row g-3">
       <div class="col-md-6">
-        <h6 class="mb-2">Fleet manager flow</h6>
+        <h6 class="mb-2">{% trans "Fleet manager flow" %}</h6>
         <ol class="mb-0">
-          <li>Open <strong>Fleet → Vehicles</strong> and select a vehicle.</li>
-          <li>Review Sensors, GPS, Driving and Mileage panels.</li>
-          <li>Open <strong>Maintenance → Tasks</strong> to schedule work.</li>
-          <li>Use <strong>Maintenance → Spare parts</strong> to adjust stock if needed.</li>
+          <li>{% blocktrans %}Open <strong>Fleet → Vehicles</strong> and select a vehicle.{% endblocktrans %}</li>
+          <li>{% trans "Review Sensors, GPS, Driving and Mileage panels." %}</li>
+          <li>{% blocktrans %}Open <strong>Maintenance → Tasks</strong> to schedule work.{% endblocktrans %}</li>
+          <li>{% blocktrans %}Use <strong>Maintenance → Spare parts</strong> to adjust stock if needed.{% endblocktrans %}</li>
         </ol>
       </div>
       <div class="col-md-6">
-        <h6 class="mb-2">Reports and decisions flow</h6>
+        <h6 class="mb-2">{% trans "Reports and decisions flow" %}</h6>
         <ol class="mb-0">
-          <li>Open <strong>Reports &amp; predictions</strong>.</li>
-          <li>Check failure predictions, review criticality reasons, and override only with a clear reason.</li>
-          <li>Review suggested maintenance, adjust the proposed date/priority, then create the task.</li>
-          <li>Download PDF reports or use <strong>Export Center</strong> for spreadsheet-ready data.</li>
-          <li>Administrators should review <strong>Settings → Audit log</strong> after critical operations.</li>
+          <li>{% blocktrans %}Open <strong>Reports &amp; predictions</strong>.{% endblocktrans %}</li>
+          <li>{% trans "Check failure predictions, review criticality reasons, and override only with a clear reason." %}</li>
+          <li>{% trans "Review suggested maintenance, adjust the proposed date/priority, then create the task." %}</li>
+          <li>{% blocktrans %}Download PDF reports or use <strong>Export Center</strong> for spreadsheet-ready data.{% endblocktrans %}</li>
+          <li>{% blocktrans %}Administrators should review <strong>Settings → Audit log</strong> after critical operations.{% endblocktrans %}</li>
         </ol>
       </div>
     </div>

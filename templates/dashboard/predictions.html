@@ -1,24 +1,25 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Failure predictions - FleetPredict Pro{% endblock %}
-{% block meta_description %}Failure recommendations per vehicle.{% endblock %}
+{% block title %}{% trans "Failure predictions - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Failure recommendations per vehicle." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Failure predictions</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Failure predictions" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
+{% trans "—" as emdash %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Failure predictions</h2>
+  <h2 class="page-title mb-0">{% trans "Failure predictions" %}</h2>
 </div>
-<p class="text-muted">Vehicle, type, confidence, timeframe and explainable criticality. FR10 is now actionable and auditable.</p>
+<p class="text-muted">{% trans "Vehicle, type, confidence, timeframe and explainable criticality. FR10 is now actionable and auditable." %}</p>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto">
     <select name="severity" class="form-select form-select-sm">
-      <option value="">All severities</option>
+      <option value="">{% trans "All severities" %}</option>
       {% for val, label in severity_choices %}
       <option value="{{ val }}" {% if request.GET.severity == val %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
@@ -26,12 +27,12 @@
   </div>
   <div class="col-auto">
     <select name="sort" class="form-select form-select-sm">
-      <option value="">Newest first</option>
-      <option value="criticality" {% if sort == 'criticality' %}selected{% endif %}>Criticality first</option>
+      <option value="">{% trans "Newest first" %}</option>
+      <option value="criticality" {% if sort == 'criticality' %}selected{% endif %}>{% trans "Criticality first" %}</option>
     </select>
   </div>
   <div class="col-auto">
-    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    <button type="submit" class="btn btn-sm btn-primary">{% trans "Filter" %}</button>
   </div>
 </form>
 <div class="card card-fp">
@@ -41,15 +42,15 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Vehicle</th>
-            <th>Type</th>
-            <th>Severity</th>
-            <th>Message</th>
-            <th>Why</th>
-            <th>Confidence</th>
-            <th>Timeframe</th>
-            <th>Date</th>
-            <th>Actions</th>
+            <th>{% trans "Vehicle" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Severity" %}</th>
+            <th>{% trans "Message" %}</th>
+            <th>{% trans "Why" %}</th>
+            <th>{% trans "Confidence" %}</th>
+            <th>{% trans "Timeframe" %}</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Actions" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -60,8 +61,8 @@
             <td><span class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning text-dark{% else %}secondary{% endif %}">{{ alert.get_severity_display }}</span></td>
             <td>{{ alert.message|truncatewords:12 }}</td>
             <td class="small text-muted">{{ alert.criticality_reason|default:alert.build_criticality_reason|truncatewords:16 }}</td>
-            <td>{% if alert.confidence %}{{ alert.confidence }}{% else %}—{% endif %}</td>
-            <td>{{ alert.timeframe_text|default:"—" }}</td>
+            <td>{% if alert.confidence %}{{ alert.confidence }}{% else %}{{ emdash }}{% endif %}</td>
+            <td>{{ alert.timeframe_text|default:emdash }}</td>
             <td>{{ alert.created_at|date:"M d, H:i" }}</td>
             <td>
               {% for runbook in runbooks_list %}
@@ -77,7 +78,7 @@
               {% endfor %}
               {% if user.can_manage_maintenance %}
               <details class="mt-1">
-                <summary class="small text-primary">Override</summary>
+                <summary class="small text-primary">{% trans "Override" %}</summary>
                 <form method="post" action="{% url 'dashboard:override_criticality' %}" class="mt-2">
                   {% csrf_token %}
                   <input type="hidden" name="alert_id" value="{{ alert.id }}">
@@ -86,8 +87,8 @@
                     <option value="{{ val }}" {% if alert.severity == val %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
                   </select>
-                  <input type="text" name="reason" class="form-control form-control-sm mb-1" placeholder="Reason required">
-                  <button class="btn btn-sm btn-outline-warning" type="submit">Save override</button>
+                  <input type="text" name="reason" class="form-control form-control-sm mb-1" placeholder="{% trans 'Reason required' %}">
+                  <button class="btn btn-sm btn-outline-warning" type="submit">{% trans "Save override" %}</button>
                 </form>
               </details>
               {% endif %}
@@ -101,17 +102,17 @@
     <nav class="p-3">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with num=page_obj.number npages=page_obj.paginator.num_pages %}Page {{ num }} of {{ npages }}{% endblocktrans %}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a></li>
         {% endif %}
       </ul>
     </nav>
     {% endif %}
     {% else %}
-    <div class="p-4 text-muted text-center">No prediction alerts.</div>
+    <div class="p-4 text-muted text-center">{% trans "No prediction alerts." %}</div>
     {% endif %}
   </div>
 </div>

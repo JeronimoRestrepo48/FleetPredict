@@ -1,23 +1,23 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Maintenance History - {{ vehicle.display_name }}{% endblock %}
-{% block meta_description %}Maintenance history for {{ vehicle.display_name }}.{% endblock %}
+{% block title %}{% trans "Maintenance History" %} — {{ vehicle.display_name }}{% endblock %}
+{% block meta_description %}{% blocktrans with name=vehicle.display_name %}Maintenance history for {{ name }}.{% endblocktrans %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">{% trans "Vehicles" %}</a></li>
     <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}">{{ vehicle.display_name }}</a></li>
-    <li class="breadcrumb-item active" aria-current="page">History</li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "History" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Maintenance History: {{ vehicle.display_name }}</h2>
+  <h2 class="page-title mb-0">{% blocktrans with name=vehicle.display_name %}Maintenance History: {{ name }}{% endblocktrans %}</h2>
   <div class="d-flex gap-2">
-    <a href="{% url 'vehicles:vehicle_history_csv' vehicle.pk %}" class="btn btn-outline-success">Export CSV</a>
-    <a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}" class="btn btn-outline-secondary">Back to Vehicle</a>
+    <a href="{% url 'vehicles:vehicle_history_csv' vehicle.pk %}" class="btn btn-outline-success">{% trans "Export CSV" %}</a>
+    <a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}" class="btn btn-outline-secondary">{% trans "Back to Vehicle" %}</a>
   </div>
 </div>
 <div class="card card-fp">
@@ -26,10 +26,10 @@
       <table class="table table-fp table-hover">
                 <thead>
                     <tr>
-                        <th>Task</th>
-                        <th>Type</th>
-                        <th>Completed</th>
-                        <th>Cost</th>
+                        <th>{% trans "Task" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Completed" %}</th>
+                        <th>{% trans "Cost" %}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -40,10 +40,10 @@
                         <td>{{ task.get_maintenance_type_display|default:"-" }}</td>
                         <td>{{ task.completion_date|default:"-" }}</td>
                         <td>{% if task.actual_cost %}${{ task.actual_cost|floatformat:2 }}{% else %}-{% endif %}</td>
-                        <td><a href="{% url 'maintenance:task_detail' task.id %}">View</a></td>
+                        <td><a href="{% url 'maintenance:task_detail' task.id %}">{% trans "View" %}</a></td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="5">No maintenance history.</td></tr>
+                    <tr><td colspan="5">{% trans "No maintenance history." %}</td></tr>
                     {% endfor %}
                 </tbody>
             </table>

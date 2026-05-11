@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Cost Report - FleetPredict Pro{% endblock %}
-{% block meta_description %}FR13: Maintenance cost by vehicle.{% endblock %}
+{% block title %}{% trans "Cost Report - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "FR13: Maintenance cost by vehicle." %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Cost Report</h2>
-  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to Reports</a>
+  <h2 class="page-title mb-0">{% trans "Cost Report" %}</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">{% trans "Back to Reports" %}</a>
 </div>
-<p class="text-muted">Actual cost of completed maintenance by vehicle.</p>
+<p class="text-muted">{% trans "Actual cost of completed maintenance by vehicle." %}</p>
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-3">
     <select name="vehicle" class="form-select form-select-sm">
-      <option value="">All vehicles</option>
+      <option value="">{% trans "All vehicles" %}</option>
       {% for vehicle in vehicles %}
       <option value="{{ vehicle.pk }}" {% if request.GET.vehicle == vehicle.pk|stringformat:'s' %}selected{% endif %}>{{ vehicle.license_plate }} - {{ vehicle.display_name }}</option>
       {% endfor %}
@@ -19,18 +19,18 @@
   </div>
   <div class="col-md-2"><input type="date" name="start" class="form-control form-control-sm" value="{{ request.GET.start }}"></div>
   <div class="col-md-2"><input type="date" name="end" class="form-control form-control-sm" value="{{ request.GET.end }}"></div>
-  <div class="col-md-2"><button class="btn btn-sm btn-primary">Apply filters</button></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-primary">{% trans "Apply filters" %}</button></div>
 </form>
 <div class="card card-fp">
   <div class="card-body">
-    <p><strong>Grand total (all vehicles):</strong> ${{ grand_total|floatformat:2 }}</p>
+    <p><strong>{% trans "Grand total (all vehicles):" %}</strong> ${{ grand_total|floatformat:2 }}</p>
     <div class="table-responsive">
       <table class="table table-fp mb-0">
         <thead>
           <tr>
-            <th>Vehicle</th>
-            <th>Tasks</th>
-            <th>Total cost</th>
+            <th>{% trans "Vehicle" %}</th>
+            <th>{% trans "Tasks" %}</th>
+            <th>{% trans "Total cost" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,7 +41,7 @@
             <td>${{ row.total|floatformat:2 }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="3">No completed maintenance with cost data.</td></tr>
+          <tr><td colspan="3">{% trans "No completed maintenance with cost data." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

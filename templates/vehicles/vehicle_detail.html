@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{{ vehicle.display_name }} - FleetPredict Pro{% endblock %}
-{% block meta_description %}Vehicle details and maintenance history.{% endblock %}
+{% block title %}{{ vehicle.display_name }} — {% trans "FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Vehicle details and maintenance history." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">{% trans "Vehicles" %}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ vehicle.display_name }}</li>
   </ol>
 </nav>
@@ -15,18 +15,18 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">{{ vehicle.display_name }}</h2>
   <div class="d-flex flex-wrap gap-2">
-    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
     {% if can_manage %}
-    <a href="{% url 'vehicles:vehicle_update' vehicle.pk %}" class="btn btn-primary">Edit</a>
-    <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">History</a>
-    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal">Delete</button>
+    <a href="{% url 'vehicles:vehicle_update' vehicle.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+    <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">{% trans "History" %}</a>
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteVehicleModal">{% trans "Delete" %}</button>
     {% endif %}
-    <a href="{% url 'vehicles:sensor_dashboard' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer2 me-1"></i>Sensors</a>
-    <a href="{% url 'vehicles:gps_map' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-geo-alt me-1"></i>GPS</a>
-    <a href="{% url 'vehicles:driving_analysis' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer me-1"></i>Driving</a>
-    <a href="{% url 'vehicles:mileage_report' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-signpost-2 me-1"></i>Mileage</a>
+    <a href="{% url 'vehicles:sensor_dashboard' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer2 me-1"></i>{% trans "Sensors" %}</a>
+    <a href="{% url 'vehicles:gps_map' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-geo-alt me-1"></i>{% trans "GPS" %}</a>
+    <a href="{% url 'vehicles:driving_analysis' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-speedometer me-1"></i>{% trans "Driving" %}</a>
+    <a href="{% url 'vehicles:mileage_report' vehicle.pk %}" class="btn btn-outline-info"><i class="bi bi-signpost-2 me-1"></i>{% trans "Mileage" %}</a>
     {% if user.can_view_reports %}
-    <a href="{% url 'reports:vehicle_pdf' vehicle.pk %}" class="btn btn-outline-success" target="_blank" rel="noopener">Exportar reporte PDF</a>
+    <a href="{% url 'reports:vehicle_pdf' vehicle.pk %}" class="btn btn-outline-success" target="_blank" rel="noopener">{% trans "Export PDF report" %}</a>
     {% endif %}
   </div>
 </div>
@@ -35,18 +35,18 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="deleteVehicleModalLabel">Delete vehicle</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="deleteVehicleModalLabel">{% trans "Delete vehicle" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to delete <strong>{{ vehicle.display_name }}</strong> ({{ vehicle.license_plate }})?</p>
-        <p class="text-muted small mb-0">This will mark the vehicle as retired. Historical data will be preserved.</p>
+        <p>{% blocktrans with name=vehicle.display_name plate=vehicle.license_plate %}Are you sure you want to delete <strong>{{ name }}</strong> ({{ plate }})?{% endblocktrans %}</p>
+        <p class="text-muted small mb-0">{% trans "This will mark the vehicle as retired. Historical data will be preserved." %}</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
         <form method="post" action="{% url 'vehicles:vehicle_delete' vehicle.pk %}" class="d-inline">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Delete</button>
+          <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
         </form>
       </div>
     </div>
@@ -57,11 +57,11 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="healthReasonsModalLabel">Health indicator</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title" id="healthReasonsModalLabel">{% trans "Health indicator" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
       </div>
       <div class="modal-body">
-        <p class="mb-2">This vehicle has status <strong>{% if health_status == 'green' %}Good{% elif health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</strong> because:</p>
+        <p class="mb-2">{% trans "This vehicle has status" %} <strong>{% if health_status == 'green' %}{% trans "Good" %}{% elif health_status == 'yellow' %}{% trans "Caution" %}{% else %}{% trans "Critical" %}{% endif %}</strong> {% trans "because:" %}</p>
         <ul class="mb-0">
           {% for reason in health_reasons %}
           <li>{{ reason }}</li>
@@ -74,37 +74,37 @@
 <div class="row g-3">
   <div class="col-md-6">
     <div class="card card-fp mb-0">
-            <div class="card-header">Vehicle Information</div>
+            <div class="card-header">{% trans "Vehicle Information" %}</div>
             <div class="card-body">
                 <dl class="row mb-0">
-                    <dt class="col-sm-4">License Plate</dt>
+                    <dt class="col-sm-4">{% trans "License Plate" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.license_plate }}</dd>
-                    <dt class="col-sm-4">VIN</dt>
+                    <dt class="col-sm-4">{% trans "VIN" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.vin }}</dd>
-                    <dt class="col-sm-4">Make / Model</dt>
+                    <dt class="col-sm-4">{% trans "Make / Model" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.make }} {{ vehicle.model }}</dd>
-                    <dt class="col-sm-4">Year</dt>
+                    <dt class="col-sm-4">{% trans "Year" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.year }}</dd>
-                    <dt class="col-sm-4">Color</dt>
+                    <dt class="col-sm-4">{% trans "Color" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.color|default:"-" }}</dd>
-                    <dt class="col-sm-4">Type</dt>
+                    <dt class="col-sm-4">{% trans "Type" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.vehicle_type|default:"-" }}</dd>
-                    <dt class="col-sm-4">Status</dt>
+                    <dt class="col-sm-4">{% trans "Status" %}</dt>
                     <dd class="col-sm-8"><span class="badge bg-{% if vehicle.status == 'active' %}success{% elif vehicle.status == 'under_maintenance' %}warning{% elif vehicle.status == 'retired' %}secondary{% else %}secondary{% endif %}">{{ vehicle.get_status_display }}</span></dd>
-                    <dt class="col-sm-4">Health</dt>
+                    <dt class="col-sm-4">{% trans "Health" %}</dt>
                     <dd class="col-sm-8">
-                      <button type="button" class="btn btn-link p-0 border-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#healthReasonsModal" aria-label="Why this health status?">
-                        <span class="badge bg-{% if health_status == 'green' %}success{% elif health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if health_status == 'green' %}Good{% elif health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</span>
+                      <button type="button" class="btn btn-link p-0 border-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#healthReasonsModal" aria-label="{% trans 'Why this health status?' %}">
+                        <span class="badge bg-{% if health_status == 'green' %}success{% elif health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if health_status == 'green' %}{% trans "Good" %}{% elif health_status == 'yellow' %}{% trans "Caution" %}{% else %}{% trans "Critical" %}{% endif %}</span>
                       </button>
                     </dd>
-                    <dt class="col-sm-4">Current Mileage</dt>
-                    <dd class="col-sm-8">{{ vehicle.current_mileage|default:"-" }} km</dd>
-                    <dt class="col-sm-4">Fuel Type</dt>
+                    <dt class="col-sm-4">{% trans "Current Mileage" %}</dt>
+                    <dd class="col-sm-8">{% if vehicle.current_mileage %}{{ vehicle.current_mileage }} {% trans "km" %}{% else %}-{% endif %}</dd>
+                    <dt class="col-sm-4">{% trans "Fuel Type" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.fuel_type|default:"-" }}</dd>
-                    <dt class="col-sm-4">Assigned Driver</dt>
+                    <dt class="col-sm-4">{% trans "Assigned Driver" %}</dt>
                     <dd class="col-sm-8">{% if vehicle.assigned_driver %}{{ vehicle.assigned_driver.get_full_name }}{% else %}-{% endif %}</dd>
                     {% if vehicle.notes %}
-                    <dt class="col-sm-4">Notes</dt>
+                    <dt class="col-sm-4">{% trans "Notes" %}</dt>
                     <dd class="col-sm-8">{{ vehicle.notes }}</dd>
                     {% endif %}
                 </dl>
@@ -113,11 +113,11 @@
   </div>
   <div class="col-md-6">
     <div class="card card-fp mb-0">
-      <div class="card-header">Maintenance</div>
+      <div class="card-header">{% trans "Maintenance" %}</div>
             <div class="card-body">
-                <p><strong>Total maintenance tasks:</strong> {{ vehicle.maintenance_tasks.count }}</p>
-                <p><strong>Last maintenance:</strong> {{ vehicle.get_last_maintenance_date|default:"Never" }}</p>
-                <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">View History</a>
+                <p><strong>{% trans "Total maintenance tasks:" %}</strong> {{ vehicle.maintenance_tasks.count }}</p>
+                <p><strong>{% trans "Last maintenance:" %}</strong> {% if vehicle.get_last_maintenance_date %}{{ vehicle.get_last_maintenance_date }}{% else %}{% trans "Never" %}{% endif %}</p>
+                <a href="{% url 'vehicles:vehicle_history' vehicle.pk %}" class="btn btn-outline-primary">{% trans "View History" %}</a>
             </div>
         </div>
     </div>
@@ -128,9 +128,9 @@
   <div class="col-12">
     <div class="card card-fp">
       <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <span>Compliance</span>
+        <span>{% trans "Compliance" %}</span>
         {% if can_manage %}
-        <a href="{% url 'vehicles:compliance_create' %}?vehicle={{ vehicle.pk }}" class="btn btn-sm btn-primary">Add requirement</a>
+        <a href="{% url 'vehicles:compliance_create' %}?vehicle={{ vehicle.pk }}" class="btn btn-sm btn-primary">{% trans "Add requirement" %}</a>
         {% endif %}
       </div>
       <div class="card-body">
@@ -139,10 +139,10 @@
           <table class="table table-sm mb-0">
             <thead>
               <tr>
-                <th>Requirement</th>
-                <th>Type</th>
-                <th>Expiration</th>
-                <th>Status</th>
+                <th>{% trans "Requirement" %}</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Expiration" %}</th>
+                <th>{% trans "Status" %}</th>
                 {% if can_manage %}<th></th>{% endif %}
               </tr>
             </thead>
@@ -154,17 +154,17 @@
                 <td>{{ c.expiration_date }}</td>
                 <td>
                   {% if c.is_expired %}
-                  <span class="badge bg-danger">Expired</span>
+                  <span class="badge bg-danger">{% trans "Expired" %}</span>
                   {% elif c.days_until_expiry <= 30 %}
-                  <span class="badge bg-warning text-dark">Expiring in {{ c.days_until_expiry }} days</span>
+                  <span class="badge bg-warning text-dark">{% blocktrans with d=c.days_until_expiry %}Expiring in {{ d }} days{% endblocktrans %}</span>
                   {% else %}
-                  <span class="badge bg-success">OK</span>
+                  <span class="badge bg-success">{% trans "OK" %}</span>
                   {% endif %}
                 </td>
                 {% if can_manage %}
                 <td>
-                  <a href="{% url 'vehicles:compliance_update' c.pk %}">Edit</a>
-                  <a href="{% url 'vehicles:compliance_delete' c.pk %}" class="ms-2 text-danger">Delete</a>
+                  <a href="{% url 'vehicles:compliance_update' c.pk %}">{% trans "Edit" %}</a>
+                  <a href="{% url 'vehicles:compliance_delete' c.pk %}" class="ms-2 text-danger">{% trans "Delete" %}</a>
                 </td>
                 {% endif %}
               </tr>
@@ -173,7 +173,7 @@
           </table>
         </div>
         {% else %}
-        <p class="text-muted mb-0">No compliance requirements. {% if can_manage %}Add one to track inspections, licenses, etc.{% endif %}</p>
+        <p class="text-muted mb-0">{% trans "No compliance requirements." %} {% if can_manage %}{% trans "Add one to track inspections, licenses, etc." %}{% endif %}</p>
         {% endif %}
       </div>
     </div>
@@ -185,60 +185,60 @@
   <div class="col-12">
     <div class="card card-fp">
       <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
-        <span>Live telemetry</span>
+        <span>{% trans "Live telemetry" %}</span>
         <span id="telemetry-engine-status" class="badge fs-6 {% if vehicle_engine_on_initial %}bg-success{% else %}bg-danger{% endif %}">
-          {% if vehicle_engine_on_initial %}On{% else %}Off{% endif %}
+          {% if vehicle_engine_on_initial %}{% trans "On" %}{% else %}{% trans "Off" %}{% endif %}
         </span>
       </div>
       <div class="card-body">
-        <p class="text-muted small mb-3">Data received via WebSocket. Connecting…</p>
+        <p class="text-muted small mb-3" id="telemetry-ws-message">{% trans "Connecting…" %}</p>
         <div class="row g-2 g-md-3">
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Speed</div>
-              <div id="telem-speed" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "Speed" %}</div>
+              <div id="telem-speed" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Fuel %</div>
-              <div id="telem-fuel" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "Fuel %" %}</div>
+              <div id="telem-fuel" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Engine temp °C</div>
-              <div id="telem-temp" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "Engine temp °C" %}</div>
+              <div id="telem-temp" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">RPM</div>
-              <div id="telem-rpm" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "RPM" %}</div>
+              <div id="telem-rpm" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Odometer km</div>
-              <div id="telem-mileage" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "Odometer km" %}</div>
+              <div id="telem-mileage" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Voltage</div>
-              <div id="telem-voltage" class="fw-semibold">—</div>
+              <div class="small text-muted">{% trans "Voltage" %}</div>
+              <div id="telem-voltage" class="fw-semibold">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Position</div>
-              <div id="telem-position" class="fw-semibold small">—</div>
+              <div class="small text-muted">{% trans "Position" %}</div>
+              <div id="telem-position" class="fw-semibold small">{% trans "—" %}</div>
             </div>
           </div>
           <div class="col-6 col-md-4">
             <div class="border rounded p-2">
-              <div class="small text-muted">Last reading</div>
-              <div id="telem-timestamp" class="fw-semibold small">—</div>
+              <div class="small text-muted">{% trans "Last reading" %}</div>
+              <div id="telem-timestamp" class="fw-semibold small">{% trans "—" %}</div>
             </div>
           </div>
         </div>
@@ -249,37 +249,56 @@
 {% endblock %}
 
 {% block extra_js %}
+{% trans "On" as telem_engine_on %}
+{% trans "Off" as telem_engine_off %}
+{% trans "Connected. Waiting for live data…" as telem_ws_connected %}
+{% trans "Disconnected. Reconnecting in 3 s…" as telem_ws_reconnect %}
+{% trans "—" as telem_emdash %}
+{% trans "km/h" as telem_unit_speed %}
+{% trans "%" as telem_unit_pct %}
+{% trans "°C" as telem_unit_temp %}
+{% trans "V" as telem_unit_volt %}
 <script>
 (function() {
   const vehicleId = {{ vehicle.pk }};
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
   const wsUrl = protocol + '//' + window.location.host + '/ws/telemetry/subscribe/' + vehicleId + '/';
   const ENGINE_IDLE_SEC = 90;
+  const TELEM_ON = "{{ telem_engine_on|escapejs }}";
+  const TELEM_OFF = "{{ telem_engine_off|escapejs }}";
+  const TELEM_CONNECTED = "{{ telem_ws_connected|escapejs }}";
+  const TELEM_RECONNECT = "{{ telem_ws_reconnect|escapejs }}";
+  const TELEM_DASH = "{{ telem_emdash|escapejs }}";
+  const U_SPEED = "{{ telem_unit_speed|escapejs }}";
+  const U_PCT = "{{ telem_unit_pct|escapejs }}";
+  const U_TEMP = "{{ telem_unit_temp|escapejs }}";
+  const U_VOLT = "{{ telem_unit_volt|escapejs }}";
 
-  function formatVal(v) { return v != null && v !== '' ? String(v) : '—'; }
+  function formatVal(v) { return v != null && v !== '' ? String(v) : TELEM_DASH; }
   function setEngineStatus(on) {
     const el = document.getElementById('telemetry-engine-status');
     if (!el) return;
-    el.textContent = on ? 'Encendido' : 'Apagado';
+    el.textContent = on ? TELEM_ON : TELEM_OFF;
     el.className = 'badge fs-6 ' + (on ? 'bg-success' : 'bg-danger');
   }
   function applyPayload(p) {
-    document.getElementById('telem-speed').textContent = formatVal(p.speed_kmh != null ? p.speed_kmh + ' km/h' : null);
-    document.getElementById('telem-fuel').textContent = formatVal(p.fuel_level_pct != null ? p.fuel_level_pct + '%' : null);
-    document.getElementById('telem-temp').textContent = formatVal(p.engine_temperature_c != null ? p.engine_temperature_c + ' °C' : null);
+    document.getElementById('telem-speed').textContent = formatVal(p.speed_kmh != null ? p.speed_kmh + ' ' + U_SPEED : null);
+    document.getElementById('telem-fuel').textContent = formatVal(p.fuel_level_pct != null ? p.fuel_level_pct + U_PCT : null);
+    document.getElementById('telem-temp').textContent = formatVal(p.engine_temperature_c != null ? p.engine_temperature_c + ' ' + U_TEMP : null);
     document.getElementById('telem-rpm').textContent = formatVal(p.rpm);
     document.getElementById('telem-mileage').textContent = formatVal(p.mileage);
-    document.getElementById('telem-voltage').textContent = formatVal(p.voltage != null ? p.voltage + ' V' : null);
+    document.getElementById('telem-voltage').textContent = formatVal(p.voltage != null ? p.voltage + ' ' + U_VOLT : null);
     const lat = p.latitude, lng = p.longitude;
-    document.getElementById('telem-position').textContent = (lat != null && lng != null) ? (lat.toFixed(4) + ', ' + lng.toFixed(4)) : '—';
-    document.getElementById('telem-timestamp').textContent = p.timestamp ? new Date(p.timestamp).toLocaleString() : '—';
+    document.getElementById('telem-position').textContent = (lat != null && lng != null) ? (lat.toFixed(4) + ', ' + lng.toFixed(4)) : TELEM_DASH;
+    document.getElementById('telem-timestamp').textContent = p.timestamp ? new Date(p.timestamp).toLocaleString() : TELEM_DASH;
     const on = (p.speed_kmh > 0 || (p.rpm || 0) > 0) || (p.timestamp && (Date.now() - new Date(p.timestamp).getTime()) / 1000 < ENGINE_IDLE_SEC);
     setEngineStatus(!!on);
   }
   function connect() {
     const ws = new WebSocket(wsUrl);
+    const msgEl = document.getElementById('telemetry-ws-message');
     ws.onopen = function() {
-      document.querySelector('.card-fp .text-muted.small.mb-3').textContent = 'Conectado. Esperando datos en tiempo real…';
+      if (msgEl) msgEl.textContent = TELEM_CONNECTED;
     };
     ws.onmessage = function(e) {
       try {
@@ -288,7 +307,7 @@
       } catch (err) {}
     };
     ws.onclose = function() {
-      document.querySelector('.card-fp .text-muted.small.mb-3').textContent = 'Desconectado. Reconectando en 3 s…';
+      if (msgEl) msgEl.textContent = TELEM_RECONNECT;
       setTimeout(connect, 3000);
     };
     ws.onerror = function() {};

@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Customize Dashboard - FleetPredict Pro{% endblock %}
+{% block title %}{% trans "Customize Dashboard - FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
-  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-  <li class="breadcrumb-item active">Customize</li>
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+  <li class="breadcrumb-item active">{% trans "Customize" %}</li>
 </ol></nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0"><i class="bi bi-grid-1x2 me-2"></i>Customize Dashboard</h2>
+  <h2 class="page-title mb-0"><i class="bi bi-grid-1x2 me-2"></i>{% trans "Customize Dashboard" %}</h2>
   <div class="d-flex gap-2">
-    <button id="saveLayout" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Save layout</button>
-    <form method="post" action="{% url 'dashboard:dashboard_reset' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-outline-secondary">Reset to default</button></form>
-    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">Back</a>
+    <button id="saveLayout" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>{% trans "Save layout" %}</button>
+    <form method="post" action="{% url 'dashboard:dashboard_reset' %}" class="d-inline">{% csrf_token %}<button type="submit" class="btn btn-outline-secondary">{% trans "Reset to default" %}</button></form>
+    <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary">{% trans "Back" %}</a>
   </div>
 </div>
 <div class="row g-3 mb-4">
   <div class="col-lg-3">
     <div class="card card-fp">
-      <div class="card-header">Available Widgets</div>
+      <div class="card-header">{% trans "Available Widgets" %}</div>
       <div class="card-body" id="widgetLibrary">
         {% for val, label in widget_choices %}
         <div class="widget-item border rounded p-2 mb-2" data-widget-type="{{ val }}" draggable="true" style="cursor:grab">
@@ -29,7 +29,7 @@
       </div>
     </div>
     <div class="card card-fp mt-3">
-      <div class="card-header">Widget Size</div>
+      <div class="card-header">{% trans "Widget Size" %}</div>
       <div class="card-body">
         <select id="widgetSize" class="form-select">
           {% for val, label in size_choices %}
@@ -41,7 +41,7 @@
   </div>
   <div class="col-lg-9">
     <div class="card card-fp">
-      <div class="card-header">Current Layout <span class="badge bg-secondary" id="widgetCount">0</span></div>
+      <div class="card-header">{% trans "Current Layout" %} <span class="badge bg-secondary" id="widgetCount">0</span></div>
       <div class="card-body">
         <div id="layoutArea" class="row g-2" style="min-height:200px;border:2px dashed #dee2e6;border-radius:.5rem;padding:1rem"></div>
       </div>
@@ -50,14 +50,24 @@
 </div>
 {% endblock %}
 {% block extra_js %}
+{% trans "Max 20 widgets." as js_max_widgets %}
+{% trans "Layout saved." as js_layout_saved %}
+{% trans "widgets" as js_widgets %}
+{% trans "Error:" as js_error %}
+{% trans "unknown" as js_unknown %}
 <script>
 (function(){
   var layout=JSON.parse('{{ layout_json|escapejs }}');
   var area=document.getElementById('layoutArea');
   var sizeSelect=document.getElementById('widgetSize');
   var csrfToken='{{ csrf_token }}';
+  var MSG_MAX="{{ js_max_widgets|escapejs }}";
+  var MSG_SAVED="{{ js_layout_saved|escapejs }}";
+  var MSG_WIDGETS="{{ js_widgets|escapejs }}";
+  var MSG_ERR="{{ js_error|escapejs }}";
+  var MSG_UNK="{{ js_unknown|escapejs }}";
   var wl={};
-  {% for val, label in widget_choices %}wl['{{ val }}']='{{ label }}';{% endfor %}
+  {% for val, label in widget_choices %}wl['{{ val }}']='{{ label|escapejs }}';{% endfor %}
   function sizeToCol(s){return s==='lg'?'col-12':s==='md'?'col-md-6':'col-md-4'}
   function render(){
     area.innerHTML='';
@@ -80,9 +90,9 @@
     el.ondragstart=function(e){e.dataTransfer.setData('text','a:'+el.dataset.widgetType)};
   });
   area.ondragover=function(e){e.preventDefault()};
-  area.ondrop=function(e){e.preventDefault();var d=e.dataTransfer.getData('text');if(d.startsWith('a:')){if(layout.length>=20){alert('Max 20 widgets.');return}layout.push({widget_type:d.split(':')[1],position:layout.length,size:sizeSelect.value});render()}};
+  area.ondrop=function(e){e.preventDefault();var d=e.dataTransfer.getData('text');if(d.startsWith('a:')){if(layout.length>=20){alert(MSG_MAX);return}layout.push({widget_type:d.split(':')[1],position:layout.length,size:sizeSelect.value});render()}};
   document.getElementById('saveLayout').onclick=function(){
-    fetch('{% url "dashboard:dashboard_customize" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(layout)}).then(function(r){return r.json()}).then(function(d){if(d.ok)alert('Layout saved ('+d.count+' widgets).');else alert('Error: '+(d.error||'unknown'))});
+    fetch('{% url "dashboard:dashboard_customize" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(layout)}).then(function(r){return r.json()}).then(function(d){if(d.ok)alert(MSG_SAVED+' ('+d.count+' '+MSG_WIDGETS+').');else alert(MSG_ERR+' '+(d.error||MSG_UNK))});
   };
   render();
 })();

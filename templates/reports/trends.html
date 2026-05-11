@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Maintenance Trends - FleetPredict Pro{% endblock %}
-{% block meta_description %}FR12: Maintenance completion trends.{% endblock %}
+{% block title %}{% trans "Maintenance Trends - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "FR12: Maintenance completion trends." %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Maintenance Trends</h2>
-  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to Reports</a>
+  <h2 class="page-title mb-0">{% trans "Maintenance Trends" %}</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">{% trans "Back to Reports" %}</a>
 </div>
-<p class="text-muted">Completed maintenance tasks in the last 90 days by month.</p>
+<p class="text-muted">{% trans "Completed maintenance tasks in the last 90 days by month." %}</p>
 <form method="get" class="row g-2 mb-3">
   <div class="col-md-3">
     <select name="vehicle" class="form-select form-select-sm">
-      <option value="">All vehicles</option>
+      <option value="">{% trans "All vehicles" %}</option>
       {% for vehicle in vehicles %}
       <option value="{{ vehicle.pk }}" {% if request.GET.vehicle == vehicle.pk|stringformat:'s' %}selected{% endif %}>{{ vehicle.license_plate }} - {{ vehicle.display_name }}</option>
       {% endfor %}
@@ -19,18 +19,18 @@
   </div>
   <div class="col-md-2"><input type="date" name="start" class="form-control form-control-sm" value="{{ request.GET.start }}"></div>
   <div class="col-md-2"><input type="date" name="end" class="form-control form-control-sm" value="{{ request.GET.end }}"></div>
-  <div class="col-md-2"><button class="btn btn-sm btn-primary">Apply filters</button></div>
+  <div class="col-md-2"><button class="btn btn-sm btn-primary">{% trans "Apply filters" %}</button></div>
 </form>
 <div class="card card-fp">
   <div class="card-body">
-    <p><strong>Total completed (90 days):</strong> {{ total_completed }}</p>
+    <p><strong>{% trans "Total completed (90 days):" %}</strong> {{ total_completed }}</p>
     <div class="table-responsive">
       <table class="table table-fp mb-0">
         <thead>
           <tr>
-            <th>Year</th>
-            <th>Month</th>
-            <th>Completed tasks</th>
+            <th>{% trans "Year" %}</th>
+            <th>{% trans "Month" %}</th>
+            <th>{% trans "Completed tasks" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,7 +41,7 @@
             <td>{{ row.count }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="3">No completed tasks in the last 90 days.</td></tr>
+          <tr><td colspan="3">{% trans "No completed tasks in the last 90 days." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

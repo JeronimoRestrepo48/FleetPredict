@@ -1,48 +1,48 @@
 {% extends "base.html" %}
 {% load i18n fp_extras %}
-{% block title %}Users - FleetPredict Pro{% endblock %}
-{% block meta_description %}Manage users and roles.{% endblock %}
+{% block title %}{% trans "Users - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Manage users and roles." %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Users</h2>
+  <h2 class="page-title mb-0">{% trans "Users" %}</h2>
 </div>
 <div class="card card-fp">
   <div class="card-body">
     <form method="get" class="row g-3 mb-3">
       <div class="col-md-4">
-        <label for="id_search" class="form-label visually-hidden">Search</label>
-        <input type="text" name="search" id="id_search" class="form-control" placeholder="Search by name or email" value="{{ request.GET.search }}">
+        <label for="id_search" class="form-label visually-hidden">{% trans "Search" %}</label>
+        <input type="text" name="search" id="id_search" class="form-control" placeholder="{% trans 'Search by name or email' %}" value="{{ request.GET.search }}">
       </div>
       <div class="col-md-2">
-        <label for="id_role_filter" class="form-label visually-hidden">Filter by role</label>
-        <select name="role" id="id_role_filter" class="form-select" aria-label="Filter by role">
-          <option value="">All roles</option>
+        <label for="id_role_filter" class="form-label visually-hidden">{% trans "Filter by role" %}</label>
+        <select name="role" id="id_role_filter" class="form-select" aria-label="{% trans 'Filter by role' %}">
+          <option value="">{% trans "All roles" %}</option>
           {% for value, label in roles %}
           <option value="{{ value }}" {% if request.GET.role == value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-2">
-        <label for="id_per_page" class="form-label visually-hidden">Per page</label>
-        <select name="per_page" id="id_per_page" class="form-select" aria-label="Results per page">
+        <label for="id_per_page" class="form-label visually-hidden">{% trans "Per page" %}</label>
+        <select name="per_page" id="id_per_page" class="form-select" aria-label="{% trans 'Results per page' %}">
           <option value="10" {% if request.GET.per_page == '10' %}selected{% endif %}>10</option>
           <option value="20" {% if request.GET.per_page == '20' or not request.GET.per_page %}selected{% endif %}>20</option>
           <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
         </select>
       </div>
       <div class="col-md-4 d-flex gap-2 align-items-end">
-        <button type="submit" class="btn btn-primary">Filter</button>
-        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">Clear</a>
+        <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">{% trans "Clear" %}</a>
       </div>
     </form>
     <div class="fp-table-wrap table-responsive">
       <table class="table table-fp table-hover">
         <thead>
           <tr>
-            <th>Email</th>
-            <th>Name</th>
-            <th>Role</th>
-            <th>Active</th>
+            <th>{% trans "Email" %}</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Role" %}</th>
+            <th>{% trans "Active" %}</th>
             <th></th>
           </tr>
         </thead>
@@ -52,11 +52,11 @@
             <td>{{ u.email }}</td>
             <td>{{ u.get_full_name }}</td>
             <td>{{ u.get_role_display }}</td>
-            <td>{% if u.is_active %}Yes{% else %}No{% endif %}</td>
-            <td><a href="{% url 'users:user_detail' u.pk %}"><i class="bi bi-eye me-1"></i>View</a></td>
+            <td>{% if u.is_active %}{% trans "Yes" %}{% else %}{% trans "No" %}{% endif %}</td>
+            <td><a href="{% url 'users:user_detail' u.pk %}"><i class="bi bi-eye me-1"></i>{% trans "View" %}</a></td>
           </tr>
           {% empty %}
-          <tr><td colspan="5">No users found.</td></tr>
+          <tr><td colspan="5">{% trans "No users found." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -65,21 +65,21 @@
       {% for u in users %}
       <div class="fp-list-card">
         <div class="fp-list-card-title">{{ u.get_full_name }} · {{ u.email }}</div>
-        <div class="fp-list-card-meta">{{ u.get_role_display }} · {% if u.is_active %}Active{% else %}Inactive{% endif %}</div>
+        <div class="fp-list-card-meta">{{ u.get_role_display }} · {% if u.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif %}</div>
         <div class="fp-list-card-actions">
-          <a href="{% url 'users:user_detail' u.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+          <a href="{% url 'users:user_detail' u.pk %}" class="btn btn-sm btn-outline-primary">{% trans "View" %}</a>
         </div>
       </div>
       {% empty %}
-      <p class="text-muted mb-0">No users found.</p>
+      <p class="text-muted mb-0">{% trans "No users found." %}</p>
       {% endfor %}
     </div>
     {% if is_paginated %}
     <nav class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3">
-      <div class="small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} ({{ page_obj.paginator.count }} total)</div>
+      <div class="small text-muted">{% blocktrans with num=page_obj.number npages=page_obj.paginator.num_pages ntotal=page_obj.paginator.count %}Page {{ num }} of {{ npages }} ({{ ntotal }} total){% endblocktrans %}</div>
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{% trans "Previous" %}</a></li>
         {% endif %}
         {% for p in page_obj|pagination_window:5 %}
         {% if p %}
@@ -93,7 +93,7 @@
         {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{% trans "Next" %}</a></li>
         {% endif %}
       </ul>
     </nav>

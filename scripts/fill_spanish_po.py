@@ -8,6 +8,8 @@ from __future__ import annotations
 import pathlib
 import re
 
+import polib
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PO_PATH = ROOT / "locale" / "es" / "LC_MESSAGES" / "django.po"
 
@@ -188,6 +190,7 @@ ES: dict[str, str] = {
     "FleetPredict Pro – Predictive fleet maintenance and vehicle management.": "FleetPredict Pro: mantenimiento predictivo de flotas y gestión de vehículos.",
     "Toggle navigation": "Alternar navegación",
     "Dashboard": "Panel",
+    "Dashboard - FleetPredict Pro": "Panel - FleetPredict Pro",
     "Alerts": "Alertas",
     "Help": "Ayuda",
     "Fleet": "Flota",
@@ -579,6 +582,511 @@ ES: dict[str, str] = {
     "Low Stock Alert - FleetPredict Pro": "Alerta de stock bajo - FleetPredict Pro",
     "Low stock alert": "Alerta de stock bajo",
     "Low Stock Alert": "Alerta de stock bajo",
+    "My alerts - FleetPredict Pro": "Mis alertas - FleetPredict Pro",
+    "Notification center.": "Centro de notificaciones.",
+    "My alerts": "Mis alertas",
+    "Severity": "Gravedad",
+    "All severities": "Todas las gravedades",
+    "Unread": "No leídas",
+    "Read": "Leídas",
+    "Message": "Mensaje",
+    "Actions": "Acciones",
+    "No alerts.": "No hay alertas.",
+    "Help center - FleetPredict Pro": "Centro de ayuda - FleetPredict Pro",
+    "1. Quick navigation": "1. Navegación rápida",
+    "Use breadcrumbs on each page to know where you are.": (
+        "Usa las migas de pan en cada página para saber dónde estás."
+    ),
+    "Use the quick bar buttons: <strong>Go back</strong>, <strong>Go to dashboard</strong>, and <strong>Help center</strong>.": (
+        "Usa los botones de la barra rápida: <strong>Volver</strong>, <strong>Ir al panel</strong> y "
+        "<strong>Centro de ayuda</strong>."
+    ),
+    "Fleet features are under <strong>Fleet</strong>, maintenance and stock under <strong>Maintenance</strong>.": (
+        "Las funciones de flota están en <strong>Flota</strong>; el mantenimiento y el stock, en "
+        "<strong>Mantenimiento</strong>."
+    ),
+    "2. Preventing mistakes": "2. Evitar errores",
+    "Dangerous actions ask for confirmation before continuing.": (
+        "Las acciones peligrosas piden confirmación antes de continuar."
+    ),
+    "Forms validate fields and highlight invalid values.": (
+        "Los formularios validan los campos y resaltan los valores no válidos."
+    ),
+    "If you edit a form and try to leave, the app warns about unsaved changes.": (
+        "Si editas un formulario e intentas salir, la aplicación avisa sobre cambios sin guardar."
+    ),
+    "3. Error recovery": "3. Recuperación ante errores",
+    "System messages (top-right) explain successful or failed actions.": (
+        "Los mensajes del sistema (arriba a la derecha) explican si las acciones tuvieron éxito o fallaron."
+    ),
+    "On permission errors, check your role or try a route available to your profile.": (
+        "Si hay errores de permisos, revisa tu rol o prueba una ruta disponible para tu perfil."
+    ),
+    "If telemetry pages look empty, verify live telemetry is running and date filters are correct.": (
+        "Si las páginas de telemetría se ven vacías, comprueba que la telemetría en vivo esté activa y que los "
+        "filtros de fecha sean correctos."
+    ),
+    "Recommended user flows": "Flujos de usuario recomendados",
+    "Fleet manager flow": "Flujo del gestor de flota",
+    "Open <strong>Fleet → Vehicles</strong> and select a vehicle.": (
+        "Abre <strong>Flota → Vehículos</strong> y selecciona un vehículo."
+    ),
+    "Review Sensors, GPS, Driving and Mileage panels.": (
+        "Revisa los paneles de sensores, GPS, conducción y kilometraje."
+    ),
+    "Open <strong>Maintenance → Tasks</strong> to schedule work.": (
+        "Abre <strong>Mantenimiento → Tareas</strong> para programar trabajos."
+    ),
+    "Use <strong>Maintenance → Spare parts</strong> to adjust stock if needed.": (
+        "Usa <strong>Mantenimiento → Repuestos</strong> para ajustar el stock si hace falta."
+    ),
+    "Reports and decisions flow": "Flujo de informes y decisiones",
+    "Open <strong>Reports &amp; predictions</strong>.": (
+        "Abre <strong>Informes y predicciones</strong>."
+    ),
+    "Check failure predictions, review criticality reasons, and override only with a clear reason.": (
+        "Revisa predicciones de fallo, los motivos de criticidad y anula solo con un motivo claro."
+    ),
+    "Review suggested maintenance, adjust the proposed date/priority, then create the task.": (
+        "Revisa el mantenimiento sugerido, ajusta la fecha o prioridad propuesta y crea la tarea."
+    ),
+    "Download PDF reports or use <strong>Export Center</strong> for spreadsheet-ready data.": (
+        "Descarga informes PDF o usa el <strong>Centro de exportación</strong> para datos listos para hojas de cálculo."
+    ),
+    "Administrators should review <strong>Settings → Audit log</strong> after critical operations.": (
+        "Los administradores deberían revisar <strong>Configuración → Registro de auditoría</strong> tras operaciones "
+        "críticas."
+    ),
+    "Comparison Report - FleetPredict Pro": "Informe comparativo - FleetPredict Pro",
+    "FR14/15: Compare vehicles by maintenance count and cost.": (
+        "FR14/15: compara vehículos por número de mantenimientos y costo."
+    ),
+    "Comparison Report (FR14/15)": "Informe comparativo (FR14/15)",
+    "Back to Reports": "Volver a informes",
+    "Vehicles compared by number of completed tasks and total cost.": (
+        "Vehículos comparados por tareas completadas y costo total."
+    ),
+    "All vehicles": "Todos los vehículos",
+    "Apply filters": "Aplicar filtros",
+    "Total cost": "Costo total",
+    "Cost Report - FleetPredict Pro": "Informe de costos - FleetPredict Pro",
+    "FR13: Maintenance cost by vehicle.": "FR13: costo de mantenimiento por vehículo.",
+    "Cost Report": "Informe de costos",
+    "Actual cost of completed maintenance by vehicle.": (
+        "Costo real del mantenimiento completado por vehículo."
+    ),
+    "Grand total (all vehicles):": "Total general (todos los vehículos):",
+    "No completed maintenance with cost data.": (
+        "No hay mantenimiento completado con datos de costo."
+    ),
+    "Export Center - FleetPredict Pro": "Centro de exportación - FleetPredict Pro",
+    "Export Center": "Centro de exportación",
+    "Back to reports": "Volver a informes",
+    "Export operational data with role-aware visibility. Files are CSV and open directly in Excel or Google Sheets.": (
+        "Exporta datos operativos según visibilidad por rol. Los archivos son CSV y se abren en Excel o Google Sheets."
+    ),
+    "Dataset": "Conjunto de datos",
+    "Format": "Formato",
+    "Vehicle filter": "Filtro de vehículo",
+    "All visible vehicles": "Todos los vehículos visibles",
+    "Start": "Inicio",
+    "End": "Fin",
+    "Generate export": "Generar exportación",
+    "Recent export history": "Historial reciente de exportaciones",
+    "Rows": "Filas",
+    "Expires": "Caduca",
+    "No exports yet.": "Aún no hay exportaciones.",
+    "Reports - FleetPredict Pro": "Informes - FleetPredict Pro",
+    "Export PDF reports per vehicle or fleet.": (
+        "Exporta informes PDF por vehículo o de toda la flota."
+    ),
+    "Fleet report": "Informe de flota",
+    "Download a PDF summary of all visible vehicles (health, latest alert, upcoming maintenance, mileage).": (
+        "Descarga un PDF resumido de todos los vehículos visibles (salud, última alerta, mantenimiento próximo, "
+        "kilometraje)."
+    ),
+    "Download fleet report (PDF)": "Descargar informe de flota (PDF)",
+    "Per-vehicle report": "Informe por vehículo",
+    "For a detailed vehicle report (maintenance history, recent alerts, telemetry), open the vehicle detail and use the \"Export PDF report\" button.": (
+        "Para un informe detallado del vehículo (historial de mantenimiento, alertas recientes, telemetría), abre el "
+        "detalle del vehículo y usa el botón «Exportar informe PDF»."
+    ),
+    "Go to vehicle list": "Ir a la lista de vehículos",
+    "Analytics reports (FR12–15)": "Informes analíticos (FR12–15)",
+    "Maintenance trends, cost by vehicle, and comparison.": (
+        "Tendencias de mantenimiento, costo por vehículo y comparación."
+    ),
+    "Trends": "Tendencias",
+    "Comparison": "Comparación",
+    "Commercial report schedule": "Programación de informes comerciales",
+    "Save report delivery metadata for weekly or monthly operational reviews.": (
+        "Guarda metadatos de entrega de informes para revisiones operativas semanales o mensuales."
+    ),
+    "Schedule name": "Nombre del programa",
+    "Weekly": "Semanal",
+    "Monthly": "Mensual",
+    "ops@example.com": "ops@example.com",
+    "Frequency": "Frecuencia",
+    "Recipients": "Destinatarios",
+    "Maintenance Trends - FleetPredict Pro": "Tendencias de mantenimiento - FleetPredict Pro",
+    "FR12: Maintenance completion trends.": "FR12: tendencias de mantenimiento completado.",
+    "Maintenance Trends": "Tendencias de mantenimiento",
+    "Completed maintenance tasks in the last 90 days by month.": (
+        "Tareas de mantenimiento completadas en los últimos 90 días por mes."
+    ),
+    "Total completed (90 days):": "Total completado (90 días):",
+    "Year": "Año",
+    "Month": "Mes",
+    "No completed tasks in the last 90 days.": (
+        "No hay tareas completadas en los últimos 90 días."
+    ),
+    "Route History - FleetPredict Pro": "Historial de rutas - FleetPredict Pro",
+    "Route History": "Historial de rutas",
+    "Plan route": "Planificar ruta",
+    "Origin": "Origen",
+    "Destination": "Destino",
+    "No routes planned yet.": "Aún no hay rutas planificadas.",
+    "Route Planner - FleetPredict Pro": "Planificador de rutas - FleetPredict Pro",
+    "Route Planner": "Planificador de rutas",
+    "Enter origin, destination, and select a vehicle. The system will suggest 3 route alternatives based on vehicle health and your optimization priority.": (
+        "Indica origen, destino y selecciona un vehículo. El sistema sugerirá 3 alternativas de ruta según la salud "
+        "del vehículo y tu prioridad de optimización."
+    ),
+    "Get suggestions": "Obtener sugerencias",
+    "Route history": "Historial de rutas",
+    "Route Suggestions - FleetPredict Pro": "Sugerencias de ruta - FleetPredict Pro",
+    "Suggestions": "Sugerencias",
+    "Route Suggestions": "Sugerencias de ruta",
+    "Recommended": "Recomendada",
+    "Distance:": "Distancia:",
+    "Time:": "Tiempo:",
+    "Fuel cost:": "Costo de combustible:",
+    "Select this route": "Seleccionar esta ruta",
+    "Plan another route": "Planificar otra ruta",
+    "Profile - FleetPredict Pro": "Perfil - FleetPredict Pro",
+    "Your FleetPredict Pro profile and notification preferences.": (
+        "Tu perfil de FleetPredict Pro y preferencias de notificación."
+    ),
+    "Notification preferences": "Preferencias de notificación",
+    "Email notifications": "Notificaciones por correo",
+    "Maintenance due alerts": "Alertas de mantenimiento próximo",
+    "Overdue maintenance alerts": "Alertas de mantenimiento vencido",
+    "Critical alerts": "Alertas críticas",
+    "Yes": "Sí",
+    "No": "No",
+    "Date joined": "Fecha de registro",
+    "Users - FleetPredict Pro": "Usuarios - FleetPredict Pro",
+    "Manage users and roles.": "Gestiona usuarios y roles.",
+    "Search by name or email": "Buscar por nombre o correo",
+    "Filter by role": "Filtrar por rol",
+    "All roles": "Todos los roles",
+    "No users found.": "No se encontraron usuarios.",
+    "Vehicle details and maintenance history.": (
+        "Detalle del vehículo e historial de mantenimiento."
+    ),
+    "Sensors": "Sensores",
+    "GPS": "GPS",
+    "Driving": "Conducción",
+    "Export PDF report": "Exportar informe PDF",
+    "Delete vehicle": "Eliminar vehículo",
+    "This will mark the vehicle as retired. Historical data will be preserved.": (
+        "Esto marcará el vehículo como retirado. Los datos históricos se conservarán."
+    ),
+    "Health indicator": "Indicador de salud",
+    "This vehicle has status": "Este vehículo tiene estado",
+    "because:": "porque:",
+    "Vehicle Information": "Información del vehículo",
+    "VIN": "VIN",
+    "Make / Model": "Marca / modelo",
+    "Color": "Color",
+    "Why this health status?": "¿Por qué este estado de salud?",
+    "Current Mileage": "Kilometraje actual",
+    "km": "km",
+    "Fuel Type": "Tipo de combustible",
+    "Assigned Driver": "Conductor asignado",
+    "Total maintenance tasks:": "Total de tareas de mantenimiento:",
+    "Last maintenance:": "Último mantenimiento:",
+    "Never": "Nunca",
+    "View History": "Ver historial",
+    "Add requirement": "Agregar requisito",
+    "Requirement": "Requisito",
+    "Expiration": "Vencimiento",
+    "Expired": "Vencido",
+    "No compliance requirements.": "No hay requisitos de cumplimiento.",
+    "Add one to track inspections, licenses, etc.": (
+        "Agrega uno para seguir inspecciones, licencias, etc."
+    ),
+    "Live telemetry": "Telemetría en vivo",
+    "Connecting…": "Conectando…",
+    "Speed": "Velocidad",
+    "—": "—",
+    "Fuel %%": "Combustible %%",
+    "Engine temp °C": "Temp. motor °C",
+    "RPM": "RPM",
+    "Odometer km": "Odómetro km",
+    "Voltage": "Voltaje",
+    "Position": "Posición",
+    "Last reading": "Última lectura",
+    "Connected. Waiting for live data…": "Conectado. Esperando datos en tiempo real…",
+    "Disconnected. Reconnecting in 3 s…": "Desconectado. Reconectando en 3 s…",
+    "km/h": "km/h",
+    "%%": "%%",
+    "°C": "°C",
+    "V": "V",
+    "Edit Vehicle": "Editar vehículo",
+    "Edit vehicle details.": "Editar datos del vehículo.",
+    "Add a new vehicle to the fleet.": "Agregar un vehículo nuevo a la flota.",
+    "Make": "Marca",
+    "Model": "Modelo",
+    "Vehicle Type": "Tipo de vehículo",
+    "Current Mileage (km)": "Kilometraje actual (km)",
+    "Fuel Capacity (L)": "Capacidad de combustible (L)",
+    "Create alert rule - FleetPredict Pro": "Crear regla de alerta - FleetPredict Pro",
+    "Create alert rule": "Crear regla de alerta",
+    "Back to rules": "Volver a reglas",
+    "Add a new alert rule. Select the rule type, set the value, and enable it.": (
+        "Agrega una regla de alerta nueva. Elige el tipo, ajusta el valor y actívala."
+    ),
+    "Create rule": "Crear regla",
+    "Edit alert rule - FleetPredict Pro": "Editar regla de alerta - FleetPredict Pro",
+    "Edit alert rule": "Editar regla de alerta",
+    "Alert rules - FleetPredict Pro": "Reglas de alerta - FleetPredict Pro",
+    "Alert rules": "Reglas de alerta",
+    "Add rule": "Agregar regla",
+    "Back to dashboard": "Volver al panel",
+    "Configure when alerts are triggered.": "Configura cuándo se generan las alertas.",
+    "Add new rules with <strong>Add rule</strong>, or": (
+        "Agrega reglas nuevas con <strong>Agregar regla</strong>, o"
+    ),
+    "adjust the values below and click <strong>Save</strong> to apply changes.": (
+        "ajusta los valores siguientes y pulsa <strong>Guardar</strong> para aplicar los cambios."
+    ),
+    "Rule": "Regla",
+    "Value": "Valor",
+    "Action": "Acción",
+    "Maintenance: alert when a task is due within N days": (
+        "Mantenimiento: alerta cuando una tarea vence en N días"
+    ),
+    "Maintenance: alert when a task is overdue": (
+        "Mantenimiento: alerta cuando una tarea está vencida"
+    ),
+    "Compliance: show banner when requirements expire within N days": (
+        "Cumplimiento: aviso cuando los requisitos vencen en N días"
+    ),
+    "Work orders: (reserved) due within N days window": (
+        "Órdenes de trabajo: (reservado) ventana de vencimiento en N días"
+    ),
+    "No rules. Default rules are created on first load.": (
+        "No hay reglas. Se crean reglas predeterminadas en la primera carga."
+    ),
+    "Delete threshold - FleetPredict Pro": "Eliminar umbral - FleetPredict Pro",
+    "Delete threshold": "Eliminar umbral",
+    "Are you sure you want to delete this threshold?": (
+        "¿Seguro que deseas eliminar este umbral?"
+    ),
+    "Edit threshold - FleetPredict Pro": "Editar umbral - FleetPredict Pro",
+    "Create threshold - FleetPredict Pro": "Crear umbral - FleetPredict Pro",
+    "Edit threshold": "Editar umbral",
+    "Create threshold": "Crear umbral",
+    "Back to thresholds": "Volver a umbrales",
+    "Define a trigger: select the telemetry attribute, comparison operator, threshold value, and severity. When the attribute crosses the threshold, an alert is created.": (
+        "Define un disparador: elige el atributo de telemetría, el operador, el valor umbral y la gravedad. "
+        "Cuando el atributo cruza el umbral, se crea una alerta."
+    ),
+    "Attribute": "Atributo",
+    "Operator": "Operador",
+    "Threshold value": "Valor umbral",
+    "Label (optional)": "Etiqueta (opcional)",
+    "Enabled": "Activado",
+    "Telemetry thresholds - FleetPredict Pro": "Umbrales de telemetría - FleetPredict Pro",
+    "Telemetry thresholds": "Umbrales de telemetría",
+    "Add threshold": "Agregar umbral",
+    "Create triggers and thresholds for telemetry attributes. When a value crosses the threshold, an alert is generated (e.g. engine temperature ≥ 105 °C, fuel level ≤ 15%).": (
+        "Crea disparadores y umbrales para atributos de telemetría. Cuando un valor cruza el umbral, se genera una "
+        "alerta (p. ej. temperatura del motor ≥ 105 °C, nivel de combustible ≤ 15 %)."
+    ),
+    "Condition": "Condición",
+    "Label": "Etiqueta",
+    "No thresholds yet. Click <strong>Add threshold</strong> to create one.": (
+        "Aún no hay umbrales. Pulsa <strong>Agregar umbral</strong> para crear uno."
+    ),
+    "Audit Log - FleetPredict Pro": "Registro de auditoría - FleetPredict Pro",
+    "FR27: User action audit log.": "FR27: registro de auditoría de acciones.",
+    "Audit Log": "Registro de auditoría",
+    "Back to Dashboard": "Volver al panel",
+    "Export CSV": "Exportar CSV",
+    "All actions": "Todas las acciones",
+    "Model name": "Nombre del modelo",
+    "User email/name": "Correo o nombre de usuario",
+    "Search message/object": "Buscar en mensaje/objeto",
+    "Object ID": "ID de objeto",
+    "Changes": "Cambios",
+    "IP": "IP",
+    "No audit log entries.": "No hay entradas en el registro de auditoría.",
+    "View": "Ver",
+    "Customize Dashboard - FleetPredict Pro": "Personalizar panel - FleetPredict Pro",
+    "Customize Dashboard": "Personalizar panel",
+    "Save layout": "Guardar diseño",
+    "Reset to default": "Restablecer predeterminado",
+    "Available Widgets": "Widgets disponibles",
+    "Widget Size": "Tamaño del widget",
+    "Current Layout": "Diseño actual",
+    "Max 20 widgets.": "Máximo 20 widgets.",
+    "Layout saved.": "Diseño guardado.",
+    "widgets": "widgets",
+    "Error:": "Error:",
+    "unknown": "desconocido",
+    "Platform overview: users, vehicle types, audit activity.": (
+        "Resumen de la plataforma: usuarios, tipos de vehículo y actividad de auditoría."
+    ),
+    "Platform Overview": "Resumen de la plataforma",
+    "Total Users": "Usuarios totales",
+    "Fleet Vehicles": "Vehículos de la flota",
+    "Users by Role": "Usuarios por rol",
+    "Quick Links": "Enlaces rápidos",
+    "Manage Users": "Gestionar usuarios",
+    "Django Admin": "Administración Django",
+    "Recent Audit Activity": "Actividad reciente de auditoría",
+    "View full audit log": "Ver registro completo",
+    "No audit entries yet.": "Aún no hay entradas de auditoría.",
+    "Your assigned maintenance tasks and workload.": (
+        "Tareas de mantenimiento asignadas y carga de trabajo."
+    ),
+    "My Workload": "Mi carga de trabajo",
+    "Assigned to Me": "Asignadas a mí",
+    "Unassigned": "Sin asignar",
+    "Tasks by Status": "Tareas por estado",
+    "Recent Completions (Mine)": "Completadas recientes (mías)",
+    "No recent completions.": "No hay completadas recientes.",
+    "View all maintenance tasks": "Ver todas las tareas de mantenimiento",
+    "Failure predictions - FleetPredict Pro": "Predicciones de fallo - FleetPredict Pro",
+    "Failure predictions": "Predicciones de fallo",
+    "Failure recommendations per vehicle.": "Recomendaciones de fallo por vehículo.",
+    "Vehicle, type, confidence, timeframe and explainable criticality. FR10 is now actionable and auditable.": (
+        "Vehículo, tipo, confianza, plazo y criticidad explicable. FR10 es accionable y auditable."
+    ),
+    "Newest first": "Más recientes primero",
+    "Criticality first": "Criticidad primero",
+    "Why": "Motivo",
+    "Confidence": "Confianza",
+    "Timeframe": "Plazo",
+    "Reason required": "Motivo obligatorio",
+    "Save override": "Guardar anulación",
+    "No prediction alerts.": "No hay alertas de predicción.",
+    "Suggested Maintenance - FleetPredict Pro": "Mantenimiento sugerido - FleetPredict Pro",
+    "Suggested Maintenance": "Mantenimiento sugerido",
+    "Suggested maintenance": "Mantenimiento sugerido",
+    "Accept or dismiss suggested maintenance from predictions.": (
+        "Acepta o descarta el mantenimiento sugerido a partir de predicciones."
+    ),
+    "Recommendations from predictions. Review the evidence, adjust the plan, then accept or dismiss with a reason.": (
+        "Recomendaciones desde predicciones. Revisa la evidencia, ajusta el plan y acepta o descarta con un motivo."
+    ),
+    "Reasoning": "Razonamiento",
+    "Review and accept": "Revisar y aceptar",
+    "Suggested": "Sugerido",
+    "Create task": "Crear tarea",
+    "Dismiss reason": "Motivo del descarte",
+    "Dismiss": "Descartar",
+    "No pending suggestions. Accepted and dismissed items no longer appear here.": (
+        "No hay sugerencias pendientes. Las aceptadas o descartadas ya no aparecen aquí."
+    ),
+    "Delete Compliance - FleetPredict Pro": "Eliminar cumplimiento - FleetPredict Pro",
+    "Delete compliance requirement": "Eliminar requisito de cumplimiento",
+    "Edit Compliance - FleetPredict Pro": "Editar cumplimiento - FleetPredict Pro",
+    "Add Compliance - FleetPredict Pro": "Agregar cumplimiento - FleetPredict Pro",
+    "Edit Compliance Requirement": "Editar requisito de cumplimiento",
+    "Add Compliance Requirement": "Agregar requisito de cumplimiento",
+    "Expiration date": "Fecha de vencimiento",
+    "Issuing authority": "Autoridad emisora",
+    "Document reference": "Referencia del documento",
+    "Regulatory compliance requirements.": "Requisitos regulatorios de cumplimiento.",
+    "Compliance - FleetPredict Pro": "Cumplimiento - FleetPredict Pro",
+    "Compliance Requirements": "Requisitos de cumplimiento",
+    "Expiring (30 days)": "Por vencer (30 días)",
+    "Expiring": "Por vencer",
+    "No compliance requirements. Add one from Vehicles or here.": (
+        "No hay requisitos de cumplimiento. Agrega uno desde Vehículos o aquí."
+    ),
+    "Driving Analysis": "Análisis de conducción",
+    "Driving analysis": "Análisis de conducción",
+    "Total km": "Km totales",
+    "Avg speed": "Velocidad prom.",
+    "Driving hours": "Horas de conducción",
+    "Aggressive events": "Eventos agresivos",
+    "Recent Driving Patterns": "Patrones recientes de conducción",
+    "Period": "Período",
+    "Km": "Km",
+    "Driving h": "h conducción",
+    "Idle h": "h ralentí",
+    "Max speed": "Velocidad máx.",
+    "Aggressive": "Agresivo",
+    "No driving pattern data yet.": "Aún no hay datos de patrones de conducción.",
+    "GPS Map": "Mapa GPS",
+    "N/A": "N/D",
+    "Track summary:": "Resumen del recorrido:",
+    "points": "puntos",
+    "km approx.": "km aprox.",
+    "Last update:": "Última actualización:",
+    "No GPS data for this period.": "No hay datos GPS en este período.",
+    "Start": "Inicio",
+    "Latest": "Último",
+    "Speed:": "Velocidad:",
+    "Mileage Report": "Informe de kilometraje",
+    "Mileage report": "Informe de kilometraje",
+    "Current odometer": "Odómetro actual",
+    "Daily Mileage": "Kilometraje diario",
+    "Sensor Dashboard": "Panel de sensores",
+    "Add reading": "Agregar lectura",
+    "Upload CSV": "Subir CSV",
+    "1 day": "1 día",
+    "90 days": "90 días",
+    "Sensor type": "Tipo de sensor",
+    "No sensor readings for the selected period.": (
+        "No hay lecturas de sensores en el período seleccionado."
+    ),
+    "Add Sensor Reading - FleetPredict Pro": "Agregar lectura de sensor - FleetPredict Pro",
+    "Add sensor reading": "Agregar lectura de sensor",
+    "Add Sensor Reading": "Agregar lectura de sensor",
+    "Save reading": "Guardar lectura",
+    "Upload Sensor CSV": "Subir CSV de sensores",
+    "Upload Sensor Readings": "Subir lecturas de sensores",
+    "Import": "Importar",
+    "Delete Vehicle - FleetPredict Pro": "Eliminar vehículo - FleetPredict Pro",
+    "Delete Vehicle": "Eliminar vehículo",
+    "Maintenance History": "Historial de mantenimiento",
+    "Back to Vehicle": "Volver al vehículo",
+    "No maintenance history.": "No hay historial de mantenimiento.",
+    "Delete Vehicle Type - FleetPredict Pro": "Eliminar tipo de vehículo - FleetPredict Pro",
+    "Delete vehicle type": "Eliminar tipo de vehículo",
+    "Are you sure you want to delete <strong>%(name)s</strong>?": (
+        "¿Seguro que deseas eliminar <strong>%(name)s</strong>?"
+    ),
+    "This type is used by one vehicle. Reassign it before deleting.": (
+        "Este tipo está asignado a un vehículo. Reasígnalo antes de eliminar."
+    ),
+    "This type is used by %(c)s vehicles. Reassign them before deleting.": (
+        "Este tipo está asignado a %(c)s vehículos. Reasígnalos antes de eliminar."
+    ),
+    "Edit Vehicle Type - FleetPredict Pro": "Editar tipo de vehículo - FleetPredict Pro",
+    "Add Vehicle Type - FleetPredict Pro": "Agregar tipo de vehículo - FleetPredict Pro",
+    "Edit Vehicle Type": "Editar tipo de vehículo",
+    "Add Vehicle Type": "Agregar tipo de vehículo",
+    "Maintenance interval (days)": "Intervalo de mantenimiento (días)",
+    "Maintenance interval (km)": "Intervalo de mantenimiento (km)",
+    "Vehicle Types - FleetPredict Pro": "Tipos de vehículo - FleetPredict Pro",
+    "Vehicle Types": "Tipos de vehículo",
+    "Manage vehicle types and maintenance intervals.": (
+        "Gestiona tipos de vehículo e intervalos de mantenimiento."
+    ),
+    "Add type": "Agregar tipo",
+    "Back to vehicles": "Volver a vehículos",
+    "Back to types": "Volver a tipos",
+    "Interval (days)": "Intervalo (días)",
+    "Interval (km)": "Intervalo (km)",
+    "No vehicle types. Add one to use in vehicles.": (
+        "No hay tipos de vehículo. Agrega uno para usarlo en vehículos."
+    ),
     "Add": "Agregar",
 }
 
@@ -703,7 +1211,98 @@ def fill_multiline_entries(text: str) -> str:
         '"cambiará."\n'
     )
     text = text.replace(pwd_ignore, pwd_ignore_es)
+    # Corrupt duplicate msgstr (from bad fuzzy merge) for dashboard meta_description
+    bad_fleet = (
+        'msgid "Fleet overview, vehicle status, maintenance tasks and key metrics."\n'
+        'msgstr ""\n'
+        '"Resumen de la flota, estado de vehículos, tareas de mantenimiento e "\n'
+        '"indicadores clave.Resumen de la flota, estado de vehículos, tareas de "\n'
+        '"mantenimiento e indicadores clave.Resumen de la flota, estado de vehículos, "\n'
+        '"tareas de mantenimiento e indicadores clave.Resumen de la flota, estado de "\n'
+        '"vehículos, tareas de mantenimiento e indicadores clave."\n'
+    )
+    good_fleet = (
+        'msgid "Fleet overview, vehicle status, maintenance tasks and key metrics."\n'
+        'msgstr ""\n'
+        '"Resumen de la flota, estado de vehículos, tareas de mantenimiento e "\n'
+        '"indicadores clave."\n'
+    )
+    text = text.replace(bad_fleet, good_fleet)
+    retired_old = (
+        'msgid ""\n'
+        '"This will mark the vehicle as retired. Historical data will be preserved."\n'
+        'msgstr ""\n'
+    )
+    retired_new = (
+        'msgid ""\n'
+        '"This will mark the vehicle as retired. Historical data will be preserved."\n'
+        'msgstr ""\n'
+        '"Esto marcará el vehículo como retirado. Los datos históricos se conservarán."\n'
+    )
+    text = text.replace(retired_old, retired_new)
+    thresh_help_old = (
+        'msgid ""\n'
+        '"Create triggers and thresholds for telemetry attributes. When a value "\n'
+        '"crosses the threshold, an alert is generated (e.g. engine temperature ≥ 105 "\n'
+        '"°C, fuel level ≤ 15%%)."\n'
+        'msgstr ""\n'
+    )
+    thresh_help_new = (
+        'msgid ""\n'
+        '"Create triggers and thresholds for telemetry attributes. When a value "\n'
+        '"crosses the threshold, an alert is generated (e.g. engine temperature ≥ 105 "\n'
+        '"°C, fuel level ≤ 15%%)."\n'
+        'msgstr ""\n'
+        '"Crea disparadores y umbrales para atributos de telemetría. Cuando un valor "\n'
+        '"cruza el umbral, se genera una alerta (p. ej. temperatura del motor ≥ 105 °C, "\n'
+        '"nivel de combustible ≤ 15 %%)."\n'
+    )
+    text = text.replace(thresh_help_old, thresh_help_new)
+    compliance_remove_old = (
+        '#, python-format\n'
+        'msgid ""\n'
+        '"Are you sure you want to remove <strong>%(name)s</strong> (%(rtype)s) for "\n'
+        '"%(vehicle)s?"\n'
+        'msgstr ""\n'
+    )
+    compliance_remove_new = (
+        '#, python-format\n'
+        'msgid ""\n'
+        '"Are you sure you want to remove <strong>%(name)s</strong> (%(rtype)s) for "\n'
+        '"%(vehicle)s?"\n'
+        'msgstr ""\n'
+        '"¿Seguro que deseas quitar <strong>%(name)s</strong> (%(rtype)s) de %(vehicle)s?"\n'
+    )
+    text = text.replace(compliance_remove_old, compliance_remove_new)
     return text
+
+
+def apply_es_dict_to_po_file(po_path: pathlib.Path, es: dict[str, str]) -> None:
+    """Overwrite msgstr for every entry whose msgid exists in es (fixes multiline msgids and stale merges)."""
+    po = polib.pofile(str(po_path))
+    for entry in po:
+        if entry.msgid in es:
+            entry.msgstr = es[entry.msgid]
+            if "fuzzy" in entry.flags:
+                entry.flags.remove("fuzzy")
+            if hasattr(entry, "previous_msgid"):
+                entry.previous_msgid = None
+            if hasattr(entry, "previous_msgctxt"):
+                entry.previous_msgctxt = None
+    po.save()
+
+
+def clear_fuzzy_entries(po_path: pathlib.Path) -> None:
+    """Remove fuzzy flags and empty msgstr so fill_simple_msgstrs can refill."""
+    po = polib.pofile(str(po_path))
+    for entry in po:
+        if "fuzzy" in entry.flags:
+            entry.msgstr = ""
+            entry.flags.remove("fuzzy")
+        for attr in ("previous_msgid", "previous_msgctxt", "previous_msgid_plural"):
+            if hasattr(entry, attr):
+                setattr(entry, attr, None)
+    po.save()
 
 
 def fill_python_format_msgstrs(text: str) -> str:
@@ -775,6 +1374,46 @@ def fill_python_format_msgstrs(text: str) -> str:
             'msgid "Work Order %(num)s"\nmsgstr ""',
             'msgid "Work Order %(num)s"\nmsgstr "Orden de trabajo %(num)s"',
         ),
+        (
+            '#, python-format\nmsgid "Alternative %(n)s"\nmsgstr ""',
+            '#, python-format\nmsgid "Alternative %(n)s"\nmsgstr "Alternativa %(n)s"',
+        ),
+        (
+            '#, python-format\nmsgid "Expiring in %(d)s days"\nmsgstr ""',
+            '#, python-format\nmsgid "Expiring in %(d)s days"\nmsgstr "Vence en %(d)s días"',
+        ),
+        (
+            '#, python-format\nmsgid "%(d)s days"\nmsgstr ""',
+            '#, python-format\nmsgid "%(d)s days"\nmsgstr "%(d)s días"',
+        ),
+        (
+            '#, python-format\n'
+            'msgid "Are you sure you want to delete <strong>%(name)s</strong> (%(plate)s)?"\n'
+            'msgstr ""',
+            '#, python-format\n'
+            'msgid "Are you sure you want to delete <strong>%(name)s</strong> (%(plate)s)?"\n'
+            'msgstr "¿Seguro que deseas eliminar <strong>%(name)s</strong> (%(plate)s)?"',
+        ),
+        (
+            '#, python-format\nmsgid "Are you sure you want to delete <strong>%(name)s</strong>?"\nmsgstr ""',
+            '#, python-format\nmsgid "Are you sure you want to delete <strong>%(name)s</strong>?"\n'
+            'msgstr "¿Seguro que deseas eliminar <strong>%(name)s</strong>?"',
+        ),
+        (
+            '#, python-format\nmsgid "Maintenance history for %(name)s."\nmsgstr ""',
+            '#, python-format\nmsgid "Maintenance history for %(name)s."\n'
+            'msgstr "Historial de mantenimiento de %(name)s."',
+        ),
+        (
+            '#, python-format\nmsgid "Maintenance History: %(name)s"\nmsgstr ""',
+            '#, python-format\nmsgid "Maintenance History: %(name)s"\n'
+            'msgstr "Historial de mantenimiento: %(name)s"',
+        ),
+        (
+            '#, python-format\nmsgid "This type is used by %(c)s vehicles. Reassign them before deleting."\nmsgstr ""',
+            '#, python-format\nmsgid "This type is used by %(c)s vehicles. Reassign them before deleting."\n'
+            'msgstr "Este tipo está asignado a %(c)s vehículos. Reasígnalos antes de eliminar."',
+        ),
     ]
     for old, new in pairs:
         if old in text:
@@ -783,12 +1422,14 @@ def fill_python_format_msgstrs(text: str) -> str:
 
 
 def main() -> None:
+    clear_fuzzy_entries(PO_PATH)
     raw = PO_PATH.read_text(encoding="utf-8")
     text = fill_multiline_header(raw)
     text = fill_multiline_entries(text)
     text = fill_python_format_msgstrs(text)
     text = fill_simple_msgstrs(text)
     PO_PATH.write_text(text, encoding="utf-8")
+    apply_es_dict_to_po_file(PO_PATH, ES)
     print("Updated", PO_PATH)
 
 

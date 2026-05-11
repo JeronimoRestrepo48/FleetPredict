@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}{% if compliance %}Edit{% else %}Add{% endif %} Compliance - FleetPredict Pro{% endblock %}
+{% block title %}{% if compliance %}{% trans "Edit Compliance - FleetPredict Pro" %}{% else %}{% trans "Add Compliance - FleetPredict Pro" %}{% endif %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">Vehicles</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'vehicles:compliance_list' %}">Compliance</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% if compliance %}Edit{% else %}Add{% endif %}</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_list' %}">{% trans "Vehicles" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'vehicles:compliance_list' %}">{% trans "Compliance" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if compliance %}{% trans "Edit" %}{% else %}{% trans "Add" %}{% endif %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if compliance %}Edit Compliance Requirement{% else %}Add Compliance Requirement{% endif %}</h2>
-  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">Back to list</a>
+  <h2 class="page-title mb-0">{% if compliance %}{% trans "Edit Compliance Requirement" %}{% else %}{% trans "Add Compliance Requirement" %}{% endif %}</h2>
+  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -22,42 +22,42 @@
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
       <div class="mb-3">
-        <label for="id_vehicle" class="form-label">Vehicle</label>
+        <label for="id_vehicle" class="form-label">{% trans "Vehicle" %}</label>
         {{ form.vehicle }}
         {% if form.vehicle.errors %}<div class="invalid-feedback d-block">{{ form.vehicle.errors }}</div>{% endif %}
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="id_requirement_type" class="form-label">Type</label>
+          <label for="id_requirement_type" class="form-label">{% trans "Type" %}</label>
           {{ form.requirement_type }}
         </div>
         <div class="col-md-6 mb-3">
-          <label for="id_name" class="form-label">Name</label>
+          <label for="id_name" class="form-label">{% trans "Name" %}</label>
           {{ form.name }}
           {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors }}</div>{% endif %}
         </div>
       </div>
       <div class="mb-3">
-        <label for="id_expiration_date" class="form-label">Expiration date</label>
+        <label for="id_expiration_date" class="form-label">{% trans "Expiration date" %}</label>
         {{ form.expiration_date }}
         {% if form.expiration_date.errors %}<div class="invalid-feedback d-block">{{ form.expiration_date.errors }}</div>{% endif %}
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="id_issuing_authority" class="form-label">Issuing authority</label>
+          <label for="id_issuing_authority" class="form-label">{% trans "Issuing authority" %}</label>
           {{ form.issuing_authority }}
         </div>
         <div class="col-md-6 mb-3">
-          <label for="id_document_reference" class="form-label">Document reference</label>
+          <label for="id_document_reference" class="form-label">{% trans "Document reference" %}</label>
           {{ form.document_reference }}
         </div>
       </div>
       <div class="mb-3">
-        <label for="id_notes" class="form-label">Notes</label>
+        <label for="id_notes" class="form-label">{% trans "Notes" %}</label>
         {{ form.notes }}
       </div>
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+      <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+      <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
     </form>
   </div>
 </div>

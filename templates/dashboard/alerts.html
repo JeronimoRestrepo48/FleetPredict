@@ -1,39 +1,39 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}My alerts - FleetPredict Pro{% endblock %}
-{% block meta_description %}Notification center.{% endblock %}
+{% block title %}{% trans "My alerts - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Notification center." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Alerts</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Alerts" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">My alerts</h2>
+  <h2 class="page-title mb-0">{% trans "My alerts" %}</h2>
 </div>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto">
-    <label class="form-label visually-hidden">Severity</label>
+    <label class="form-label visually-hidden">{% trans "Severity" %}</label>
     <select name="severity" class="form-select form-select-sm">
-      <option value="">All severities</option>
+      <option value="">{% trans "All severities" %}</option>
       {% for val, label in severity_choices %}
       <option value="{{ val }}" {% if request.GET.severity == val %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <label class="form-label visually-hidden">Status</label>
+    <label class="form-label visually-hidden">{% trans "Status" %}</label>
     <select name="read" class="form-select form-select-sm">
-      <option value="">All</option>
-      <option value="unread" {% if request.GET.read == 'unread' %}selected{% endif %}>Unread</option>
-      <option value="read" {% if request.GET.read == 'read' %}selected{% endif %}>Read</option>
+      <option value="">{% trans "All" %}</option>
+      <option value="unread" {% if request.GET.read == 'unread' %}selected{% endif %}>{% trans "Unread" %}</option>
+      <option value="read" {% if request.GET.read == 'read' %}selected{% endif %}>{% trans "Read" %}</option>
     </select>
   </div>
   <div class="col-auto">
-    <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    <button type="submit" class="btn btn-sm btn-primary">{% trans "Filter" %}</button>
   </div>
 </form>
 <div class="card card-fp">
@@ -43,13 +43,13 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Vehicle</th>
-            <th>Type</th>
-            <th>Severity</th>
-            <th>Message</th>
-            <th>Date</th>
-            <th>Read</th>
-            <th>Actions</th>
+            <th>{% trans "Vehicle" %}</th>
+            <th>{% trans "Type" %}</th>
+            <th>{% trans "Severity" %}</th>
+            <th>{% trans "Message" %}</th>
+            <th>{% trans "Date" %}</th>
+            <th>{% trans "Read" %}</th>
+            <th>{% trans "Actions" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -83,17 +83,17 @@
     <nav class="p-3">
       <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">{% trans "Previous" %}</a></li>
         {% endif %}
-        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        <li class="page-item disabled"><span class="page-link">{% blocktrans with num=page_obj.number npages=page_obj.paginator.num_pages %}Page {{ num }} of {{ npages }}{% endblocktrans %}</span></li>
         {% if page_obj.has_next %}
-        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">Next</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.severity %}&severity={{ request.GET.severity }}{% endif %}{% if request.GET.read %}&read={{ request.GET.read }}{% endif %}">{% trans "Next" %}</a></li>
         {% endif %}
       </ul>
     </nav>
     {% endif %}
     {% else %}
-    <div class="p-4 text-muted text-center">No alerts.</div>
+    <div class="p-4 text-muted text-center">{% trans "No alerts." %}</div>
     {% endif %}
   </div>
 </div>

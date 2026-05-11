@@ -1,51 +1,57 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}GPS Map - {{ vehicle.display_name }}{% endblock %}
+{% block title %}{% trans "GPS Map" %} — {{ vehicle.display_name }}{% endblock %}
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9/dist/leaflet.css"/>
 <style>#gps-map{height:500px;border-radius:var(--fp-radius-lg)}</style>
 {% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
-  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
   <li class="breadcrumb-item"><a href="{% url 'vehicles:vehicle_detail' vehicle.pk %}">{{ vehicle.display_name }}</a></li>
-  <li class="breadcrumb-item active">GPS Map</li>
+  <li class="breadcrumb-item active">{% trans "GPS Map" %}</li>
 </ol></nav>
 {% endblock %}
 {% block content %}
+{% trans "N/A" as na %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0"><i class="bi bi-geo-alt me-2"></i>GPS Map</h2>
+  <h2 class="page-title mb-0"><i class="bi bi-geo-alt me-2"></i>{% trans "GPS Map" %}</h2>
   <form method="get" class="d-flex gap-2 align-items-end">
     <select name="days" class="form-select" style="width:auto">
-      <option value="1" {% if selected_days == 1 %}selected{% endif %}>Last 24h</option>
-      <option value="7" {% if selected_days == 7 %}selected{% endif %}>Last 7 days</option>
-      <option value="30" {% if selected_days == 30 %}selected{% endif %}>Last 30 days</option>
+      <option value="1" {% if selected_days == 1 %}selected{% endif %}>{% trans "Last 24h" %}</option>
+      <option value="7" {% if selected_days == 7 %}selected{% endif %}>{% trans "Last 7 days" %}</option>
+      <option value="30" {% if selected_days == 30 %}selected{% endif %}>{% trans "Last 30 days" %}</option>
     </select>
-    <button type="submit" class="btn btn-primary">Filter</button>
+    <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
   </form>
 </div>
 <div class="alert alert-info py-2">
-  <strong>Track summary:</strong>
-  {{ gps_summary.points|default:0 }} points ·
-  {{ gps_summary.distance_km|default:0 }} km approx. ·
-  Last update: {{ gps_summary.last_seen|default:"N/A" }}
+  <strong>{% trans "Track summary:" %}</strong>
+  {{ gps_summary.points|default:0 }} {% trans "points" %} ·
+  {{ gps_summary.distance_km|default:0 }} {% trans "km approx." %} ·
+  {% trans "Last update:" %} {{ gps_summary.last_seen|default:na }}
 </div>
 <div class="card card-fp mb-3"><div class="card-body p-0"><div id="gps-map"></div></div></div>
 {% endblock %}
 {% block extra_js %}
+{% trans "No GPS data for this period." as js_no_gps %}
+{% trans "Start" as js_start %}
+{% trans "Latest" as js_latest %}
+{% trans "Speed:" as js_speed %}
+{% trans "km/h" as js_kmh %}
 <script src="https://unpkg.com/leaflet@1.9/dist/leaflet.js"></script>
 <script>
 (function(){
   var pts=JSON.parse('{{ gps_points_json|escapejs }}');
   var map=L.map('gps-map').setView([4.6,-74.08],12);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap',maxZoom:19}).addTo(map);
-  if(!pts.length){document.getElementById('gps-map').innerHTML='<div class="empty-state p-5"><p>No GPS data for this period.</p></div>';return;}
+  if(!pts.length){document.getElementById('gps-map').innerHTML='<div class="empty-state p-5"><p>{{ js_no_gps|escapejs }}</p></div>';return;}
   var ll=pts.map(function(p){return[p.lat,p.lng]});
   var route = L.polyline(ll,{color:'#0d6efd',weight:4,opacity:0.85}).addTo(map);
   L.circleMarker(ll[0], {radius:8, color:'#198754', fillColor:'#198754', fillOpacity:0.9}).addTo(map)
-    .bindPopup('Start<br>'+pts[0].time+'<br>Speed: '+pts[0].speed+' km/h');
+    .bindPopup('{{ js_start|escapejs }}<br>'+pts[0].time+'<br>{{ js_speed|escapejs }} '+pts[0].speed+' {{ js_kmh|escapejs }}');
   L.circleMarker(ll[ll.length-1], {radius:8, color:'#dc3545', fillColor:'#dc3545', fillOpacity:0.9}).addTo(map)
-    .bindPopup('Latest<br>'+pts[pts.length-1].time+'<br>Speed: '+pts[pts.length-1].speed+' km/h');
+    .bindPopup('{{ js_latest|escapejs }}<br>'+pts[pts.length-1].time+'<br>{{ js_speed|escapejs }} '+pts[pts.length-1].speed+' {{ js_kmh|escapejs }}');
   map.fitBounds(route.getBounds(),{padding:[30,30]});
 })();
 </script>

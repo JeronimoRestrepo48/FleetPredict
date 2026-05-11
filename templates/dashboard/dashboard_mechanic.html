@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
-{% block title %}Dashboard - FleetPredict Pro{% endblock %}
-{% block meta_description %}Your assigned maintenance tasks and workload.{% endblock %}
+{% block title %}{% trans "Dashboard - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Your assigned maintenance tasks and workload." %}{% endblock %}
 {% block extra_css %}
 <style>
   .dashboard-hero { margin-bottom: var(--fp-spacing-lg); }
@@ -14,13 +14,23 @@
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Dashboard" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
+{% trans "Scheduled" as ch_sched %}
+{% trans "In Progress" as ch_prog %}
+{% trans "Completed" as ch_done %}
+{% trans "Cancelled" as ch_can %}
+{% trans "Overdue" as ch_over %}
+{% trans "Tasks" as ch_tasks %}
+{% trans "Low" as pr_low %}
+{% trans "Medium" as pr_med %}
+{% trans "High" as pr_high %}
+{% trans "Critical" as pr_crit %}
 <div class="dashboard-hero">
-  <h1 class="mb-1">My Workload</h1>
+  <h1 class="mb-1">{% trans "My Workload" %}</h1>
   <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
 </div>
 
@@ -28,7 +38,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-person-check me-1"></i> Assigned to Me</div>
+        <div class="kpi-label"><i class="bi bi-person-check me-1"></i> {% trans "Assigned to Me" %}</div>
         <div class="kpi-value">{{ my_assigned_count }}</div>
       </div>
     </div>
@@ -36,7 +46,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-success">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-person-plus me-1"></i> Unassigned</div>
+        <div class="kpi-label"><i class="bi bi-person-plus me-1"></i> {% trans "Unassigned" %}</div>
         <div class="kpi-value">{{ unassigned_count }}</div>
       </div>
     </div>
@@ -44,7 +54,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-warning">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-exclamation-triangle me-1"></i> Need Attention</div>
+        <div class="kpi-label"><i class="bi bi-exclamation-triangle me-1"></i> {% trans "Need Attention" %}</div>
         <div class="kpi-value">{{ tasks_needing_attention }}</div>
       </div>
     </div>
@@ -52,7 +62,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-danger">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-clock-history me-1"></i> Overdue</div>
+        <div class="kpi-label"><i class="bi bi-clock-history me-1"></i> {% trans "Overdue" %}</div>
         <div class="kpi-value">{{ overdue_tasks }}</div>
       </div>
     </div>
@@ -62,7 +72,7 @@
 <div class="row g-3 g-md-4 mb-4">
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Tasks by Status</div>
+      <div class="card-header">{% trans "Tasks by Status" %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartTasks"></canvas>
@@ -72,7 +82,7 @@
   </div>
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Tasks by Priority (open)</div>
+      <div class="card-header">{% trans "Tasks by Priority (open)" %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartPriority"></canvas>
@@ -85,17 +95,17 @@
 <div class="row g-3 g-md-4 mb-4">
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Upcoming Maintenance (Next 7 Days)</div>
+      <div class="card-header">{% trans "Upcoming Maintenance (Next 7 Days)" %}</div>
       <div class="card-body p-0">
         {% if upcoming_maintenance %}
         <div class="table-responsive">
           <table class="table table-fp mb-0">
             <thead>
               <tr>
-                <th>Vehicle</th>
-                <th>Task</th>
-                <th>Date</th>
-                <th>Priority</th>
+                <th>{% trans "Vehicle" %}</th>
+                <th>{% trans "Task" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Priority" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,7 +122,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <p>No upcoming maintenance.</p>
+          <p>{% trans "No upcoming maintenance." %}</p>
         </div>
         {% endif %}
       </div>
@@ -120,17 +130,17 @@
   </div>
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Recent Completions (Mine)</div>
+      <div class="card-header">{% trans "Recent Completions (Mine)" %}</div>
       <div class="card-body p-0">
         {% if recent_completed %}
         <div class="table-responsive">
           <table class="table table-fp mb-0">
             <thead>
               <tr>
-                <th>Vehicle</th>
-                <th>Task</th>
-                <th>Completed</th>
-                <th>Cost</th>
+                <th>{% trans "Vehicle" %}</th>
+                <th>{% trans "Task" %}</th>
+                <th>{% trans "Completed" %}</th>
+                <th>{% trans "Cost" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -147,7 +157,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <p>No recent completions.</p>
+          <p>{% trans "No recent completions." %}</p>
         </div>
         {% endif %}
       </div>
@@ -156,7 +166,7 @@
 </div>
 
 <div class="mb-3">
-  <a href="{% url 'maintenance:task_list' %}" class="btn btn-primary">View all maintenance tasks</a>
+  <a href="{% url 'maintenance:task_list' %}" class="btn btn-primary">{% trans "View all maintenance tasks" %}</a>
 </div>
 
 {{ task_status_dict|json_script:"taskStatusData" }}
@@ -166,11 +176,11 @@
 (function() {
   const taskData = JSON.parse(document.getElementById('taskStatusData').textContent);
   const priorityData = JSON.parse(document.getElementById('taskPriorityData').textContent);
-  const taskLabels = ['Scheduled', 'In Progress', 'Completed', 'Cancelled', 'Overdue'];
+  const taskLabels = ['{{ ch_sched|escapejs }}', '{{ ch_prog|escapejs }}', '{{ ch_done|escapejs }}', '{{ ch_can|escapejs }}', '{{ ch_over|escapejs }}'];
   const taskKeys = ['scheduled', 'in_progress', 'completed', 'cancelled', 'overdue'];
   const taskValues = taskKeys.map(function(k) { return taskData[k] || 0; });
   const taskColors = ['#0d6efd', '#0dcaf0', '#198754', '#6c757d', '#dc3545'];
-  const priorityLabels = ['Low', 'Medium', 'High', 'Critical'];
+  const priorityLabels = ['{{ pr_low|escapejs }}', '{{ pr_med|escapejs }}', '{{ pr_high|escapejs }}', '{{ pr_crit|escapejs }}'];
   const priorityKeys = ['low', 'medium', 'high', 'critical'];
   const priorityValues = priorityKeys.map(function(k) { return priorityData[k] || 0; });
   const priorityColors = ['#6c757d', '#0d6efd', '#ffc107', '#dc3545'];
@@ -196,7 +206,7 @@
       type: 'bar',
       data: {
         labels: priorityLabels,
-        datasets: [{ label: 'Tasks', data: priorityValues, backgroundColor: priorityColors }]
+        datasets: [{ label: '{{ ch_tasks|escapejs }}', data: priorityValues, backgroundColor: priorityColors }]
       },
       options: {
         responsive: true,

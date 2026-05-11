@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Vehicle Types - FleetPredict Pro{% endblock %}
-{% block meta_description %}Manage vehicle types and maintenance intervals.{% endblock %}
+{% block title %}{% trans "Vehicle Types - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Manage vehicle types and maintenance intervals." %}{% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Vehicle Types</h2>
+  <h2 class="page-title mb-0">{% trans "Vehicle Types" %}</h2>
   <div class="d-flex gap-2">
-    <a href="{% url 'vehicles:vehicletype_create' %}" class="btn btn-primary">Add type</a>
-    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">Back to vehicles</a>
+    <a href="{% url 'vehicles:vehicletype_create' %}" class="btn btn-primary">{% trans "Add type" %}</a>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-secondary">{% trans "Back to vehicles" %}</a>
   </div>
 </div>
 <div class="card card-fp">
@@ -16,10 +16,10 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Interval (days)</th>
-            <th>Interval (km)</th>
-            <th>Vehicles</th>
+            <th>{% trans "Name" %}</th>
+            <th>{% trans "Interval (days)" %}</th>
+            <th>{% trans "Interval (km)" %}</th>
+            <th>{% trans "Vehicles" %}</th>
             <th></th>
           </tr>
         </thead>
@@ -31,12 +31,12 @@
             <td>{{ vt.maintenance_interval_km }}</td>
             <td>{{ vt.vehicles.count }}</td>
             <td>
-              <a href="{% url 'vehicles:vehicletype_update' vt.pk %}">Edit</a>
-              <a href="{% url 'vehicles:vehicletype_delete' vt.pk %}" class="ms-2 text-danger">Delete</a>
+              <a href="{% url 'vehicles:vehicletype_update' vt.pk %}">{% trans "Edit" %}</a>
+              <a href="{% url 'vehicles:vehicletype_delete' vt.pk %}" class="ms-2 text-danger">{% trans "Delete" %}</a>
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="5">No vehicle types. Add one to use in vehicles.</td></tr>
+          <tr><td colspan="5">{% trans "No vehicle types. Add one to use in vehicles." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

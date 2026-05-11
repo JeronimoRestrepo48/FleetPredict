@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Upload Sensor CSV - {{ vehicle.display_name }}{% endblock %}
+{% block title %}{% trans "Upload Sensor CSV" %} — {{ vehicle.display_name }}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp"><ol class="breadcrumb mb-0">
-  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-  <li class="breadcrumb-item"><a href="{% url 'vehicles:sensor_dashboard' vehicle.pk %}">Sensors</a></li>
-  <li class="breadcrumb-item active">Upload CSV</li>
+  <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+  <li class="breadcrumb-item"><a href="{% url 'vehicles:sensor_dashboard' vehicle.pk %}">{% trans "Sensors" %}</a></li>
+  <li class="breadcrumb-item active">{% trans "Upload CSV" %}</li>
 </ol></nav>
 {% endblock %}
 {% block content %}
-<h2 class="page-title">Upload Sensor Readings</h2>
+<h2 class="page-title">{% trans "Upload Sensor Readings" %}</h2>
 <div class="card card-fp"><div class="card-body">
   <form method="post" enctype="multipart/form-data" class="fp-validate">{% csrf_token %}
     {% for field in form %}
@@ -20,7 +20,7 @@
       {% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
     </div>
     {% endfor %}
-    <button type="submit" class="btn btn-primary">Import</button>
+    <button type="submit" class="btn btn-primary">{% trans "Import" %}</button>
   </form>
 </div></div>
 {% endblock %}

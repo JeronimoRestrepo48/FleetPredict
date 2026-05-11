@@ -1,71 +1,71 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Reports - FleetPredict Pro{% endblock %}
-{% block meta_description %}Export PDF reports per vehicle or fleet.{% endblock %}
+{% block title %}{% trans "Reports - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Export PDF reports per vehicle or fleet." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Reports</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Reports" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Reports</h2>
-  <a href="{% url 'reports:export_center' %}" class="btn btn-outline-primary">Export Center</a>
+  <h2 class="page-title mb-0">{% trans "Reports" %}</h2>
+  <a href="{% url 'reports:export_center' %}" class="btn btn-outline-primary">{% trans "Export Center" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <h5 class="card-title">Fleet report</h5>
-    <p class="card-text text-muted">Download a PDF summary of all visible vehicles (health, latest alert, upcoming maintenance, mileage).</p>
-    <a href="{% url 'reports:fleet_pdf' %}" class="btn btn-primary">Download fleet report (PDF)</a>
+    <h5 class="card-title">{% trans "Fleet report" %}</h5>
+    <p class="card-text text-muted">{% trans "Download a PDF summary of all visible vehicles (health, latest alert, upcoming maintenance, mileage)." %}</p>
+    <a href="{% url 'reports:fleet_pdf' %}" class="btn btn-primary">{% trans "Download fleet report (PDF)" %}</a>
   </div>
 </div>
 <div class="card card-fp mt-3">
   <div class="card-body">
-    <h5 class="card-title">Per-vehicle report</h5>
-    <p class="card-text text-muted">For a detailed vehicle report (maintenance history, recent alerts, telemetry), open the vehicle detail and use the &quot;Export PDF report&quot; button.</p>
-    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-primary">Go to vehicle list</a>
+    <h5 class="card-title">{% trans "Per-vehicle report" %}</h5>
+    <p class="card-text text-muted">{% trans 'For a detailed vehicle report (maintenance history, recent alerts, telemetry), open the vehicle detail and use the "Export PDF report" button.' %}</p>
+    <a href="{% url 'vehicles:vehicle_list' %}" class="btn btn-outline-primary">{% trans "Go to vehicle list" %}</a>
   </div>
 </div>
 <div class="card card-fp mt-3">
   <div class="card-body">
-    <h5 class="card-title">Analytics reports (FR12–15)</h5>
-    <p class="card-text text-muted">Maintenance trends, cost by vehicle, and comparison.</p>
-    <a href="{% url 'reports:trends' %}" class="btn btn-outline-primary me-2">Trends</a>
-    <a href="{% url 'reports:cost' %}" class="btn btn-outline-primary me-2">Cost</a>
-    <a href="{% url 'reports:comparison' %}" class="btn btn-outline-primary">Comparison</a>
+    <h5 class="card-title">{% trans "Analytics reports (FR12–15)" %}</h5>
+    <p class="card-text text-muted">{% trans "Maintenance trends, cost by vehicle, and comparison." %}</p>
+    <a href="{% url 'reports:trends' %}" class="btn btn-outline-primary me-2">{% trans "Trends" %}</a>
+    <a href="{% url 'reports:cost' %}" class="btn btn-outline-primary me-2">{% trans "Cost" %}</a>
+    <a href="{% url 'reports:comparison' %}" class="btn btn-outline-primary">{% trans "Comparison" %}</a>
   </div>
 </div>
 <div class="card card-fp mt-3">
   <div class="card-body">
-    <h5 class="card-title">Commercial report schedule</h5>
-    <p class="card-text text-muted">Save report delivery metadata for weekly or monthly operational reviews.</p>
+    <h5 class="card-title">{% trans "Commercial report schedule" %}</h5>
+    <p class="card-text text-muted">{% trans "Save report delivery metadata for weekly or monthly operational reviews." %}</p>
     <form method="post" action="{% url 'reports:schedule_create' %}" class="row g-2">
       {% csrf_token %}
-      <div class="col-md-3"><input name="name" class="form-control" placeholder="Schedule name" required></div>
+      <div class="col-md-3"><input name="name" class="form-control" placeholder="{% trans 'Schedule name' %}" required></div>
       <div class="col-md-2">
         <select name="report_type" class="form-select">
-          <option value="fleet">Fleet</option>
-          <option value="trends">Trends</option>
-          <option value="cost">Cost</option>
-          <option value="comparison">Comparison</option>
+          <option value="fleet">{% trans "Fleet" %}</option>
+          <option value="trends">{% trans "Trends" %}</option>
+          <option value="cost">{% trans "Cost" %}</option>
+          <option value="comparison">{% trans "Comparison" %}</option>
         </select>
       </div>
       <div class="col-md-2">
         <select name="frequency" class="form-select">
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
+          <option value="weekly">{% trans "Weekly" %}</option>
+          <option value="monthly">{% trans "Monthly" %}</option>
         </select>
       </div>
-      <div class="col-md-3"><input name="recipients" class="form-control" placeholder="ops@example.com"></div>
-      <div class="col-md-2"><button class="btn btn-primary w-100">Save</button></div>
+      <div class="col-md-3"><input name="recipients" class="form-control" placeholder="{% trans 'ops@example.com' %}"></div>
+      <div class="col-md-2"><button class="btn btn-primary w-100">{% trans "Save" %}</button></div>
     </form>
     {% if schedules %}
     <div class="table-responsive mt-3">
       <table class="table table-sm table-fp mb-0">
-        <thead><tr><th>Name</th><th>Type</th><th>Frequency</th><th>Recipients</th></tr></thead>
+        <thead><tr><th>{% trans "Name" %}</th><th>{% trans "Type" %}</th><th>{% trans "Frequency" %}</th><th>{% trans "Recipients" %}</th></tr></thead>
         <tbody>
           {% for schedule in schedules %}
           <tr><td>{{ schedule.name }}</td><td>{{ schedule.report_type }}</td><td>{{ schedule.frequency }}</td><td>{{ schedule.recipients|default:"—" }}</td></tr>

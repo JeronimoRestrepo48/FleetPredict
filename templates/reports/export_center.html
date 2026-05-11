@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% block title %}Export Center - FleetPredict Pro{% endblock %}
+{% block title %}{% trans "Export Center - FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Export Center</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">{% trans "Reports" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Export Center" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Export Center</h2>
-  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">Back to reports</a>
+  <h2 class="page-title mb-0">{% trans "Export Center" %}</h2>
+  <a href="{% url 'reports:index' %}" class="btn btn-outline-secondary">{% trans "Back to reports" %}</a>
 </div>
 <div class="card card-fp fp-operational-panel mb-4">
   <div class="card-body">
-    <p class="text-muted">Export operational data with role-aware visibility. Files are CSV and open directly in Excel or Google Sheets.</p>
+    <p class="text-muted">{% trans "Export operational data with role-aware visibility. Files are CSV and open directly in Excel or Google Sheets." %}</p>
     <form method="post" class="row g-3">
       {% csrf_token %}
       <div class="col-md-3">
-        <label class="form-label">Dataset</label>
+        <label class="form-label">{% trans "Dataset" %}</label>
         <select name="dataset" class="form-select">
           {% for value, label in datasets %}
           <option value="{{ value }}">{{ label }}</option>
@@ -29,7 +29,7 @@
         </select>
       </div>
       <div class="col-md-2">
-        <label class="form-label">Format</label>
+        <label class="form-label">{% trans "Format" %}</label>
         <select name="export_format" class="form-select">
           {% for value, label in formats %}
           <option value="{{ value }}">{{ label }}</option>
@@ -37,34 +37,34 @@
         </select>
       </div>
       <div class="col-md-3">
-        <label class="form-label">Vehicle filter</label>
+        <label class="form-label">{% trans "Vehicle filter" %}</label>
         <select name="vehicle" class="form-select">
-          <option value="">All visible vehicles</option>
+          <option value="">{% trans "All visible vehicles" %}</option>
           {% for vehicle in vehicles %}
           <option value="{{ vehicle.pk }}">{{ vehicle.license_plate }} - {{ vehicle.display_name }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-2">
-        <label class="form-label">Start</label>
+        <label class="form-label">{% trans "Start" %}</label>
         <input type="date" name="start" class="form-control">
       </div>
       <div class="col-md-2">
-        <label class="form-label">End</label>
+        <label class="form-label">{% trans "End" %}</label>
         <input type="date" name="end" class="form-control">
       </div>
       <div class="col-12">
-        <button class="btn btn-primary">Generate export</button>
+        <button class="btn btn-primary">{% trans "Generate export" %}</button>
       </div>
     </form>
   </div>
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <h3 class="h6 mb-3">Recent export history</h3>
+    <h3 class="h6 mb-3">{% trans "Recent export history" %}</h3>
     <div class="table-responsive">
       <table class="table table-fp table-sm mb-0">
-        <thead><tr><th>Date</th><th>Dataset</th><th>Format</th><th>Rows</th><th>Status</th><th>Expires</th></tr></thead>
+        <thead><tr><th>{% trans "Date" %}</th><th>{% trans "Dataset" %}</th><th>{% trans "Format" %}</th><th>{% trans "Rows" %}</th><th>{% trans "Status" %}</th><th>{% trans "Expires" %}</th></tr></thead>
         <tbody>
           {% for job in jobs %}
           <tr>
@@ -76,7 +76,7 @@
             <td>{{ job.expires_at|date:"Y-m-d"|default:"—" }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="text-muted text-center py-3">No exports yet.</td></tr>
+          <tr><td colspan="6" class="text-muted text-center py-3">{% trans "No exports yet." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -84,4 +84,3 @@
   </div>
 </div>
 {% endblock %}
-
