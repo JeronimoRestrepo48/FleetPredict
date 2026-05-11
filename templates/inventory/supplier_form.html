@@ -1,19 +1,20 @@
 {% extends "base.html" %}
-{% block title %}{% if supplier %}Edit{% else %}Create{% endif %} Supplier - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{% if supplier %}{% trans "Edit Supplier - FleetPredict Pro" %}{% else %}{% trans "Create Supplier - FleetPredict Pro" %}{% endif %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Suppliers</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% if supplier %}Edit{% else %}Create{% endif %}</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">{% trans "Inventory" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">{% trans "Suppliers" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if supplier %}{% trans "Edit" %}{% else %}{% trans "Create" %}{% endif %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if supplier %}Edit Supplier{% else %}Create Supplier{% endif %}</h2>
-  <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">Cancel</a>
+  <h2 class="page-title mb-0">{% if supplier %}{% trans "Edit Supplier" %}{% else %}{% trans "Create Supplier" %}{% endif %}</h2>
+  <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -30,7 +31,7 @@
         {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
       </div>
       {% endfor %}
-      <button type="submit" class="btn btn-primary">Save</button>
+      <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
     </form>
   </div>
 </div>

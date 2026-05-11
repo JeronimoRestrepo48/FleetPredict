@@ -1,20 +1,21 @@
 {% extends "base.html" %}
-{% block title %}{% if object %}Edit{% else %}Add{% endif %} Maintenance Template - FleetPredict Pro{% endblock %}
-{% block meta_description %}{% if object %}Edit maintenance template.{% else %}Create a maintenance template.{% endif %}{% endblock %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans "Edit Maintenance Template - FleetPredict Pro" %}{% else %}{% trans "Add Maintenance Template - FleetPredict Pro" %}{% endif %}{% endblock %}
+{% block meta_description %}{% if object %}{% trans "Edit maintenance template." %}{% else %}{% trans "Create a maintenance template." %}{% endif %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'maintenance:template_list' %}">Templates</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% if object %}Edit{% else %}Add{% endif %}</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">{% trans "Maintenance" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:template_list' %}">{% trans "Templates" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if object %}{% trans "Edit" %}{% else %}{% trans "Add" %}{% endif %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if object %}Edit Template{% else %}Add Maintenance Template{% endif %}</h2>
-  <a href="{% url 'maintenance:template_list' %}" class="btn btn-outline-secondary">Back to templates</a>
+  <h2 class="page-title mb-0">{% if object %}{% trans "Edit Template" %}{% else %}{% trans "Add Maintenance Template" %}{% endif %}</h2>
+  <a href="{% url 'maintenance:template_list' %}" class="btn btn-outline-secondary">{% trans "Back to templates" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -22,34 +23,34 @@
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
       <div class="mb-3">
-        <label for="id_name" class="form-label">Name</label>
+        <label for="id_name" class="form-label">{% trans "Name" %}</label>
         {{ form.name }}
         {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors }}</div>{% endif %}
       </div>
       <div class="mb-3">
-        <label for="id_description" class="form-label">Description</label>
+        <label for="id_description" class="form-label">{% trans "Description" %}</label>
         {{ form.description }}
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label for="id_maintenance_type" class="form-label">Type</label>
+          <label for="id_maintenance_type" class="form-label">{% trans "Type" %}</label>
           {{ form.maintenance_type }}
           {% if form.maintenance_type.errors %}<div class="invalid-feedback d-block">{{ form.maintenance_type.errors }}</div>{% endif %}
         </div>
         <div class="col-md-6 mb-3">
-          <label for="id_estimated_duration" class="form-label">Estimated duration (minutes)</label>
+          <label for="id_estimated_duration" class="form-label">{% trans "Estimated duration (minutes)" %}</label>
           {{ form.estimated_duration }}
           {% if form.estimated_duration.errors %}<div class="invalid-feedback d-block">{{ form.estimated_duration.errors }}</div>{% endif %}
         </div>
       </div>
       <div class="mb-3">
-        <label for="id_steps" class="form-label">Steps (checklist)</label>
+        <label for="id_steps" class="form-label">{% trans "Steps (checklist)" %}</label>
         {{ form.steps }}
         {% if form.steps.help_text %}<div class="form-text">{{ form.steps.help_text }}</div>{% endif %}
         {% if form.steps.errors %}<div class="invalid-feedback d-block">{{ form.steps.errors }}</div>{% endif %}
       </div>
-      <button type="submit" class="btn btn-primary">Save</button>
-      <a href="{% url 'maintenance:template_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+      <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+      <a href="{% url 'maintenance:template_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
     </form>
   </div>
 </div>

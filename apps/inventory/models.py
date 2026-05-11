@@ -5,21 +5,22 @@ FR26: Supplier Management.
 from django.db import models
 from django.conf import settings
 from django.db.models import Avg
+from django.utils.translation import gettext_lazy as _
 
 
 class SparePart(models.Model):
     """A spare part in inventory."""
 
     class Category(models.TextChoices):
-        ENGINE = 'engine', 'Engine'
-        BRAKES = 'brakes', 'Brakes'
-        TIRES = 'tires', 'Tires'
-        ELECTRICAL = 'electrical', 'Electrical'
-        TRANSMISSION = 'transmission', 'Transmission'
-        SUSPENSION = 'suspension', 'Suspension'
-        FLUIDS = 'fluids', 'Fluids & Filters'
-        BODY = 'body', 'Body & Exterior'
-        OTHER = 'other', 'Other'
+        ENGINE = 'engine', _('Engine')
+        BRAKES = 'brakes', _('Brakes')
+        TIRES = 'tires', _('Tires')
+        ELECTRICAL = 'electrical', _('Electrical')
+        TRANSMISSION = 'transmission', _('Transmission')
+        SUSPENSION = 'suspension', _('Suspension')
+        FLUIDS = 'fluids', _('Fluids & Filters')
+        BODY = 'body', _('Body & Exterior')
+        OTHER = 'other', _('Other')
 
     name = models.CharField(max_length=200)
     part_number = models.CharField(max_length=100, unique=True)
@@ -47,9 +48,9 @@ class StockMovement(models.Model):
     """Records changes to spare part stock levels."""
 
     class MovementType(models.TextChoices):
-        IN = 'in', 'Stock In'
-        OUT = 'out', 'Stock Out'
-        ADJUSTMENT = 'adjustment', 'Adjustment'
+        IN = 'in', _('Stock In')
+        OUT = 'out', _('Stock Out')
+        ADJUSTMENT = 'adjustment', _('Adjustment')
 
     spare_part = models.ForeignKey(SparePart, on_delete=models.CASCADE, related_name='movements')
     movement_type = models.CharField(max_length=12, choices=MovementType.choices)

@@ -3,20 +3,21 @@ FR17: Intelligent Route Optimizer models.
 """
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 
 
 class Route(models.Model):
     """A route request from a user for a specific vehicle."""
 
     class Status(models.TextChoices):
-        PLANNING = 'planning', 'Planning'
-        SELECTED = 'selected', 'Selected'
-        COMPLETED = 'completed', 'Completed'
+        PLANNING = 'planning', _('Planning')
+        SELECTED = 'selected', _('Selected')
+        COMPLETED = 'completed', _('Completed')
 
     class OptPriority(models.TextChoices):
-        DISTANCE = 'distance', 'Shortest distance'
-        TIME = 'time', 'Fastest time'
-        FUEL = 'fuel', 'Lowest fuel cost'
+        DISTANCE = 'distance', _('Shortest distance')
+        TIME = 'time', _('Fastest time')
+        FUEL = 'fuel', _('Lowest fuel cost')
 
     vehicle = models.ForeignKey(
         'vehicles.Vehicle', on_delete=models.CASCADE, related_name='routes',

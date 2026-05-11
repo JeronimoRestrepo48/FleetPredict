@@ -16,6 +16,7 @@ from django.contrib.auth.views import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import (
@@ -61,7 +62,7 @@ class RegisterView(FormView):
 
     def form_valid(self, form):
         user = form.save()
-        messages.success(self.request, 'Registration successful. You can now log in.')
+        messages.success(self.request, _('Registration successful. You can now log in.'))
         return redirect(self.success_url)
 
 

@@ -1,18 +1,19 @@
 {% extends "base.html" %}
-{% block title %}Stock Adjustment - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Stock Adjustment - FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Stock adjustment</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">{% trans "Inventory" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Stock adjustment" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Stock Adjustment</h2>
-  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Back</a>
+  <h2 class="page-title mb-0">{% trans "Stock Adjustment" %}</h2>
+  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">{% trans "Back" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -30,19 +31,19 @@
       </div>
       {% endfor %}
       <div class="border rounded p-3 mb-3">
-        <h3 class="h6 mb-3">Post-delivery supplier rating (optional for Stock In)</h3>
+        <h3 class="h6 mb-3">{% trans "Post-delivery supplier rating (optional for Stock In)" %}</h3>
         <div class="row g-2">
           <div class="col-md-4">
-            <label class="form-label" for="id_supplier_id">Supplier</label>
+            <label class="form-label" for="id_supplier_id">{% trans "Supplier" %}</label>
             <select id="id_supplier_id" name="supplier_id" class="form-select">
-              <option value="">Select supplier</option>
+              <option value="">{% trans "Select supplier" %}</option>
               {% for supplier in supplier_options %}
               <option value="{{ supplier.pk }}">{{ supplier.name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label" for="id_supplier_rating">Stars</label>
+            <label class="form-label" for="id_supplier_rating">{% trans "Stars" %}</label>
             <select id="id_supplier_rating" name="supplier_rating" class="form-select">
               <option value="">-</option>
               <option value="1">1</option>
@@ -53,13 +54,13 @@
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label" for="id_supplier_comment">Comment</label>
-            <input id="id_supplier_comment" name="supplier_comment" type="text" class="form-control" placeholder="Optional feedback about this delivery">
+            <label class="form-label" for="id_supplier_comment">{% trans "Comment" %}</label>
+            <input id="id_supplier_comment" name="supplier_comment" type="text" class="form-control" placeholder="{% trans 'Optional feedback about this delivery' %}">
           </div>
         </div>
-        <div class="form-text">This review is only saved when movement type is Stock In.</div>
+        <div class="form-text">{% trans "This review is only saved when movement type is Stock In." %}</div>
       </div>
-      <button type="submit" class="btn btn-primary">Save movement</button>
+      <button type="submit" class="btn btn-primary">{% trans "Save movement" %}</button>
     </form>
   </div>
 </div>

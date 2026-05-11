@@ -11,6 +11,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.template.response import TemplateResponse
 from django.db import transaction
 from django.db.models import F
+from django.utils.translation import gettext as _
 
 from .models import SparePart, StockMovement, PartUsage, Supplier, SupplierPart, SupplierReview
 from .forms import SparePartForm, StockMovementForm, SupplierForm, SupplierPartForm, SupplierReviewForm
@@ -70,7 +71,7 @@ class SparePartCreateView(LoginRequiredMixin, CanManageInventoryMixin, CreateVie
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
-        messages.success(self.request, 'Spare part created.')
+        messages.success(self.request, _('Spare part created.'))
         return super().form_valid(form)
 
 
@@ -82,7 +83,7 @@ class SparePartUpdateView(LoginRequiredMixin, CanManageInventoryMixin, UpdateVie
     success_url = reverse_lazy('inventory:sparepart_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Spare part updated.')
+        messages.success(self.request, _('Spare part updated.'))
         return super().form_valid(form)
 
 
@@ -133,7 +134,10 @@ class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
                             comment=comment,
                             created_by=self.request.user,
                         )
-        messages.success(self.request, f'Stock updated: {part.name} -> {part.current_stock}')
+        messages.success(
+            self.request,
+            _('Stock updated: %(name)s -> %(stock)s') % {'name': part.name, 'stock': part.current_stock},
+        )
         return redirect('inventory:sparepart_detail', pk=part.pk)
 
     def get_context_data(self, **kwargs):
@@ -203,9 +207,9 @@ class SupplierReviewCreateView(LoginRequiredMixin, CanManageInventoryMixin, View
             review.supplier = supplier
             review.created_by = request.user
             review.save()
-            messages.success(request, 'Supplier review saved.')
+            messages.success(request, _('Supplier review saved.'))
         else:
-            messages.error(request, 'Please provide a valid rating between 1 and 5.')
+            messages.error(request, _('Please provide a valid rating between 1 and 5.'))
         return redirect('inventory:supplier_detail', pk=supplier.pk)
 
 
@@ -216,7 +220,7 @@ class SupplierCreateView(LoginRequiredMixin, CanManageInventoryMixin, CreateView
     success_url = reverse_lazy('inventory:supplier_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Supplier created.')
+        messages.success(self.request, _('Supplier created.'))
         return super().form_valid(form)
 
 
@@ -228,7 +232,7 @@ class SupplierUpdateView(LoginRequiredMixin, CanManageInventoryMixin, UpdateView
     success_url = reverse_lazy('inventory:supplier_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Supplier updated.')
+        messages.success(self.request, _('Supplier updated.'))
         return super().form_valid(form)
 
 

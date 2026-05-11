@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 from django.db.models import Count, Sum
@@ -87,7 +88,7 @@ class ReportScheduleCreateView(LoginRequiredMixin, CanViewReportsMixin, View):
         report_type = request.POST.get('report_type', '').strip()
         frequency = request.POST.get('frequency', 'weekly')
         if not name or report_type not in {'fleet', 'trends', 'cost', 'comparison'}:
-            messages.error(request, 'Report schedule requires a name and report type.')
+            messages.error(request, _('Report schedule requires a name and report type.'))
             return redirect('reports:index')
         schedule = ReportSchedule.objects.create(
             name=name,
@@ -102,7 +103,7 @@ class ReportScheduleCreateView(LoginRequiredMixin, CanViewReportsMixin, View):
             created_by=request.user,
         )
         log_audit(request, 'create', 'ReportSchedule', schedule.pk, f'Created report schedule {schedule.name}')
-        messages.success(request, 'Report schedule saved.')
+        messages.success(request, _('Report schedule saved.'))
         return redirect('reports:index')
 
 
@@ -208,7 +209,7 @@ class ExportCenterView(LoginRequiredMixin, CanViewReportsMixin, TemplateView):
         dataset = request.POST.get('dataset')
         export_format = request.POST.get('export_format', 'csv')
         if dataset not in dict(ExportJob.DATASETS):
-            messages.error(request, 'Invalid export dataset.')
+            messages.error(request, _('Invalid export dataset.'))
             return redirect('reports:export_center')
         if dataset == 'audit' and not request.user.can_manage_platform():
             return HttpResponse('Forbidden', status=403)

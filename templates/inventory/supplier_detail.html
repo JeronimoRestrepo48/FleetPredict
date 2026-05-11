@@ -1,11 +1,12 @@
 {% extends "base.html" %}
-{% block title %}{{ supplier.name }} - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{{ supplier.name }} - {% trans "FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Suppliers</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">{% trans "Inventory" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">{% trans "Suppliers" %}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ supplier.name }}</li>
   </ol>
 </nav>
@@ -14,25 +15,25 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">{{ supplier.name }}</h2>
   <div class="d-flex flex-wrap gap-2">
-    <a href="{% url 'inventory:supplier_update' supplier.pk %}" class="btn btn-primary">Edit</a>
-    <a href="{% url 'inventory:supplier_delete' supplier.pk %}" class="btn btn-primary">Delete</a>
-    <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    <a href="{% url 'inventory:supplier_update' supplier.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+    <a href="{% url 'inventory:supplier_delete' supplier.pk %}" class="btn btn-primary">{% trans "Delete" %}</a>
+    <a href="{% url 'inventory:supplier_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
   </div>
 </div>
 <div class="card card-fp mb-4">
   <div class="card-body">
-    <h3 class="h6 text-muted text-uppercase mb-3">Supplier information</h3>
+    <h3 class="h6 text-muted text-uppercase mb-3">{% trans "Supplier information" %}</h3>
     <dl class="row mb-0">
-      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ supplier.name }}</dd>
-      <dt class="col-sm-3">Contact</dt><dd class="col-sm-9">{{ supplier.contact_name|default:"—" }}</dd>
-      <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{% if supplier.email %}<a href="mailto:{{ supplier.email }}">{{ supplier.email }}</a>{% else %}—{% endif %}</dd>
-      <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ supplier.phone|default:"—" }}</dd>
-      <dt class="col-sm-3">Address</dt><dd class="col-sm-9">{{ supplier.address|default:"—"|linebreaksbr }}</dd>
-      <dt class="col-sm-3">Delivery terms</dt><dd class="col-sm-9">{{ supplier.delivery_terms|default:"—"|linebreaksbr }}</dd>
-      <dt class="col-sm-3">Rating</dt>
+      <dt class="col-sm-3">{% trans "Name" %}</dt><dd class="col-sm-9">{{ supplier.name }}</dd>
+      <dt class="col-sm-3">{% trans "Contact" %}</dt><dd class="col-sm-9">{{ supplier.contact_name|default:"—" }}</dd>
+      <dt class="col-sm-3">{% trans "Email" %}</dt><dd class="col-sm-9">{% if supplier.email %}<a href="mailto:{{ supplier.email }}">{{ supplier.email }}</a>{% else %}—{% endif %}</dd>
+      <dt class="col-sm-3">{% trans "Phone" %}</dt><dd class="col-sm-9">{{ supplier.phone|default:"—" }}</dd>
+      <dt class="col-sm-3">{% trans "Address" %}</dt><dd class="col-sm-9">{{ supplier.address|default:"—"|linebreaksbr }}</dd>
+      <dt class="col-sm-3">{% trans "Delivery terms" %}</dt><dd class="col-sm-9">{{ supplier.delivery_terms|default:"—"|linebreaksbr }}</dd>
+      <dt class="col-sm-3">{% trans "Rating" %}</dt>
       <dd class="col-sm-9">
         {% if supplier.rating_avg is not None %}
-          {{ supplier.rating_avg|floatformat:1 }}/5 ({{ supplier.rating_count }} reviews)
+          {{ supplier.rating_avg|floatformat:1 }}/5 ({{ supplier.rating_count }} {% trans "reviews" %})
         {% else %}
           —
         {% endif %}
@@ -42,24 +43,24 @@
 </div>
 <div class="card card-fp mb-4">
   <div class="card-body">
-    <h3 class="h6 mb-3">Rate after delivery</h3>
+    <h3 class="h6 mb-3">{% trans "Rate after delivery" %}</h3>
     <form method="post" action="{% url 'inventory:supplier_review_create' supplier.pk %}" class="fp-validate">
       {% csrf_token %}
       <div class="row g-3">
         <div class="col-md-3">
-          <label class="form-label">Stars</label>
+          <label class="form-label">{% trans "Stars" %}</label>
           {{ review_form.rating }}
         </div>
         <div class="col-md-9">
-          <label class="form-label">Comment</label>
+          <label class="form-label">{% trans "Comment" %}</label>
           {{ review_form.comment }}
         </div>
       </div>
-      <button type="submit" class="btn btn-primary btn-sm mt-3">Save review</button>
+      <button type="submit" class="btn btn-primary btn-sm mt-3">{% trans "Save review" %}</button>
     </form>
     {% if reviews %}
     <hr>
-    <h4 class="h6 mb-2">Recent reviews</h4>
+    <h4 class="h6 mb-2">{% trans "Recent reviews" %}</h4>
     <div class="list-group list-group-flush">
       {% for review in reviews %}
       <div class="list-group-item px-0">
@@ -67,7 +68,7 @@
           <strong>{{ review.rating }}/5</strong>
           <span class="text-muted small">{{ review.created_at|date:"M d, Y H:i" }}</span>
         </div>
-        <div class="text-muted small">By {{ review.created_by.get_full_name|default:review.created_by.email|default:"Unknown" }}</div>
+        <div class="text-muted small">{% trans "By" %} {{ review.created_by.get_full_name|default:review.created_by.email|default:"—" }}</div>
         {% if review.comment %}<p class="mb-0 mt-1">{{ review.comment }}</p>{% endif %}
       </div>
       {% endfor %}
@@ -77,14 +78,14 @@
 </div>
 <div class="card card-fp">
   <div class="card-body">
-    <h3 class="h6 mb-3">Supplied parts</h3>
+    <h3 class="h6 mb-3">{% trans "Supplied parts" %}</h3>
     <div class="table-responsive">
       <table class="table table-fp mb-0">
         <thead>
           <tr>
-            <th>Spare part</th>
-            <th>Price</th>
-            <th>Lead time</th>
+            <th>{% trans "Spare part" %}</th>
+            <th>{% trans "Price" %}</th>
+            <th>{% trans "Lead time" %}</th>
           </tr>
         </thead>
         <tbody>
@@ -92,10 +93,10 @@
           <tr>
             <td><a href="{% url 'inventory:sparepart_detail' row.spare_part.pk %}">{{ row.spare_part.name }}</a></td>
             <td>{{ row.unit_price }}</td>
-            <td>{{ row.lead_time_days }} days</td>
+            <td>{% blocktrans with d=row.lead_time_days %}{{ d }} days{% endblocktrans %}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="3" class="text-center text-muted py-4">No data.</td></tr>
+          <tr><td colspan="3" class="text-center text-muted py-4">{% trans "No data." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>

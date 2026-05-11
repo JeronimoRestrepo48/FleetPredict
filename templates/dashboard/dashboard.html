@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% load static %}
-{% block title %}Dashboard - FleetPredict Pro{% endblock %}
-{% block meta_description %}Fleet overview, vehicle status, maintenance tasks and key metrics.{% endblock %}
+{% load i18n static %}
+{% get_current_language as LANGUAGE_CODE %}
+{% block title %}{% trans "Dashboard" %} - {% trans "FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Fleet overview, vehicle status, maintenance tasks and key metrics." %}{% endblock %}
 {% block extra_css %}
 <style>
   .dashboard-hero { margin-bottom: var(--fp-spacing-lg); }
@@ -12,49 +13,49 @@
 </style>
 {% endblock %}
 {% block breadcrumb %}
-<nav aria-label="breadcrumb" class="breadcrumb-fp">
+<nav aria-label="{% trans 'breadcrumb' %}" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Dashboard" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="dashboard-hero d-flex flex-wrap justify-content-between align-items-start gap-2">
   <div>
-    <h1 class="mb-1">Dashboard</h1>
+    <h1 class="mb-1">{% trans "Dashboard" %}</h1>
     <p class="dashboard-summary mb-0">{{ executive_summary }}</p>
   </div>
-  <a href="{% url 'dashboard:dashboard_customize' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-grid-1x2 me-1"></i>Customize</a>
+  <a href="{% url 'dashboard:dashboard_customize' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-grid-1x2 me-1"></i>{% trans "Customize" %}</a>
 </div>
 
 {% if compliance_expired or compliance_expiring %}
 <div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3" role="alert">
   <span>
-    <strong>Compliance:</strong>
-    {% if compliance_expired %}<span class="text-danger">{{ compliance_expired }} expired</span>{% endif %}
+    <strong>{% trans "Compliance" %}:</strong>
+    {% if compliance_expired %}<span class="text-danger">{{ compliance_expired }} {% trans "expired" %}</span>{% endif %}
     {% if compliance_expired and compliance_expiring %} · {% endif %}
     {% if compliance_expiring %}
-      <span>{{ compliance_expiring }} expiring in {{ compliance_window_days }} days</span>
+      <span>{{ compliance_expiring }} {% trans "expiring in" %} {{ compliance_window_days }} {% trans "days" %}</span>
     {% endif %}
   </span>
   {% if user.can_manage_vehicles %}
-  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-sm btn-outline-dark">View compliance</a>
+  <a href="{% url 'vehicles:compliance_list' %}" class="btn btn-sm btn-outline-dark">{% trans "View compliance" %}</a>
   {% endif %}
 </div>
 {% endif %}
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-  <span class="text-muted small" data-i18n="charts_period">Charts period:</span>
-  <a href="?period=7d" class="btn btn-sm btn-outline-primary period-btn {% if period == '7d' %}active{% endif %}" data-i18n="seven_days">7 days</a>
-  <a href="?period=30d" class="btn btn-sm btn-outline-primary period-btn {% if period == '30d' %}active{% endif %}" data-i18n="thirty_days">30 days</a>
-  <a href="?period=month" class="btn btn-sm btn-outline-primary period-btn {% if period == 'month' %}active{% endif %}" data-i18n="this_month">This month</a>
+  <span class="text-muted small">{% trans "Charts period:" %}</span>
+  <a href="?period=7d" class="btn btn-sm btn-outline-primary period-btn {% if period == '7d' %}active{% endif %}">{% trans "7 days" %}</a>
+  <a href="?period=30d" class="btn btn-sm btn-outline-primary period-btn {% if period == '30d' %}active{% endif %}">{% trans "30 days" %}</a>
+  <a href="?period=month" class="btn btn-sm btn-outline-primary period-btn {% if period == 'month' %}active{% endif %}">{% trans "This month" %}</a>
 </div>
 
 <div class="row g-3 g-md-4 mb-4">
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-truck me-1"></i> Total Vehicles</div>
+        <div class="kpi-label"><i class="bi bi-truck me-1"></i> {% trans "Total Vehicles" %}</div>
         <div class="kpi-value">{{ total_vehicles }}</div>
       </div>
     </div>
@@ -62,7 +63,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-success">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-check-circle me-1"></i> Fleet Availability</div>
+        <div class="kpi-label"><i class="bi bi-check-circle me-1"></i> {% trans "Fleet Availability" %}</div>
         <div class="kpi-value">{{ fleet_availability }}%</div>
       </div>
     </div>
@@ -70,7 +71,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-warning">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-exclamation-triangle me-1"></i> Need Attention</div>
+        <div class="kpi-label"><i class="bi bi-exclamation-triangle me-1"></i> {% trans "Need Attention" %}</div>
         <div class="kpi-value">{{ tasks_requiring_attention }}</div>
       </div>
     </div>
@@ -78,7 +79,7 @@
   <div class="col-6 col-md-3">
     <div class="card card-fp kpi-card kpi-danger">
       <div class="card-body">
-        <div class="kpi-label"><i class="bi bi-currency-dollar me-1"></i> Monthly Costs</div>
+        <div class="kpi-label"><i class="bi bi-currency-dollar me-1"></i> {% trans "Monthly Costs" %}</div>
         <div class="kpi-value">${{ monthly_total|floatformat:2 }}</div>
       </div>
     </div>
@@ -88,21 +89,21 @@
 <div class="row g-3 g-md-4 mb-3">
   <div class="col-12">
     <div class="card card-fp">
-      <div class="card-header">Fleet health</div>
+      <div class="card-header">{% trans "Fleet health" %}</div>
       <div class="card-body py-2">
-        <span class="badge bg-success me-2">Good {{ vehicle_health_counts.green|default:0 }}</span>
-        <span class="badge bg-warning text-dark me-2">Caution {{ vehicle_health_counts.yellow|default:0 }}</span>
-        <span class="badge bg-danger">Critical {{ vehicle_health_counts.red|default:0 }}</span>
+        <span class="badge bg-success me-2">{% trans "Good" %} {{ vehicle_health_counts.green|default:0 }}</span>
+        <span class="badge bg-warning text-dark me-2">{% trans "Caution" %} {{ vehicle_health_counts.yellow|default:0 }}</span>
+        <span class="badge bg-danger">{% trans "Critical" %} {{ vehicle_health_counts.red|default:0 }}</span>
         {% if vehicles_with_health %}
         <div class="table-responsive mt-2">
           <table class="table table-sm table-fp mb-0">
-            <thead><tr><th>Vehicle</th><th>Health</th><th>Engine</th></tr></thead>
+            <thead><tr><th>{% trans "Vehicle" %}</th><th>{% trans "Health" %}</th><th>{% trans "Engine" %}</th></tr></thead>
             <tbody>
               {% for v in vehicles_with_health %}
               <tr>
                 <td><a href="{% url 'vehicles:vehicle_detail' v.pk %}">{{ v.display_name }}</a></td>
-                <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}Good{% elif v.health_status == 'yellow' %}Caution{% else %}Critical{% endif %}</span></td>
-                <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}On{% else %}Off{% endif %}</span></td>
+                <td><span class="badge bg-{% if v.health_status == 'green' %}success{% elif v.health_status == 'yellow' %}warning text-dark{% else %}danger{% endif %}">{% if v.health_status == 'green' %}{% trans "Good" %}{% elif v.health_status == 'yellow' %}{% trans "Caution" %}{% else %}{% trans "Critical" %}{% endif %}</span></td>
+                <td><span class="badge bg-{% if v.is_engine_on %}success{% else %}danger{% endif %}">{% if v.is_engine_on %}{% trans "On" %}{% else %}{% trans "Off" %}{% endif %}</span></td>
               </tr>
               {% endfor %}
             </tbody>
@@ -117,7 +118,7 @@
 <div class="row g-3 g-md-4 mb-4">
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Vehicles by Status</div>
+      <div class="card-header">{% trans "Vehicles by Status" %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartVehicles"></canvas>
@@ -127,7 +128,7 @@
   </div>
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Maintenance Tasks by Status</div>
+      <div class="card-header">{% trans "Maintenance Tasks by Status" %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartTasks"></canvas>
@@ -140,7 +141,7 @@
 <div class="row g-3 g-md-4 mb-4">
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Tasks by Priority (open)</div>
+      <div class="card-header">{% trans "Tasks by Priority (open)" %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartPriority"></canvas>
@@ -150,7 +151,7 @@
   </div>
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Completed Tasks &amp; Cost ({{ period }})</div>
+      <div class="card-header">{% blocktrans with p=period %}Completed Tasks & Cost ({{ p }}){% endblocktrans %}</div>
       <div class="card-body">
         <div class="chart-container">
           <canvas id="chartLine"></canvas>
@@ -165,52 +166,52 @@
     <div class="card card-fp border-warning">
       <div class="card-header bg-light d-flex align-items-center">
         <i class="bi bi-shield-exclamation me-2"></i>
-        <span>Operations center (SOC) – High and critical alerts</span>
+        <span>{% trans "Operations center (SOC) – High and critical alerts" %}</span>
       </div>
       <div class="card-body">
         <form method="get" class="row g-2 mb-3 p-2 border rounded bg-light-subtle fp-filter-active">
           <input type="hidden" name="period" value="{{ period }}">
           <div class="col-md-2">
-            <label class="form-label small mb-1">Time</label>
+            <label class="form-label small mb-1">{% trans "Time" %}</label>
             <select name="soc_days" class="form-select form-select-sm">
-              <option value="1" {% if soc_filter_days == 1 %}selected{% endif %}>Last 24h</option>
-              <option value="7" {% if soc_filter_days == 7 %}selected{% endif %}>Last 7 days</option>
-              <option value="30" {% if soc_filter_days == 30 %}selected{% endif %}>Last 30 days</option>
+              <option value="1" {% if soc_filter_days == 1 %}selected{% endif %}>{% trans "Last 24h" %}</option>
+              <option value="7" {% if soc_filter_days == 7 %}selected{% endif %}>{% trans "Last 7 days" %}</option>
+              <option value="30" {% if soc_filter_days == 30 %}selected{% endif %}>{% trans "Last 30 days" %}</option>
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small mb-1">Vehicle</label>
+            <label class="form-label small mb-1">{% trans "Vehicle" %}</label>
             <select name="soc_vehicle" class="form-select form-select-sm">
-              <option value="">All</option>
+              <option value="">{% trans "All" %}</option>
               {% for v in soc_vehicle_options %}
               <option value="{{ v.id }}" {% if soc_filter_vehicle == v.id|stringformat:'s' %}selected{% endif %}>{{ v.license_plate }} · {{ v.display_name }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small mb-1">Reason</label>
+            <label class="form-label small mb-1">{% trans "Reason" %}</label>
             <select name="soc_reason" class="form-select form-select-sm">
-              <option value="">All</option>
+              <option value="">{% trans "All" %}</option>
               {% for value, label in soc_reason_options %}
               <option value="{{ value }}" {% if soc_filter_reason == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small mb-1">Place</label>
+            <label class="form-label small mb-1">{% trans "Place" %}</label>
             <select name="soc_place" class="form-select form-select-sm">
-              <option value="">All</option>
+              <option value="">{% trans "All" %}</option>
               {% for place in soc_place_options %}
               <option value="{{ place }}" {% if soc_filter_place == place %}selected{% endif %}>{{ place }}</option>
               {% endfor %}
             </select>
           </div>
           <div class="col-md-2">
-            <label class="form-label small mb-1">Contains</label>
-            <input type="text" name="soc_search" class="form-control form-control-sm" value="{{ soc_filter_search }}" placeholder="Message text">
+            <label class="form-label small mb-1">{% trans "Contains" %}</label>
+            <input type="text" name="soc_search" class="form-control form-control-sm" value="{{ soc_filter_search }}" placeholder="{% trans 'Message text' %}">
           </div>
           <div class="col-md-1">
-            <label class="form-label small mb-1">Show</label>
+            <label class="form-label small mb-1">{% trans "Show" %}</label>
             <select name="soc_limit" class="form-select form-select-sm">
               <option value="20" {% if soc_filter_limit == 20 %}selected{% endif %}>20</option>
               <option value="50" {% if soc_filter_limit == 50 %}selected{% endif %}>50</option>
@@ -218,15 +219,15 @@
             </select>
           </div>
           <div class="col-md-1 d-flex align-items-end gap-1">
-            <button class="btn btn-sm btn-primary w-100" type="submit">Apply</button>
+            <button class="btn btn-sm btn-primary w-100" type="submit">{% trans "Apply" %}</button>
           </div>
         </form>
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <p class="text-muted small mb-0">Filtered alerts: <strong>{{ soc_total_count }}</strong></p>
-          <a href="?period={{ period }}" class="btn btn-sm btn-outline-secondary">Clear filters</a>
+          <p class="text-muted small mb-0">{% trans "Filtered alerts:" %} <strong>{{ soc_total_count }}</strong></p>
+          <a href="?period={{ period }}" class="btn btn-sm btn-outline-secondary">{% trans "Clear filters" %}</a>
         </div>
         {% if soc_alerts %}
-        <p class="text-muted small mb-3">Suggested actions (playbooks) and runnable runbooks for each alert.</p>
+        <p class="text-muted small mb-3">{% trans "Suggested actions (playbooks) and runnable runbooks for each alert." %}</p>
         <div class="accordion" id="socAccordion">
           {% for alert, playbook in soc_alerts_with_playbook %}
           <div class="accordion-item">
@@ -241,7 +242,7 @@
                 <p class="mb-2">{{ alert.message }}</p>
                 {% if playbook %}
                 <div class="mb-3">
-                  <strong>Playbook – Suggested steps:</strong>
+                  <strong>{% trans "Playbook – Suggested steps:" %}</strong>
                   <ol class="mb-0 ps-3">
                     {% for step in playbook.steps %}
                     <li>{{ step }}</li>
@@ -249,7 +250,7 @@
                   </ol>
                 </div>
                 {% endif %}
-                <div class="mb-2"><strong>Runbooks – Actions:</strong></div>
+                <div class="mb-2"><strong>{% trans "Runbooks – Actions:" %}</strong></div>
                 <div class="d-flex flex-wrap gap-2">
                   {% for runbook in runbooks_list %}
                     {% if not runbook.alert_type or runbook.alert_type == alert.alert_type %}
@@ -268,7 +269,7 @@
           {% endfor %}
         </div>
         {% else %}
-        <p class="text-muted mb-0">No high or critical alerts at this time.</p>
+        <p class="text-muted mb-0">{% trans "No high or critical alerts at this time." %}</p>
         {% endif %}
       </div>
     </div>
@@ -278,17 +279,17 @@
 <div class="row g-3 g-md-4">
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Upcoming Maintenance (Next 7 Days)</div>
+      <div class="card-header">{% trans "Upcoming Maintenance (Next 7 Days)" %}</div>
       <div class="card-body p-0">
         {% if upcoming_maintenance %}
         <div class="table-responsive">
           <table class="table table-fp mb-0">
             <thead>
               <tr>
-                <th>Vehicle</th>
-                <th>Task</th>
-                <th>Date</th>
-                <th>Priority</th>
+                <th>{% trans "Vehicle" %}</th>
+                <th>{% trans "Task" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "Priority" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -305,7 +306,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <p>No upcoming maintenance.</p>
+          <p>{% trans "No upcoming maintenance." %}</p>
         </div>
         {% endif %}
       </div>
@@ -313,17 +314,17 @@
   </div>
   <div class="col-lg-6">
     <div class="card card-fp">
-      <div class="card-header">Recent Completed Tasks</div>
+      <div class="card-header">{% trans "Recent Completed Tasks" %}</div>
       <div class="card-body p-0">
         {% if recent_completed %}
         <div class="table-responsive">
           <table class="table table-fp mb-0">
             <thead>
               <tr>
-                <th>Vehicle</th>
-                <th>Task</th>
-                <th>Completed</th>
-                <th>Cost</th>
+                <th>{% trans "Vehicle" %}</th>
+                <th>{% trans "Task" %}</th>
+                <th>{% trans "Completed" %}</th>
+                <th>{% trans "Cost" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -340,7 +341,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <p>No recent completed tasks.</p>
+          <p>{% trans "No recent completed tasks." %}</p>
         </div>
         {% endif %}
       </div>
@@ -356,29 +357,30 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function() {
+  const dateLocale = "{{ LANGUAGE_CODE|default:'en' }}" === "es" ? "es-ES" : "en-US";
   const vehicleData = JSON.parse(document.getElementById('vehicleStatusData').textContent);
   const taskData = JSON.parse(document.getElementById('taskStatusData').textContent);
   const priorityData = JSON.parse(document.getElementById('taskPriorityData').textContent);
   const costsByDay = JSON.parse(document.getElementById('costsByDayData').textContent);
   const completedByDay = JSON.parse(document.getElementById('completedByDayData').textContent);
 
-  const vehicleLabels = ['Active', 'Inactive', 'Under Maintenance', 'Retired'];
+  const vehicleLabels = ["{% filter escapejs %}{% trans "Active" %}{% endfilter %}", "{% filter escapejs %}{% trans "Inactive" %}{% endfilter %}", "{% filter escapejs %}{% trans "Under Maintenance" %}{% endfilter %}", "{% filter escapejs %}{% trans "Retired" %}{% endfilter %}"];
   const vehicleKeys = ['active', 'inactive', 'under_maintenance', 'retired'];
   const vehicleValues = vehicleKeys.map(function(k) { return vehicleData[k] || 0; });
   const vehicleColors = ['#198754', '#6c757d', '#ffc107', '#212529'];
 
-  const taskLabels = ['Scheduled', 'In Progress', 'Completed', 'Cancelled', 'Overdue'];
+  const taskLabels = ["{% filter escapejs %}{% trans "Scheduled" %}{% endfilter %}", "{% filter escapejs %}{% trans "In Progress" %}{% endfilter %}", "{% filter escapejs %}{% trans "Completed" %}{% endfilter %}", "{% filter escapejs %}{% trans "Cancelled" %}{% endfilter %}", "{% filter escapejs %}{% trans "Overdue" %}{% endfilter %}"];
   const taskKeys = ['scheduled', 'in_progress', 'completed', 'cancelled', 'overdue'];
   const taskValues = taskKeys.map(function(k) { return taskData[k] || 0; });
   const taskColors = ['#0d6efd', '#0dcaf0', '#198754', '#6c757d', '#dc3545'];
 
-  const priorityLabels = ['Low', 'Medium', 'High', 'Critical'];
+  const priorityLabels = ["{% filter escapejs %}{% trans "Low" %}{% endfilter %}", "{% filter escapejs %}{% trans "Medium" %}{% endfilter %}", "{% filter escapejs %}{% trans "High" %}{% endfilter %}", "{% filter escapejs %}{% trans "Critical" %}{% endfilter %}"];
   const priorityKeys = ['low', 'medium', 'high', 'critical'];
   const priorityValues = priorityKeys.map(function(k) { return priorityData[k] || 0; });
   const priorityColors = ['#6c757d', '#0d6efd', '#ffc107', '#dc3545'];
 
   const dayLabels = Object.keys(costsByDay).map(function(d) {
-    return new Date(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return new Date(d).toLocaleDateString(dateLocale, { weekday: 'short', month: 'short', day: 'numeric' });
   });
   const costValues = Object.values(costsByDay);
   const completedValues = Object.values(completedByDay);
@@ -408,7 +410,7 @@
       type: 'bar',
       data: {
         labels: labels,
-        datasets: [{ label: 'Tasks', data: values, backgroundColor: colors }]
+        datasets: [{ label: "{% filter escapejs %}{% trans 'Tasks' %}{% endfilter %}", data: values, backgroundColor: colors }]
       },
       options: {
         responsive: true,
@@ -429,8 +431,8 @@
       data: {
         labels: dayLabels,
         datasets: [
-          { label: 'Completed tasks', data: completedValues, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, yAxisID: 'y' },
-          { label: 'Cost ($)', data: costValues, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.1)', fill: true, yAxisID: 'y1' }
+          { label: "{% filter escapejs %}{% trans 'Completed tasks' %}{% endfilter %}", data: completedValues, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,0.1)', fill: true, yAxisID: 'y' },
+          { label: "{% filter escapejs %}{% trans 'Cost ($)' %}{% endfilter %}", data: costValues, borderColor: '#0d6efd', backgroundColor: 'rgba(13,110,253,0.1)', fill: true, yAxisID: 'y1' }
         ]
       },
       options: {

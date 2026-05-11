@@ -21,6 +21,7 @@ from django.views.generic import (
     View,
 )
 from django.db.models import Q
+from django.utils.translation import gettext as _
 
 from apps.dashboard.audit import log_audit
 from .models import (
@@ -148,7 +149,7 @@ class VehicleCreateView(LoginRequiredMixin, CanManageVehiclesMixin, CreateView):
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
         log_audit(self.request, 'create', 'Vehicle', self.object.pk, f'Vehicle {self.object.license_plate} created')
-        messages.success(self.request, 'Vehicle created successfully.')
+        messages.success(self.request, _('Vehicle created successfully.'))
         return response
 
 
@@ -169,7 +170,7 @@ class VehicleUpdateView(LoginRequiredMixin, CanManageVehiclesMixin, UpdateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         log_audit(self.request, 'update', 'Vehicle', self.object.pk, f'Vehicle {self.object.license_plate} updated')
-        messages.success(self.request, 'Vehicle updated successfully.')
+        messages.success(self.request, _('Vehicle updated successfully.'))
         return response
 
 
@@ -187,7 +188,7 @@ class VehicleDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteView):
     def form_valid(self, form):
         log_audit(self.request, 'delete', 'Vehicle', self.object.pk, f'Vehicle {self.object.license_plate} deleted')
         self.object.soft_delete()
-        messages.success(self.request, 'Vehicle deleted successfully.')
+        messages.success(self.request, _('Vehicle deleted successfully.'))
         return redirect(self.success_url)
 
 
@@ -298,7 +299,7 @@ class VehicleTypeCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     success_url = reverse_lazy('vehicles:vehicletype_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Vehicle type created successfully.')
+        messages.success(self.request, _('Vehicle type created successfully.'))
         return super().form_valid(form)
 
 
@@ -312,7 +313,7 @@ class VehicleTypeUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     success_url = reverse_lazy('vehicles:vehicletype_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Vehicle type updated successfully.')
+        messages.success(self.request, _('Vehicle type updated successfully.'))
         return super().form_valid(form)
 
 
@@ -328,10 +329,10 @@ class VehicleTypeDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
         if self.object.vehicles.exists():
             messages.error(
                 self.request,
-                'Cannot delete: some vehicles use this type. Reassign them first.',
+                _('Cannot delete: some vehicles use this type. Reassign them first.'),
             )
             return redirect('vehicles:vehicletype_list')
-        messages.success(self.request, 'Vehicle type deleted.')
+        messages.success(self.request, _('Vehicle type deleted.'))
         return super().form_valid(form)
 
 
@@ -387,7 +388,7 @@ class ComplianceCreateView(LoginRequiredMixin, CanManageVehiclesMixin, CreateVie
         return initial
 
     def form_valid(self, form):
-        messages.success(self.request, 'Compliance requirement added.')
+        messages.success(self.request, _('Compliance requirement added.'))
         return super().form_valid(form)
 
 
@@ -401,7 +402,7 @@ class ComplianceUpdateView(LoginRequiredMixin, CanManageVehiclesMixin, UpdateVie
     success_url = reverse_lazy('vehicles:compliance_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Compliance requirement updated.')
+        messages.success(self.request, _('Compliance requirement updated.'))
         return super().form_valid(form)
 
 
@@ -414,7 +415,7 @@ class ComplianceDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteVie
     success_url = reverse_lazy('vehicles:compliance_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Compliance requirement removed.')
+        messages.success(self.request, _('Compliance requirement removed.'))
         return super().form_valid(form)
 
 
@@ -469,7 +470,7 @@ class SensorManualEntryView(LoginRequiredMixin, CanManageVehiclesMixin, CreateVi
 
     def form_valid(self, form):
         form.instance.source = 'manual'
-        messages.success(self.request, 'Sensor reading added.')
+        messages.success(self.request, _('Sensor reading added.'))
         return super().form_valid(form)
 
     def get_success_url(self):
@@ -502,7 +503,7 @@ class SensorCSVUploadView(LoginRequiredMixin, CanManageVehiclesMixin, View):
                         source='csv',
                     )
                     count += 1
-            messages.success(request, f'{count} sensor readings imported.')
+            messages.success(request, _('%(count)s sensor readings imported.') % {'count': count})
             return redirect('vehicles:sensor_dashboard', pk=vehicle.pk)
         return self._render(request, form, vehicle)
 

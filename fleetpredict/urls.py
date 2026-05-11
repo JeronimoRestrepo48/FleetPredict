@@ -11,6 +11,7 @@ from fleetpredict.health import healthz, readyz
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('i18n/', include('django.conf.urls.i18n')),
     path('healthz/', healthz, name='healthz'),
     path('readyz/', readyz, name='readyz'),
     

@@ -1,20 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Delete Maintenance Task - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Delete Maintenance Task - FleetPredict Pro" %}{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
-                <h2 class="card-title mb-4">Delete Maintenance Task</h2>
-                <p>Are you sure you want to delete <strong>{{ task.title }}</strong> for {{ task.vehicle.display_name }}?</p>
+                <h2 class="card-title mb-4">{% trans "Delete Maintenance Task" %}</h2>
+                <p>{% trans "Are you sure you want to delete this maintenance task?" %}</p>
+                <p class="mb-3"><strong>{{ task.title }}</strong> — {{ task.vehicle.display_name }}</p>
                 {% if task.status == 'completed' %}
-                <p class="text-danger">Cannot delete completed tasks.</p>
-                <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-outline-secondary">Back</a>
+                <p class="text-danger">{% trans "Cannot delete completed tasks." %}</p>
+                <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-outline-secondary">{% trans "Back" %}</a>
                 {% else %}
                 <form method="post" action="">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                    <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+                    <button type="submit" class="btn btn-danger">{% trans "Delete" %}</button>
+                    <a href="{% url 'maintenance:task_detail' task.pk %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
                 </form>
                 {% endif %}
             </div>

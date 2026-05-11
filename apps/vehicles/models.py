@@ -5,6 +5,8 @@ Implements FR2: Vehicle registry.
 
 from django.db import models
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext
 
 
 class VehicleType(models.Model):
@@ -40,10 +42,10 @@ class Vehicle(models.Model):
     """
 
     class Status(models.TextChoices):
-        ACTIVE = 'active', 'Active'
-        INACTIVE = 'inactive', 'Inactive'
-        UNDER_MAINTENANCE = 'under_maintenance', 'Under Maintenance'
-        RETIRED = 'retired', 'Retired'
+        ACTIVE = 'active', _('Active')
+        INACTIVE = 'inactive', _('Inactive')
+        UNDER_MAINTENANCE = 'under_maintenance', _('Under Maintenance')
+        RETIRED = 'retired', _('Retired')
 
     # Identification
     license_plate = models.CharField(max_length=20, unique=True)
@@ -365,20 +367,25 @@ class VehicleAlert(models.Model):
     Feeds FR6 (health), FR7 (notifications), FR9 (failure prediction).
     """
     class AlertType(models.TextChoices):
-        HIGH_ENGINE_TEMP = 'high_engine_temp', 'High engine temperature'
-        ANOMALOUS_FUEL = 'anomalous_fuel', 'Anomalous fuel consumption'
-        HARSH_DRIVING = 'harsh_driving', 'Harsh driving'
-        PROLONGED_IDLE = 'prolonged_idle', 'Prolonged idling'
-        MAINTENANCE_MILEAGE = 'maintenance_mileage', 'Maintenance due by mileage'
-        MAINTENANCE_TIME = 'maintenance_time', 'Maintenance due by time'
-        STATISTICAL_ANOMALY = 'statistical_anomaly', 'Statistical anomaly'
-        THRESHOLD_EXCEEDED = 'threshold_exceeded', 'Custom threshold exceeded'
+        HIGH_ENGINE_TEMP = 'high_engine_temp', _('High engine temperature')
+        ANOMALOUS_FUEL = 'anomalous_fuel', _('Anomalous fuel consumption')
+        HARSH_DRIVING = 'harsh_driving', _('Harsh driving')
+        PROLONGED_IDLE = 'prolonged_idle', _('Prolonged idling')
+        MAINTENANCE_MILEAGE = 'maintenance_mileage', _('Maintenance due by mileage')
+        MAINTENANCE_TIME = 'maintenance_time', _('Maintenance due by time')
+        STATISTICAL_ANOMALY = 'statistical_anomaly', _('Statistical anomaly')
+        THRESHOLD_EXCEEDED = 'threshold_exceeded', _('Custom threshold exceeded')
 
     class Severity(models.TextChoices):
-        LOW = 'low', 'Low'
-        MEDIUM = 'medium', 'Medium'
-        HIGH = 'high', 'High'
-        CRITICAL = 'critical', 'Critical'
+        LOW = 'low', _('Low')
+        MEDIUM = 'medium', _('Medium')
+        HIGH = 'high', _('High')
+        CRITICAL = 'critical', _('Critical')
+
+    class SuggestionStatus(models.TextChoices):
+        PENDING = 'pending', _('Pending')
+        ACCEPTED = 'accepted', _('Accepted')
+        DISMISSED = 'dismissed', _('Dismissed')
 
     vehicle = models.ForeignKey(
         Vehicle,
@@ -418,11 +425,7 @@ class VehicleAlert(models.Model):
     # FR11: Suggested maintenance - accept (create task) or dismiss
     suggestion_status = models.CharField(
         max_length=16,
-        choices=[
-            ('pending', 'Pending'),
-            ('accepted', 'Accepted'),
-            ('dismissed', 'Dismissed'),
-        ],
+        choices=SuggestionStatus.choices,
         null=True,
         blank=True,
         db_index=True,
@@ -490,9 +493,9 @@ class Playbook(models.Model):
 class Runbook(models.Model):
     """Executable action for alerts (SOC runbook)."""
     class ActionType(models.TextChoices):
-        MARK_ALERT_READ = 'mark_alert_read', 'Mark alert as read'
-        CREATE_MAINTENANCE_TASK = 'create_maintenance_task', 'Create maintenance task'
-        DISMISS_ALERT = 'dismiss_alert', 'Dismiss alert'
+        MARK_ALERT_READ = 'mark_alert_read', _('Mark alert as read')
+        CREATE_MAINTENANCE_TASK = 'create_maintenance_task', _('Create maintenance task')
+        DISMISS_ALERT = 'dismiss_alert', _('Dismiss alert')
 
     name = models.CharField(max_length=200)
     alert_type = models.CharField(
@@ -522,11 +525,11 @@ class Runbook(models.Model):
         if self.action_type == self.ActionType.MARK_ALERT_READ:
             alert.read_at = timezone.now()
             alert.save(update_fields=['read_at'])
-            return True, 'Alert marked as read.'
+            return True, gettext('Alert marked as read.')
         if self.action_type == self.ActionType.DISMISS_ALERT:
             alert.read_at = timezone.now()
             alert.save(update_fields=['read_at'])
-            return True, 'Alert dismissed.'
+            return True, gettext('Alert dismissed.')
         if self.action_type == self.ActionType.CREATE_MAINTENANCE_TASK:
             from apps.maintenance.models import MaintenanceTask
             from datetime import timedelta
@@ -541,8 +544,8 @@ class Runbook(models.Model):
                 created_by=user,
             )
             task.save()
-            return True, f'Maintenance task created: {task.title}'
-        return False, 'Unknown action type.'
+            return True, gettext('Maintenance task created: %(title)s') % {'title': task.title}
+        return False, gettext('Unknown action type.')
 
 
 class ComplianceRequirement(models.Model):
@@ -552,12 +555,12 @@ class ComplianceRequirement(models.Model):
     """
 
     class Type(models.TextChoices):
-        INSPECTION = 'inspection', 'Inspection'
-        CERTIFICATION = 'certification', 'Certification'
-        LICENSE = 'license', 'License'
-        REGISTRATION = 'registration', 'Registration'
-        INSURANCE = 'insurance', 'Insurance'
-        OTHER = 'other', 'Other'
+        INSPECTION = 'inspection', _('Inspection')
+        CERTIFICATION = 'certification', _('Certification')
+        LICENSE = 'license', _('License')
+        REGISTRATION = 'registration', _('Registration')
+        INSURANCE = 'insurance', _('Insurance')
+        OTHER = 'other', _('Other')
 
     vehicle = models.ForeignKey(
         Vehicle,
@@ -604,17 +607,17 @@ class SensorReading(models.Model):
     """
 
     class SensorType(models.TextChoices):
-        TEMPERATURE = 'temperature', 'Temperature (C)'
-        VIBRATION = 'vibration', 'Vibration (mm/s)'
-        PRESSURE = 'pressure', 'Pressure (PSI)'
-        OIL_LEVEL = 'oil_level', 'Oil Level (%)'
-        BATTERY_VOLTAGE = 'battery_voltage', 'Battery Voltage (V)'
-        TIRE_PRESSURE = 'tire_pressure', 'Tire Pressure (PSI)'
+        TEMPERATURE = 'temperature', _('Temperature (C)')
+        VIBRATION = 'vibration', _('Vibration (mm/s)')
+        PRESSURE = 'pressure', _('Pressure (PSI)')
+        OIL_LEVEL = 'oil_level', _('Oil Level (%)')
+        BATTERY_VOLTAGE = 'battery_voltage', _('Battery Voltage (V)')
+        TIRE_PRESSURE = 'tire_pressure', _('Tire Pressure (PSI)')
 
     class Source(models.TextChoices):
-        API = 'api', 'API'
-        CSV = 'csv', 'CSV Upload'
-        MANUAL = 'manual', 'Manual Entry'
+        API = 'api', _('API')
+        CSV = 'csv', _('CSV Upload')
+        MANUAL = 'manual', _('Manual Entry')
 
     vehicle = models.ForeignKey(
         Vehicle, on_delete=models.CASCADE, related_name='sensor_readings',

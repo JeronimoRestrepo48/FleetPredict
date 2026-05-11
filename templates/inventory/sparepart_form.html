@@ -1,18 +1,19 @@
 {% extends "base.html" %}
-{% block title %}{% if part %}Edit{% else %}Create{% endif %} Spare Part - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{% if part %}{% trans "Edit Spare Part - FleetPredict Pro" %}{% else %}{% trans "Create Spare Part - FleetPredict Pro" %}{% endif %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% if part %}Edit{% else %}Create{% endif %} spare part</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">{% trans "Inventory" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if part %}{% trans "Edit spare part" %}{% else %}{% trans "Create spare part" %}{% endif %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if part %}Edit Spare Part{% else %}Create Spare Part{% endif %}</h2>
-  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Cancel</a>
+  <h2 class="page-title mb-0">{% if part %}{% trans "Edit Spare Part" %}{% else %}{% trans "Create Spare Part" %}{% endif %}</h2>
+  <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
 </div>
 <div class="card card-fp">
   <div class="card-body">
@@ -29,7 +30,7 @@
         {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
       </div>
       {% endfor %}
-      <button type="submit" class="btn btn-primary">Save</button>
+      <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
     </form>
   </div>
 </div>

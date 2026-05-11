@@ -1,31 +1,32 @@
 {% extends "base.html" %}
-{% block title %}{% if object %}Edit{% else %}Add{% endif %} Maintenance Task - FleetPredict Pro{% endblock %}
-{% block meta_description %}{% if object %}Edit maintenance task.{% else %}Create a new maintenance task.{% endif %}{% endblock %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans "Edit Maintenance Task - FleetPredict Pro" %}{% else %}{% trans "Add Maintenance Task - FleetPredict Pro" %}{% endif %}{% endblock %}
+{% block meta_description %}{% if object %}{% trans "Edit maintenance task." %}{% else %}{% trans "Create a new maintenance task." %}{% endif %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{% if object %}Edit{% else %}Add{% endif %}</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">{% trans "Maintenance" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% if object %}{% trans "Edit" %}{% else %}{% trans "Add" %}{% endif %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">{% if object %}Edit Maintenance Task{% else %}Add Maintenance Task{% endif %}</h2>
+  <h2 class="page-title mb-0">{% if object %}{% trans "Edit Maintenance Task" %}{% else %}{% trans "Add Maintenance Task" %}{% endif %}</h2>
   <div class="d-flex gap-2 align-items-center">
     {% if not object and maintenance_templates %}
     <form method="get" action="{% url 'maintenance:task_create' %}" class="d-inline">
-      <label for="id_apply_template" class="me-2">Apply template:</label>
+      <label for="id_apply_template" class="me-2">{% trans "Apply template:" %}</label>
       <select name="template" id="id_apply_template" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
-        <option value="">— None —</option>
+        <option value="">{% trans "— None —" %}</option>
         {% for t in maintenance_templates %}
         <option value="{{ t.pk }}" {% if selected_template_id == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.name }}</option>
         {% endfor %}
       </select>
     </form>
     {% endif %}
-    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
   </div>
 </div>
 <div class="card card-fp">
@@ -37,62 +38,62 @@
             {% endif %}
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="id_vehicle" class="form-label">Vehicle</label>
+                    <label for="id_vehicle" class="form-label">{% trans "Vehicle" %}</label>
                     {{ form.vehicle }}
                     {% if form.vehicle.errors %}<div class="invalid-feedback d-block">{{ form.vehicle.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label for="id_assignee" class="form-label">Assignee</label>
+                    <label for="id_assignee" class="form-label">{% trans "Assignee" %}</label>
                     {{ form.assignee }}
                     {% if form.assignee.errors %}<div class="invalid-feedback d-block">{{ form.assignee.errors }}</div>{% endif %}
                 </div>
             </div>
             <div class="mb-3">
-                <label for="id_title" class="form-label">Title</label>
+                <label for="id_title" class="form-label">{% trans "Title" %}</label>
                 {{ form.title }}
                 {% if form.title.errors %}<div class="invalid-feedback d-block">{{ form.title.errors }}</div>{% endif %}
             </div>
             <div class="mb-3">
-                <label for="id_description" class="form-label">Description</label>
+                <label for="id_description" class="form-label">{% trans "Description" %}</label>
                 {{ form.description }}
                 {% if form.description.errors %}<div class="invalid-feedback d-block">{{ form.description.errors }}</div>{% endif %}
             </div>
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label for="id_maintenance_type" class="form-label">Type</label>
+                    <label for="id_maintenance_type" class="form-label">{% trans "Type" %}</label>
                     {{ form.maintenance_type }}
                     {% if form.maintenance_type.errors %}<div class="invalid-feedback d-block">{{ form.maintenance_type.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="id_scheduled_date" class="form-label">Scheduled Date</label>
+                    <label for="id_scheduled_date" class="form-label">{% trans "Scheduled Date" %}</label>
                     {{ form.scheduled_date }}
                     {% if form.scheduled_date.errors %}<div class="invalid-feedback d-block">{{ form.scheduled_date.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="id_estimated_duration" class="form-label">Duration (min)</label>
+                    <label for="id_estimated_duration" class="form-label">{% trans "Duration (min)" %}</label>
                     {{ form.estimated_duration }}
                     {% if form.estimated_duration.errors %}<div class="invalid-feedback d-block">{{ form.estimated_duration.errors }}</div>{% endif %}
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-4 mb-3">
-                    <label for="id_status" class="form-label">Status</label>
+                    <label for="id_status" class="form-label">{% trans "Status" %}</label>
                     {{ form.status }}
                     {% if form.status.errors %}<div class="invalid-feedback d-block">{{ form.status.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="id_priority" class="form-label">Priority</label>
+                    <label for="id_priority" class="form-label">{% trans "Priority" %}</label>
                     {{ form.priority }}
                     {% if form.priority.errors %}<div class="invalid-feedback d-block">{{ form.priority.errors }}</div>{% endif %}
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label for="id_estimated_cost" class="form-label">Estimated Cost</label>
+                    <label for="id_estimated_cost" class="form-label">{% trans "Estimated Cost" %}</label>
                     {{ form.estimated_cost }}
                     {% if form.estimated_cost.errors %}<div class="invalid-feedback d-block">{{ form.estimated_cost.errors }}</div>{% endif %}
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary ms-2">Cancel</a>
+            <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+            <a href="{% url 'maintenance:task_list' %}" class="btn btn-outline-secondary ms-2">{% trans "Cancel" %}</a>
         </form>
     </div>
 </div>

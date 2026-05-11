@@ -6,6 +6,7 @@ FR27: Audit log for user actions.
 
 from django.conf import settings
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
 class AlertRule(models.Model):
@@ -14,10 +15,10 @@ class AlertRule(models.Model):
     FR8: Configurable alert thresholds.
     """
     RULE_TYPES = [
-        ('maintenance_due_days', 'Maintenance due within (days)'),
-        ('maintenance_overdue', 'Maintenance overdue alert'),
-        ('compliance_expiring_days', 'Compliance expiring within (days)'),
-        ('workorder_due_days', 'Work orders due within (days)'),
+        ('maintenance_due_days', _('Maintenance due within (days)')),
+        ('maintenance_overdue', _('Maintenance overdue alert')),
+        ('compliance_expiring_days', _('Compliance expiring within (days)')),
+        ('workorder_due_days', _('Work orders due within (days)')),
     ]
     name = models.CharField(max_length=64, unique=True, choices=RULE_TYPES)
     value_int = models.IntegerField(
@@ -69,19 +70,19 @@ class AlertThreshold(models.Model):
     Users can create rules like "alert when engine_temperature_c >= 105".
     """
     ATTRIBUTES = [
-        ('engine_temperature_c', 'Engine temperature (°C)'),
-        ('fuel_level_pct', 'Fuel level (%)'),
-        ('speed_kmh', 'Speed (km/h)'),
-        ('rpm', 'Engine RPM'),
-        ('mileage', 'Mileage (km)'),
-        ('voltage', 'Battery voltage (V)'),
-        ('throttle_pct', 'Throttle position (%)'),
+        ('engine_temperature_c', _('Engine temperature (°C)')),
+        ('fuel_level_pct', _('Fuel level (%)')),
+        ('speed_kmh', _('Speed (km/h)')),
+        ('rpm', _('Engine RPM')),
+        ('mileage', _('Mileage (km)')),
+        ('voltage', _('Battery voltage (V)')),
+        ('throttle_pct', _('Throttle position (%)')),
     ]
     OPERATORS = [
-        ('gte', '≥ (greater or equal)'),
-        ('lte', '≤ (less or equal)'),
-        ('gt', '> (greater)'),
-        ('lt', '< (less)'),
+        ('gte', _('≥ (greater or equal)')),
+        ('lte', _('≤ (less or equal)')),
+        ('gt', _('> (greater)')),
+        ('lt', _('< (less)')),
     ]
 
     attribute = models.CharField(max_length=64, choices=ATTRIBUTES)
@@ -90,10 +91,10 @@ class AlertThreshold(models.Model):
     severity = models.CharField(
         max_length=16,
         choices=[
-            ('low', 'Low'),
-            ('medium', 'Medium'),
-            ('high', 'High'),
-            ('critical', 'Critical'),
+            ('low', _('Low')),
+            ('medium', _('Medium')),
+            ('high', _('High')),
+            ('critical', _('Critical')),
         ],
         default='medium',
     )
@@ -121,14 +122,14 @@ class AuditLog(models.Model):
     FR27: Audit log - record user actions for compliance and traceability.
     """
     ACTION_CHOICES = [
-        ('create', 'Create'),
-        ('update', 'Update'),
-        ('delete', 'Delete'),
-        ('login', 'Login'),
-        ('logout', 'Logout'),
-        ('export', 'Export'),
-        ('override', 'Override'),
-        ('system', 'System event'),
+        ('create', _('Create')),
+        ('update', _('Update')),
+        ('delete', _('Delete')),
+        ('login', _('Login')),
+        ('logout', _('Logout')),
+        ('export', _('Export')),
+        ('override', _('Override')),
+        ('system', _('System event')),
     ]
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -167,22 +168,22 @@ class DashboardLayout(models.Model):
     """
 
     WIDGET_CHOICES = [
-        ('vehicle_count', 'Vehicle Count'),
-        ('status_summary', 'Status Summary'),
-        ('recent_alerts', 'Recent Alerts'),
-        ('upcoming_maintenance', 'Upcoming Maintenance'),
-        ('health_overview', 'Health Overview'),
-        ('cost_summary', 'Cost Summary'),
-        ('chart_maintenance_trend', 'Maintenance Trend Chart'),
-        ('chart_alerts_by_type', 'Alerts by Type Chart'),
-        ('compliance_status', 'Compliance Status'),
-        ('task_priority', 'Task Priority'),
+        ('vehicle_count', _('Vehicle Count')),
+        ('status_summary', _('Status Summary')),
+        ('recent_alerts', _('Recent Alerts')),
+        ('upcoming_maintenance', _('Upcoming Maintenance')),
+        ('health_overview', _('Health Overview')),
+        ('cost_summary', _('Cost Summary')),
+        ('chart_maintenance_trend', _('Maintenance Trend Chart')),
+        ('chart_alerts_by_type', _('Alerts by Type Chart')),
+        ('compliance_status', _('Compliance Status')),
+        ('task_priority', _('Task Priority')),
     ]
 
     SIZE_CHOICES = [
-        ('sm', 'Small (4 cols)'),
-        ('md', 'Medium (6 cols)'),
-        ('lg', 'Large (12 cols)'),
+        ('sm', _('Small (4 cols)')),
+        ('md', _('Medium (6 cols)')),
+        ('lg', _('Large (12 cols)')),
     ]
 
     user = models.OneToOneField(

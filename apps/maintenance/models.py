@@ -6,6 +6,7 @@ Implements FR4 (Maintenance management system) and FR5 (Maintenance history per 
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class MaintenanceTask(models.Model):
@@ -15,23 +16,23 @@ class MaintenanceTask(models.Model):
     """
 
     class Type(models.TextChoices):
-        PREVENTIVE = 'preventive', 'Preventive'
-        CORRECTIVE = 'corrective', 'Corrective'
-        INSPECTION = 'inspection', 'Inspection'
-        EMERGENCY = 'emergency', 'Emergency'
+        PREVENTIVE = 'preventive', _('Preventive')
+        CORRECTIVE = 'corrective', _('Corrective')
+        INSPECTION = 'inspection', _('Inspection')
+        EMERGENCY = 'emergency', _('Emergency')
 
     class Status(models.TextChoices):
-        SCHEDULED = 'scheduled', 'Scheduled'
-        IN_PROGRESS = 'in_progress', 'In Progress'
-        COMPLETED = 'completed', 'Completed'
-        CANCELLED = 'cancelled', 'Cancelled'
-        OVERDUE = 'overdue', 'Overdue'
+        SCHEDULED = 'scheduled', _('Scheduled')
+        IN_PROGRESS = 'in_progress', _('In Progress')
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
+        OVERDUE = 'overdue', _('Overdue')
 
     class Priority(models.TextChoices):
-        LOW = 'low', 'Low'
-        MEDIUM = 'medium', 'Medium'
-        HIGH = 'high', 'High'
-        CRITICAL = 'critical', 'Critical'
+        LOW = 'low', _('Low')
+        MEDIUM = 'medium', _('Medium')
+        HIGH = 'high', _('High')
+        CRITICAL = 'critical', _('Critical')
 
     # Relationships
     vehicle = models.ForeignKey(
@@ -271,10 +272,10 @@ class WorkOrder(models.Model):
     """
 
     class Status(models.TextChoices):
-        OPEN = 'open', 'Open'
-        IN_PROGRESS = 'in_progress', 'In Progress'
-        COMPLETED = 'completed', 'Completed'
-        CANCELLED = 'cancelled', 'Cancelled'
+        OPEN = 'open', _('Open')
+        IN_PROGRESS = 'in_progress', _('In Progress')
+        COMPLETED = 'completed', _('Completed')
+        CANCELLED = 'cancelled', _('Cancelled')
 
     task = models.OneToOneField(
         MaintenanceTask,

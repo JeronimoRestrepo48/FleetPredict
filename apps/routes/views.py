@@ -5,6 +5,7 @@ from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import ListView, View
 from django.template.response import TemplateResponse
+from django.utils.translation import gettext as _
 
 from .models import Route, RouteSuggestion
 from .forms import RoutePlannerForm
@@ -59,7 +60,10 @@ class RouteSelectView(LoginRequiredMixin, View):
         route.suggestions.update(selected=False)
         suggestion.selected = True
         suggestion.save(update_fields=['selected'])
-        messages.success(request, f'Route alternative {suggestion.alternative_number} selected.')
+        messages.success(
+            request,
+            _('Route alternative %(n)s selected.') % {'n': suggestion.alternative_number},
+        )
         return redirect('routes:suggestions', pk=route.pk)
 
 

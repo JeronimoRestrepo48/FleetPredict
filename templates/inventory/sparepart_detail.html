@@ -1,10 +1,11 @@
 {% extends "base.html" %}
-{% block title %}{{ part.name }} - FleetPredict Pro{% endblock %}
+{% load i18n %}
+{% block title %}{{ part.name }} - {% trans "FleetPredict Pro" %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">Inventory</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'inventory:sparepart_list' %}">{% trans "Inventory" %}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ part.name }}</li>
   </ol>
 </nav>
@@ -13,30 +14,30 @@
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
   <h2 class="page-title mb-0">{{ part.name }}</h2>
   <div class="d-flex flex-wrap gap-2">
-    <a href="{% url 'inventory:sparepart_update' part.pk %}" class="btn btn-primary">Edit</a>
-    <a href="{% url 'inventory:sparepart_delete' part.pk %}" class="btn btn-primary">Delete</a>
-    <a href="{% url 'inventory:stock_adjust' %}" class="btn btn-primary">Adjust stock</a>
-    <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">Back to list</a>
+    <a href="{% url 'inventory:sparepart_update' part.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+    <a href="{% url 'inventory:sparepart_delete' part.pk %}" class="btn btn-primary">{% trans "Delete" %}</a>
+    <a href="{% url 'inventory:stock_adjust' %}" class="btn btn-primary">{% trans "Adjust stock" %}</a>
+    <a href="{% url 'inventory:sparepart_list' %}" class="btn btn-outline-secondary">{% trans "Back to list" %}</a>
   </div>
 </div>
 <div class="card card-fp mb-4">
   <div class="card-body">
-    <h3 class="h6 text-muted text-uppercase mb-3">Part details</h3>
+    <h3 class="h6 text-muted text-uppercase mb-3">{% trans "Part details" %}</h3>
     <dl class="row mb-0">
-      <dt class="col-sm-3">Part number</dt><dd class="col-sm-9">{{ part.part_number }}</dd>
-      <dt class="col-sm-3">Name</dt><dd class="col-sm-9">{{ part.name }}</dd>
-      <dt class="col-sm-3">Category</dt><dd class="col-sm-9">{{ part.get_category_display }}</dd>
-      <dt class="col-sm-3">Description</dt><dd class="col-sm-9">{{ part.description|default:"—" }}</dd>
-      <dt class="col-sm-3">Unit cost</dt><dd class="col-sm-9">{{ part.unit_cost }}</dd>
-      <dt class="col-sm-3">Reorder point</dt><dd class="col-sm-9">{{ part.reorder_point }}</dd>
-      <dt class="col-sm-3">Current stock</dt><dd class="col-sm-9">{{ part.current_stock }}</dd>
-      <dt class="col-sm-3">Status</dt>
+      <dt class="col-sm-3">{% trans "Part number" %}</dt><dd class="col-sm-9">{{ part.part_number }}</dd>
+      <dt class="col-sm-3">{% trans "Name" %}</dt><dd class="col-sm-9">{{ part.name }}</dd>
+      <dt class="col-sm-3">{% trans "Category" %}</dt><dd class="col-sm-9">{{ part.get_category_display }}</dd>
+      <dt class="col-sm-3">{% trans "Description" %}</dt><dd class="col-sm-9">{{ part.description|default:"—" }}</dd>
+      <dt class="col-sm-3">{% trans "Unit cost" %}</dt><dd class="col-sm-9">{{ part.unit_cost }}</dd>
+      <dt class="col-sm-3">{% trans "Reorder point" %}</dt><dd class="col-sm-9">{{ part.reorder_point }}</dd>
+      <dt class="col-sm-3">{% trans "Current stock" %}</dt><dd class="col-sm-9">{{ part.current_stock }}</dd>
+      <dt class="col-sm-3">{% trans "Status" %}</dt>
       <dd class="col-sm-9">
-        {% if part.is_low_stock %}<span class="badge bg-danger">Low stock</span>{% else %}<span class="badge bg-success">OK</span>{% endif %}
+        {% if part.is_low_stock %}<span class="badge bg-danger">{% trans "Low stock" %}</span>{% else %}<span class="badge bg-success">{% trans "OK" %}</span>{% endif %}
       </dd>
-      <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ part.created_at }}</dd>
-      <dt class="col-sm-3">Updated</dt><dd class="col-sm-9">{{ part.updated_at }}</dd>
-      <dt class="col-sm-3">Created by</dt><dd class="col-sm-9">{% if part.created_by %}{{ part.created_by.get_full_name|default:part.created_by.email }}{% else %}—{% endif %}</dd>
+      <dt class="col-sm-3">{% trans "Created" %}</dt><dd class="col-sm-9">{{ part.created_at }}</dd>
+      <dt class="col-sm-3">{% trans "Updated" %}</dt><dd class="col-sm-9">{{ part.updated_at }}</dd>
+      <dt class="col-sm-3">{% trans "Created by" %}</dt><dd class="col-sm-9">{% if part.created_by %}{{ part.created_by.get_full_name|default:part.created_by.email }}{% else %}—{% endif %}</dd>
     </dl>
   </div>
 </div>
@@ -44,15 +45,15 @@
   <div class="col-lg-6">
     <div class="card card-fp h-100">
       <div class="card-body">
-        <h3 class="h6 mb-3">Stock movements</h3>
+        <h3 class="h6 mb-3">{% trans "Stock movements" %}</h3>
         <div class="table-responsive">
           <table class="table table-fp table-sm mb-0">
             <thead>
               <tr>
-                <th>Type</th>
-                <th>Quantity</th>
-                <th>Date</th>
-                <th>User</th>
+                <th>{% trans "Type" %}</th>
+                <th>{% trans "Quantity" %}</th>
+                <th>{% trans "Date" %}</th>
+                <th>{% trans "User" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -64,7 +65,7 @@
                 <td>{% if m.created_by %}{{ m.created_by.get_full_name|default:m.created_by.email }}{% else %}—{% endif %}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="4" class="text-center text-muted py-4">No data.</td></tr>
+              <tr><td colspan="4" class="text-center text-muted py-4">{% trans "No data." %}</td></tr>
               {% endfor %}
             </tbody>
           </table>
@@ -75,14 +76,14 @@
   <div class="col-lg-6">
     <div class="card card-fp h-100">
       <div class="card-body">
-        <h3 class="h6 mb-3">Suppliers</h3>
+        <h3 class="h6 mb-3">{% trans "Suppliers" %}</h3>
         <div class="table-responsive">
           <table class="table table-fp table-sm mb-0">
             <thead>
               <tr>
-                <th>Supplier</th>
-                <th>Price</th>
-                <th>Lead time</th>
+                <th>{% trans "Supplier" %}</th>
+                <th>{% trans "Price" %}</th>
+                <th>{% trans "Lead time" %}</th>
               </tr>
             </thead>
             <tbody>
@@ -90,10 +91,10 @@
               <tr>
                 <td><a href="{% url 'inventory:supplier_detail' link.supplier.pk %}">{{ link.supplier.name }}</a></td>
                 <td>{{ link.unit_price }}</td>
-                <td>{{ link.lead_time_days }} days</td>
+                <td>{% blocktrans with d=link.lead_time_days %}{{ d }} days{% endblocktrans %}</td>
               </tr>
               {% empty %}
-              <tr><td colspan="3" class="text-center text-muted py-4">No data.</td></tr>
+              <tr><td colspan="3" class="text-center text-muted py-4">{% trans "No data." %}</td></tr>
               {% endfor %}
             </tbody>
           </table>

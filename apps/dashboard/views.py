@@ -12,6 +12,8 @@ from django.views.generic import CreateView
 from django import forms
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _lazy
 from django.db.models import Count, Q, Sum
 from datetime import datetime, timedelta
 from collections import OrderedDict
@@ -41,8 +43,8 @@ SOC_LOCATION_HUBS = [
 
 def _nearest_city_label(lat, lng):
     if lat is None or lng is None:
-        return 'Unknown'
-    best_name = 'Unknown'
+        return _('Unknown')
+    best_name = _('Unknown')
     best_dist = float('inf')
     for city, c_lat, c_lng in SOC_LOCATION_HUBS:
         dist = math.dist([float(lat), float(lng)], [c_lat, c_lng])
@@ -106,9 +108,14 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         fleet_availability = (
             (active_vehicles / total_vehicles * 100) if total_vehicles > 0 else 0
         )
-        summary = (
-            f"Platform overview: {total_users} users, {vehicle_types_count} vehicle types, "
-            f"{total_vehicles} vehicles ({fleet_availability:.0f}% availability)."
+        summary = _(
+            'Platform overview: {total_users} users, {vehicle_types_count} vehicle types, '
+            '{total_vehicles} vehicles ({fleet_availability:.0f}% availability).'
+        ).format(
+            total_users=total_users,
+            vehicle_types_count=vehicle_types_count,
+            total_vehicles=total_vehicles,
+            fleet_availability=fleet_availability,
         )
         context.update({
             'executive_summary': summary,
@@ -162,9 +169,12 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             tasks_qs.filter(status='completed', assignee=user)
             .order_by('-completion_date')[:5]
         )
-        summary = (
-            f"{my_assigned.count()} tasks assigned to you, {unassigned.count()} unassigned. "
-            f"{tasks_needing_attention} need attention."
+        summary = _(
+            '{assigned} tasks assigned to you, {unassigned} unassigned. {attention} need attention.'
+        ).format(
+            assigned=my_assigned.count(),
+            unassigned=unassigned.count(),
+            attention=tasks_needing_attention,
         )
         context.update({
             'executive_summary': summary,
@@ -332,17 +342,21 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # Executive summary (1-2 sentences)
         if total_vehicles == 0:
-            summary = "No vehicles in the fleet yet. Add vehicles to start tracking."
+            summary = _('No vehicles in the fleet yet. Add vehicles to start tracking.')
         else:
             parts = [
-                f"{available_vehicles} of {total_vehicles} vehicles active",
-                f"{fleet_availability:.0f}% availability",
+                _('{available} of {total} vehicles active').format(
+                    available=available_vehicles, total=total_vehicles,
+                ),
+                _('{pct:.0f}% availability').format(pct=fleet_availability),
             ]
             if upcoming_count > 0:
-                parts.append(f"{upcoming_count} upcoming in 7 days")
+                parts.append(_('{count} upcoming in 7 days').format(count=upcoming_count))
             if tasks_requiring_attention > 0:
-                parts.append(f"{tasks_requiring_attention} tasks need attention")
-            summary = " · ".join(parts) + "."
+                parts.append(
+                    _('{count} tasks need attention').format(count=tasks_requiring_attention),
+                )
+            summary = ' · '.join(parts) + '.'
 
         # SOC: high/critical alerts (unread), playbooks and runbooks
         soc_days = int(self.request.GET.get('soc_days', '7'))
@@ -385,7 +399,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
                         row['longitude'],
                     )
         for alert in soc_alerts:
-            alert.location_label = latest_location_by_vehicle.get(alert.vehicle_id, 'Unknown')
+            alert.location_label = latest_location_by_vehicle.get(alert.vehicle_id, _('Unknown'))
         if soc_place:
             soc_alerts = [a for a in soc_alerts if a.location_label == soc_place]
         soc_place_options = sorted({a.location_label for a in soc_alerts if a.location_label})
@@ -462,7 +476,7 @@ class ExecuteRunbookView(LoginRequiredMixin, View):
         alert_id = request.POST.get('alert_id')
         runbook_id = request.POST.get('runbook_id')
         if not alert_id or not runbook_id:
-            messages.error(request, 'Missing alert or runbook.')
+            messages.error(request, _('Missing alert or runbook.'))
             return redirect('dashboard:index')
         user = request.user
         vehicle_ids = Vehicle.objects.filter(is_deleted=False)
@@ -471,17 +485,17 @@ class ExecuteRunbookView(LoginRequiredMixin, View):
         vehicle_ids = set(vehicle_ids.values_list('id', flat=True))
         alert = get_object_or_404(VehicleAlert, pk=alert_id)
         if alert.vehicle_id not in vehicle_ids:
-            messages.error(request, 'You do not have access to this alert.')
+            messages.error(request, _('You do not have access to this alert.'))
             return redirect('dashboard:index')
         runbook = get_object_or_404(Runbook, pk=runbook_id, is_active=True)
         if runbook.alert_type and runbook.alert_type != alert.alert_type:
-            messages.error(request, 'This runbook does not apply to this alert type.')
+            messages.error(request, _('This runbook does not apply to this alert type.'))
             return redirect('dashboard:index')
         success, msg = runbook.execute(alert, user)
         if success:
             messages.success(request, msg)
         else:
-            messages.error(request, msg or 'Action failed.')
+            messages.error(request, msg or _('Action failed.'))
         next_url = request.POST.get('next', '')
         if next_url == 'predictions':
             return redirect('dashboard:predictions')
@@ -549,14 +563,17 @@ class OverrideCriticalityView(LoginRequiredMixin, UserPassesTestMixin, View):
         new_severity = request.POST.get('severity')
         reason = request.POST.get('reason', '').strip()
         if new_severity not in dict(VehicleAlert.Severity.choices):
-            messages.error(request, 'Invalid criticality level.')
+            messages.error(request, _('Invalid criticality level.'))
             return redirect('dashboard:predictions')
         if not reason:
-            messages.error(request, 'A reason is required to override criticality.')
+            messages.error(request, _('A reason is required to override criticality.'))
             return redirect('dashboard:predictions')
         old_values = {'severity': alert.severity, 'criticality_reason': alert.criticality_reason}
         alert.severity = new_severity
-        alert.criticality_reason = f'Overridden by {request.user.get_full_name() or request.user.email}: {reason}'
+        alert.criticality_reason = _('Overridden by %(user)s: %(reason)s') % {
+            'user': request.user.get_full_name() or request.user.email,
+            'reason': reason,
+        }
         alert.severity_overridden_by = request.user
         alert.severity_override_reason = reason
         alert.severity_overridden_at = timezone.now()
@@ -569,11 +586,11 @@ class OverrideCriticalityView(LoginRequiredMixin, UserPassesTestMixin, View):
             'override',
             'VehicleAlert',
             alert.pk,
-            f'Criticality overridden for {alert.vehicle.display_name}',
+            _('Criticality overridden for %(vehicle)s') % {'vehicle': alert.vehicle.display_name},
             old_values=old_values,
             new_values={'severity': alert.severity, 'criticality_reason': alert.criticality_reason},
         )
-        messages.success(request, 'Criticality updated and audited.')
+        messages.success(request, _('Criticality updated and audited.'))
         return redirect('dashboard:predictions')
 
 
@@ -623,7 +640,7 @@ class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
         from apps.maintenance.models import MaintenanceTask
         alert_id = request.POST.get('alert_id')
         if not alert_id:
-            messages.error(request, 'Missing alert.')
+            messages.error(request, _('Missing alert.'))
             return redirect('dashboard:suggested_maintenance')
         user = request.user
         vehicle_ids = set(Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True))
@@ -631,14 +648,14 @@ class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
             vehicle_ids = set(Vehicle.objects.filter(is_deleted=False, assigned_driver=user).values_list('id', flat=True))
         alert = get_object_or_404(VehicleAlert, pk=alert_id)
         if alert.vehicle_id not in vehicle_ids:
-            messages.error(request, 'Not allowed.')
+            messages.error(request, _('Not allowed.'))
             return redirect('dashboard:suggested_maintenance')
         if alert.suggestion_status not in (None, 'pending'):
-            messages.warning(request, 'Suggestion already handled.')
+            messages.warning(request, _('Suggestion already handled.'))
             return redirect('dashboard:suggested_maintenance')
         scheduled_date_raw = request.POST.get('scheduled_date')
         priority = request.POST.get('priority') or ('critical' if alert.severity == 'critical' else 'high')
-        title = request.POST.get('title') or f"Suggested: {alert.get_alert_type_display()}"
+        title = request.POST.get('title') or _('Suggested: %(atype)s') % {'atype': alert.get_alert_type_display()}
         description = request.POST.get('description') or alert.message
         try:
             scheduled_date = datetime.strptime(scheduled_date_raw, '%Y-%m-%d').date() if scheduled_date_raw else (timezone.now() + timedelta(days=7)).date()
@@ -664,10 +681,10 @@ class AcceptSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
             'create',
             'MaintenanceTask',
             task.pk,
-            f'Accepted suggestion from alert {alert.pk}',
+            _('Accepted suggestion from alert %(pk)s') % {'pk': alert.pk},
             new_values={'scheduled_date': scheduled_date.isoformat(), 'priority': priority, 'source_alert': alert.pk},
         )
-        messages.success(request, f'Maintenance task created: {task.title}')
+        messages.success(request, _('Maintenance task created: %(title)s') % {'title': task.title})
         return redirect('dashboard:suggested_maintenance')
 
 
@@ -681,7 +698,7 @@ class DismissSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
     def post(self, request):
         alert_id = request.POST.get('alert_id')
         if not alert_id:
-            messages.error(request, 'Missing alert.')
+            messages.error(request, _('Missing alert.'))
             return redirect('dashboard:suggested_maintenance')
         user = request.user
         vehicle_ids = set(Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True))
@@ -689,10 +706,10 @@ class DismissSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
             vehicle_ids = set(Vehicle.objects.filter(is_deleted=False, assigned_driver=user).values_list('id', flat=True))
         alert = get_object_or_404(VehicleAlert, pk=alert_id)
         if alert.vehicle_id not in vehicle_ids:
-            messages.error(request, 'Not allowed.')
+            messages.error(request, _('Not allowed.'))
             return redirect('dashboard:suggested_maintenance')
         if alert.suggestion_status not in (None, 'pending'):
-            messages.warning(request, 'Suggestion already handled.')
+            messages.warning(request, _('Suggestion already handled.'))
             return redirect('dashboard:suggested_maintenance')
         reason = request.POST.get('dismiss_reason', '').strip()
         alert.suggestion_status = 'dismissed'
@@ -704,10 +721,10 @@ class DismissSuggestionView(LoginRequiredMixin, UserPassesTestMixin, View):
             'update',
             'VehicleAlert',
             alert.pk,
-            'Dismissed maintenance suggestion',
+            _('Dismissed maintenance suggestion'),
             new_values={'suggestion_status': 'dismissed', 'reason': reason},
         )
-        messages.success(request, 'Suggestion dismissed.')
+        messages.success(request, _('Suggestion dismissed.'))
         return redirect('dashboard:suggested_maintenance')
 
 
@@ -776,7 +793,7 @@ class AlertRuleCreateForm(forms.ModelForm):
         choices = [(k, v) for k, v in AlertRule.RULE_TYPES if k not in existing]
         self.fields['name'].choices = choices
         if not choices:
-            self.fields['name'].choices = [('', '— All rule types are configured —')]
+            self.fields['name'].choices = [('', _lazy('— All rule types are configured —'))]
 
 
 class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -824,7 +841,7 @@ class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         try:
             rule = AlertRule.objects.get(pk=rule_id)
         except AlertRule.DoesNotExist:
-            messages.error(request, 'Rule not found.')
+            messages.error(request, _('Rule not found.'))
             return self.get(request, *args, **kwargs)
         value_raw = request.POST.get('value_int')
         enabled = request.POST.get('enabled') == 'on'
@@ -835,7 +852,10 @@ class AlertRuleListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                 rule.value_int = 7
         rule.enabled = enabled
         rule.save()
-        messages.success(request, f'Alert rule "{rule.get_name_display()}" updated.')
+        messages.success(
+            request,
+            _('Alert rule "%(name)s" updated.') % {'name': rule.get_name_display()},
+        )
         return self.get(request, *args, **kwargs)
 
 
@@ -850,13 +870,13 @@ class AlertRuleCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
-        messages.success(self.request, 'Alert rule created.')
+        messages.success(self.request, _('Alert rule created.'))
         return super().form_valid(form)
 
     def get(self, request, *args, **kwargs):
         existing = set(AlertRule.objects.values_list('name', flat=True))
         if len(existing) >= len(AlertRule.RULE_TYPES):
-            messages.info(request, 'All alert rule types are already configured.')
+            messages.info(request, _('All alert rule types are already configured.'))
             return redirect(reverse_lazy('dashboard:alertrule_list'))
         return super().get(request, *args, **kwargs)
 
@@ -873,7 +893,7 @@ class AlertRuleUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
-        messages.success(self.request, 'Alert rule updated.')
+        messages.success(self.request, _('Alert rule updated.'))
         return super().form_valid(form)
 
 
@@ -917,7 +937,7 @@ class AlertThresholdCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateVi
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
-        messages.success(self.request, 'Threshold created.')
+        messages.success(self.request, _('Threshold created.'))
         return super().form_valid(form)
 
 
@@ -933,7 +953,7 @@ class AlertThresholdUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVi
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
-        messages.success(self.request, 'Threshold updated.')
+        messages.success(self.request, _('Threshold updated.'))
         return super().form_valid(form)
 
 
@@ -947,7 +967,7 @@ class AlertThresholdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVi
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
-        messages.success(self.request, 'Threshold deleted.')
+        messages.success(self.request, _('Threshold deleted.'))
         return super().form_valid(form)
 
 
@@ -1043,7 +1063,7 @@ class DashboardCustomizeView(LoginRequiredMixin, View):
             new_layout = json.loads(request.body)
         except (json.JSONDecodeError, ValueError):
             from django.http import JsonResponse
-            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+            return JsonResponse({'error': _('Invalid JSON')}, status=400)
         valid_types = {c[0] for c in DashboardLayout.WIDGET_CHOICES}
         valid_sizes = {c[0] for c in DashboardLayout.SIZE_CHOICES}
         cleaned = []
@@ -1067,5 +1087,5 @@ class DashboardResetView(LoginRequiredMixin, View):
         DashboardLayout.objects.filter(user=request.user).update(
             layout=DashboardLayout.get_default_layout()
         )
-        messages.success(request, 'Dashboard reset to default layout.')
+        messages.success(request, _('Dashboard reset to default layout.'))
         return redirect('dashboard:index')

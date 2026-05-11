@@ -6,6 +6,7 @@ Implements FR1 (Role-based access control) and FR21 (User profile management).
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
@@ -43,10 +44,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     """
 
     class Role(models.TextChoices):
-        ADMINISTRATOR = 'administrator', 'Administrator'
-        FLEET_MANAGER = 'fleet_manager', 'Fleet Manager'
-        MECHANIC = 'mechanic', 'Mechanic'
-        DRIVER = 'driver', 'Driver'
+        ADMINISTRATOR = 'administrator', _('Administrator')
+        FLEET_MANAGER = 'fleet_manager', _('Fleet Manager')
+        MECHANIC = 'mechanic', _('Mechanic')
+        DRIVER = 'driver', _('Driver')
 
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150)

@@ -22,6 +22,7 @@ from django.views.generic import (
 )
 from django.db.models import Q
 from django.utils import timezone
+from django.utils.translation import gettext as _
 
 from apps.dashboard.audit import log_audit
 from .models import MaintenanceTask, MaintenanceDocument, MaintenanceTemplate, WorkOrder
@@ -165,7 +166,7 @@ class MaintenanceTaskCreateView(LoginRequiredMixin, CanManageMaintenanceMixin, C
         form.instance.created_by = self.request.user
         response = super().form_valid(form)
         log_audit(self.request, 'create', 'MaintenanceTask', self.object.pk, f'Task {self.object.title} created')
-        messages.success(self.request, 'Maintenance task created successfully.')
+        messages.success(self.request, _('Maintenance task created successfully.'))
         return response
 
 
@@ -186,9 +187,9 @@ class MaintenanceTaskUpdateView(LoginRequiredMixin, CanManageMaintenanceMixin, U
     def form_valid(self, form):
         instance = form.instance
         if instance.status in [MaintenanceTask.Status.COMPLETED, MaintenanceTask.Status.CANCELLED]:
-            messages.error(self.request, 'Cannot modify completed or cancelled tasks.')
+            messages.error(self.request, _('Cannot modify completed or cancelled tasks.'))
             return redirect('maintenance:task_detail', pk=instance.pk)
-        messages.success(self.request, 'Maintenance task updated successfully.')
+        messages.success(self.request, _('Maintenance task updated successfully.'))
         return super().form_valid(form)
 
 
@@ -205,9 +206,9 @@ class MaintenanceTaskDeleteView(LoginRequiredMixin, CanManageMaintenanceMixin, D
 
     def form_valid(self, form):
         if self.object.status == MaintenanceTask.Status.COMPLETED:
-            messages.error(self.request, 'Cannot delete completed tasks.')
+            messages.error(self.request, _('Cannot delete completed tasks.'))
             return redirect('maintenance:task_detail', pk=self.object.pk)
-        messages.success(self.request, 'Maintenance task deleted successfully.')
+        messages.success(self.request, _('Maintenance task deleted successfully.'))
         return super().form_valid(form)
 
 
@@ -217,7 +218,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
     def get(self, request, pk):
         task = get_object_or_404(MaintenanceTask, pk=pk)
         if task.status == MaintenanceTask.Status.COMPLETED:
-            messages.warning(request, 'Task is already completed.')
+            messages.warning(request, _('Task is already completed.'))
             return redirect('maintenance:task_detail', pk=pk)
         form = MaintenanceTaskCompleteForm()
         return render(request, 'maintenance/task_complete.html', {'task': task, 'form': form})
@@ -225,7 +226,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
     def post(self, request, pk):
         task = get_object_or_404(MaintenanceTask, pk=pk)
         if task.status == MaintenanceTask.Status.COMPLETED:
-            messages.warning(request, 'Task is already completed.')
+            messages.warning(request, _('Task is already completed.'))
             return redirect('maintenance:task_detail', pk=pk)
         form = MaintenanceTaskCompleteForm(request.POST)
         if form.is_valid():
@@ -234,7 +235,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
                 actual_cost=form.cleaned_data.get('actual_cost'),
                 mileage=form.cleaned_data.get('mileage_at_maintenance')
             )
-            messages.success(request, 'Maintenance task completed successfully.')
+            messages.success(request, _('Maintenance task completed successfully.'))
             return redirect('maintenance:task_detail', pk=pk)
         return render(request, 'maintenance/task_complete.html', {'task': task, 'form': form})
 
@@ -250,10 +251,10 @@ class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixi
         task = get_object_or_404(MaintenanceTask, pk=pk)
         file = request.FILES.get('file')
         if not file:
-            messages.error(request, 'No file provided.')
+            messages.error(request, _('No file provided.'))
             return redirect('maintenance:task_detail', pk=pk)
         if file.size > 10 * 1024 * 1024:
-            messages.error(request, 'File size exceeds 10MB limit.')
+            messages.error(request, _('File size exceeds 10MB limit.'))
             return redirect('maintenance:task_detail', pk=pk)
         MaintenanceDocument.objects.create(
             task=task,
@@ -261,7 +262,7 @@ class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixi
             description=request.POST.get('description', ''),
             uploaded_by=request.user
         )
-        messages.success(request, 'Document uploaded successfully.')
+        messages.success(request, _('Document uploaded successfully.'))
         return redirect('maintenance:task_detail', pk=pk)
 
 
@@ -287,7 +288,7 @@ class MaintenanceTemplateCreateView(LoginRequiredMixin, CanManageMaintenanceMixi
     success_url = reverse_lazy('maintenance:template_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Maintenance template created successfully.')
+        messages.success(self.request, _('Maintenance template created successfully.'))
         return super().form_valid(form)
 
 
@@ -301,7 +302,7 @@ class MaintenanceTemplateUpdateView(LoginRequiredMixin, CanManageMaintenanceMixi
     success_url = reverse_lazy('maintenance:template_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Template updated successfully.')
+        messages.success(self.request, _('Template updated successfully.'))
         return super().form_valid(form)
 
 
@@ -314,7 +315,7 @@ class MaintenanceTemplateDeleteView(LoginRequiredMixin, CanManageMaintenanceMixi
     success_url = reverse_lazy('maintenance:template_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Template deleted.')
+        messages.success(self.request, _('Template deleted.'))
         return super().form_valid(form)
 
 
@@ -374,7 +375,7 @@ class WorkOrderCreateView(LoginRequiredMixin, CanManageMaintenanceMixin, CreateV
         return initial
 
     def form_valid(self, form):
-        messages.success(self.request, 'Work order created successfully.')
+        messages.success(self.request, _('Work order created successfully.'))
         return super().form_valid(form)
 
 
@@ -395,12 +396,12 @@ class WorkOrderUpdateView(LoginRequiredMixin, CanManageMaintenanceMixin, UpdateV
     def dispatch(self, request, *args, **kwargs):
         obj = get_object_or_404(WorkOrder, pk=kwargs.get('pk'))
         if obj.status == WorkOrder.Status.COMPLETED:
-            messages.error(request, 'Completed work orders cannot be modified.')
+            messages.error(request, _('Completed work orders cannot be modified.'))
             return redirect('maintenance:workorder_detail', pk=obj.pk)
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
         if form.cleaned_data.get('status') == WorkOrder.Status.COMPLETED:
             form.instance.completion_date = timezone.now().date()
-        messages.success(self.request, 'Work order updated.')
+        messages.success(self.request, _('Work order updated.'))
         return super().form_valid(form)

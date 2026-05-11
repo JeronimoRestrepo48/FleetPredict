@@ -1,43 +1,44 @@
 {% extends "base.html" %}
-{% block title %}Work Orders - FleetPredict Pro{% endblock %}
-{% block meta_description %}Work orders for maintenance tasks.{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Work Orders - FleetPredict Pro" %}{% endblock %}
+{% block meta_description %}{% trans "Work orders for maintenance tasks." %}{% endblock %}
 {% block breadcrumb %}
 <nav aria-label="breadcrumb" class="breadcrumb-fp">
   <ol class="breadcrumb mb-0">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">Maintenance</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Work orders</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard:index' %}">{% trans "Dashboard" %}</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'maintenance:task_list' %}">{% trans "Maintenance" %}</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{% trans "Work orders" %}</li>
   </ol>
 </nav>
 {% endblock %}
 {% block content %}
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-  <h2 class="page-title mb-0">Work Orders</h2>
-  <a href="{% url 'maintenance:workorder_create' %}" class="btn btn-primary">Create work order</a>
+  <h2 class="page-title mb-0">{% trans "Work Orders" %}</h2>
+  <a href="{% url 'maintenance:workorder_create' %}" class="btn btn-primary">{% trans "Create work order" %}</a>
 </div>
 <form method="get" class="card card-fp mb-3">
   <div class="card-body">
     <div class="row g-2 align-items-end">
       <div class="col-md-2">
-        <label for="id_status" class="form-label">Status</label>
+        <label for="id_status" class="form-label">{% trans "Status" %}</label>
         <select name="status" id="id_status" class="form-select form-select-sm">
-          <option value="">All</option>
+          <option value="">{% trans "All" %}</option>
           {% for v, l in status_choices %}
           <option value="{{ v }}" {% if request.GET.status == v %}selected{% endif %}>{{ l }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-2">
-        <label for="id_date_from" class="form-label">Due from</label>
+        <label for="id_date_from" class="form-label">{% trans "Due from" %}</label>
         <input type="date" name="date_from" id="id_date_from" class="form-control form-control-sm" value="{{ request.GET.date_from }}">
       </div>
       <div class="col-md-2">
-        <label for="id_date_to" class="form-label">Due to</label>
+        <label for="id_date_to" class="form-label">{% trans "Due to" %}</label>
         <input type="date" name="date_to" id="id_date_to" class="form-control form-control-sm" value="{{ request.GET.date_to }}">
       </div>
       <div class="col-md-2">
-        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-        <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-outline-secondary btn-sm">Clear</a>
+        <button type="submit" class="btn btn-primary btn-sm">{% trans "Filter" %}</button>
+        <a href="{% url 'maintenance:workorder_list' %}" class="btn btn-outline-secondary btn-sm">{% trans "Clear" %}</a>
       </div>
     </div>
   </div>
@@ -48,12 +49,12 @@
       <table class="table table-fp table-hover mb-0">
         <thead>
           <tr>
-            <th>Number</th>
-            <th>Task</th>
-            <th>Vehicle</th>
-            <th>Status</th>
-            <th>Assignee</th>
-            <th>Due date</th>
+            <th>{% trans "Number" %}</th>
+            <th>{% trans "Task" %}</th>
+            <th>{% trans "Vehicle" %}</th>
+            <th>{% trans "Status" %}</th>
+            <th>{% trans "Assignee" %}</th>
+            <th>{% trans "Due date" %}</th>
             <th></th>
           </tr>
         </thead>
@@ -71,14 +72,14 @@
             <td>{{ wo.assignee|default:"—" }}</td>
             <td>{{ wo.due_date|default:"—" }}</td>
             <td>
-              <a href="{% url 'maintenance:workorder_detail' wo.pk %}">View</a>
+              <a href="{% url 'maintenance:workorder_detail' wo.pk %}">{% trans "View" %}</a>
               {% if wo.status != 'completed' %}
-              <a href="{% url 'maintenance:workorder_update' wo.pk %}" class="ms-2">Edit</a>
+              <a href="{% url 'maintenance:workorder_update' wo.pk %}" class="ms-2">{% trans "Edit" %}</a>
               {% endif %}
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="7">No work orders. Create one from a maintenance task.</td></tr>
+          <tr><td colspan="7">{% trans "No work orders. Create one from a maintenance task." %}</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -89,11 +90,11 @@
 <nav class="mt-2">
   <ul class="pagination mb-0">
     {% if page_obj.has_previous %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Previous</a></li>
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{% trans "Previous" %}</a></li>
     {% endif %}
-    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    <li class="page-item disabled"><span class="page-link">{% blocktrans with num=page_obj.number npages=page_obj.paginator.num_pages %}Page {{ num }} of {{ npages }}{% endblocktrans %}</span></li>
     {% if page_obj.has_next %}
-    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">Next</a></li>
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.date_from %}&date_from={{ request.GET.date_from }}{% endif %}{% if request.GET.date_to %}&date_to={{ request.GET.date_to }}{% endif %}">{% trans "Next" %}</a></li>
     {% endif %}
   </ul>
 </nav>
