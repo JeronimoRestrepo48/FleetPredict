@@ -56,6 +56,14 @@ class Command(BaseCommand):
             action='store_true',
             help='Delete existing GPSReading for selected vehicles before inserting.',
         )
+        parser.add_argument(
+            '--organization',
+            '--org',
+            dest='org_slug',
+            type=str,
+            default=None,
+            help='Only vehicles in this organization slug (e.g. simulated-fleet).',
+        )
 
     def handle(self, *args, **options):
         vehicle_ids = options['vehicle_ids']
@@ -63,6 +71,9 @@ class Command(BaseCommand):
         n_points = max(2, options['points'])
 
         qs = Vehicle.objects.filter(is_deleted=False)
+        org_slug = (options.get('org_slug') or '').strip()
+        if org_slug:
+            qs = qs.filter(organization__slug=org_slug)
         if vehicle_ids:
             qs = qs.filter(pk__in=vehicle_ids)
         vehicles = list(qs)

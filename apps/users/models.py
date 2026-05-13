@@ -9,6 +9,21 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
+class Organization(models.Model):
+    """Tenant company: one fleet manager and many mechanics/drivers."""
+
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=80, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class UserManager(BaseUserManager):
     """Custom user manager for email-based authentication."""
 
@@ -34,6 +49,7 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
+        extra_fields.setdefault('organization', None)
         return self.create_user(email, password, **extra_fields)
 
 
@@ -57,6 +73,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         choices=Role.choices,
         default=Role.DRIVER
     )
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name='members',
+    )
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -71,6 +94,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'User'
         verbose_name_plural = 'Users'
         ordering = ['-date_joined']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('organization',),
+                condition=models.Q(role='fleet_manager') & models.Q(organization__isnull=False),
+                name='unique_fleet_manager_per_organization',
+            ),
+        ]
 
     def __str__(self):
         return self.email
@@ -100,8 +130,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.role == self.Role.DRIVER
 
     def can_manage_users(self):
-        """Check if user can manage other users."""
-        return self.role == self.Role.ADMINISTRATOR
+        """Global user directory (platform operator)."""
+        return self.is_superuser
+
+    def can_manage_organization_team(self):
+        """Create/manage mechanics and drivers in own organization."""
+        return self.is_authenticated and self.is_fleet_manager and self.organization_id is not None
 
     def can_manage_vehicles(self):
         """Check if user can create/edit/delete vehicles."""
@@ -120,8 +154,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.role in [self.Role.ADMINISTRATOR, self.Role.FLEET_MANAGER]
 
     def can_manage_platform(self):
-        """Check if user can manage platform settings (users, vehicle types, audit)."""
-        return self.role == self.Role.ADMINISTRATOR
+        """Platform settings: global operators only (not per-tenant admin role)."""
+        return bool(self.is_superuser)
 
 
 class UserProfile(models.Model):

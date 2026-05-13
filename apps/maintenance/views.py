@@ -34,6 +34,17 @@ from .forms import (
 )
 
 
+def maintenance_tasks_queryset_for(user, base=None):
+    qs = base if base is not None else MaintenanceTask.objects.select_related('vehicle', 'assignee')
+    if not getattr(user, 'is_superuser', False) and getattr(user, 'organization_id', None):
+        qs = qs.filter(vehicle__organization_id=user.organization_id)
+    if user.is_driver:
+        qs = qs.filter(vehicle__assigned_driver=user)
+    elif user.is_mechanic:
+        qs = qs.filter(Q(assignee=user) | Q(assignee__isnull=True))
+    return qs
+
+
 class CanManageMaintenanceMixin(UserPassesTestMixin):
     """Mixin that requires user to be admin, fleet manager, or mechanic."""
 
@@ -47,7 +58,7 @@ class MaintenanceBulkCsvView(LoginRequiredMixin, CanManageMaintenanceMixin, View
     """FR16: Bulk export maintenance tasks as CSV."""
 
     def get(self, request):
-        qs = MaintenanceTask.objects.select_related('vehicle', 'assignee').order_by('-scheduled_date')
+        qs = maintenance_tasks_queryset_for(request.user).order_by('-scheduled_date')
         buffer = io.StringIO()
         writer = csv.writer(buffer)
         writer.writerow([
@@ -88,12 +99,7 @@ class MaintenanceTaskListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = MaintenanceTask.objects.select_related('vehicle', 'assignee')
-
-        if user.is_driver:
-            queryset = queryset.filter(vehicle__assigned_driver=user)
-        elif user.is_mechanic:
-            queryset = queryset.filter(Q(assignee=user) | Q(assignee__isnull=True))
+        queryset = maintenance_tasks_queryset_for(user)
 
         status_filter = self.request.GET.get('status')
         if status_filter:
@@ -121,11 +127,7 @@ class MaintenanceTaskDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = MaintenanceTask.objects.select_related('vehicle', 'assignee')
-        if user.is_driver:
-            queryset = queryset.filter(vehicle__assigned_driver=user)
-        elif user.is_mechanic:
-            queryset = queryset.filter(Q(assignee=user) | Q(assignee__isnull=True))
+        queryset = maintenance_tasks_queryset_for(user)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -182,7 +184,7 @@ class MaintenanceTaskUpdateView(LoginRequiredMixin, CanManageMaintenanceMixin, U
         return reverse_lazy('maintenance:task_detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
-        return MaintenanceTask.objects.all()
+        return maintenance_tasks_queryset_for(self.request.user)
 
     def form_valid(self, form):
         instance = form.instance
@@ -202,7 +204,7 @@ class MaintenanceTaskDeleteView(LoginRequiredMixin, CanManageMaintenanceMixin, D
     success_url = reverse_lazy('maintenance:task_list')
 
     def get_queryset(self):
-        return MaintenanceTask.objects.all()
+        return maintenance_tasks_queryset_for(self.request.user)
 
     def form_valid(self, form):
         if self.object.status == MaintenanceTask.Status.COMPLETED:
@@ -216,7 +218,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
     """Mark maintenance task as completed."""
 
     def get(self, request, pk):
-        task = get_object_or_404(MaintenanceTask, pk=pk)
+        task = get_object_or_404(maintenance_tasks_queryset_for(request.user), pk=pk)
         if task.status == MaintenanceTask.Status.COMPLETED:
             messages.warning(request, _('Task is already completed.'))
             return redirect('maintenance:task_detail', pk=pk)
@@ -224,7 +226,7 @@ class MaintenanceTaskCompleteView(LoginRequiredMixin, CanManageMaintenanceMixin,
         return render(request, 'maintenance/task_complete.html', {'task': task, 'form': form})
 
     def post(self, request, pk):
-        task = get_object_or_404(MaintenanceTask, pk=pk)
+        task = get_object_or_404(maintenance_tasks_queryset_for(request.user), pk=pk)
         if task.status == MaintenanceTask.Status.COMPLETED:
             messages.warning(request, _('Task is already completed.'))
             return redirect('maintenance:task_detail', pk=pk)
@@ -248,7 +250,7 @@ class MaintenanceDocumentUploadView(LoginRequiredMixin, CanManageMaintenanceMixi
         return redirect('maintenance:task_detail', pk=pk)
 
     def post(self, request, pk):
-        task = get_object_or_404(MaintenanceTask, pk=pk)
+        task = get_object_or_404(maintenance_tasks_queryset_for(request.user), pk=pk)
         file = request.FILES.get('file')
         if not file:
             messages.error(request, _('No file provided.'))

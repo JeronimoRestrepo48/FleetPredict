@@ -29,6 +29,17 @@ from .audit import log_audit
 
 User = get_user_model()
 
+
+def alert_thresholds_queryset_for(user):
+    qs = AlertThreshold.objects.all().order_by('attribute', 'value_float')
+    if getattr(user, 'is_superuser', False):
+        return qs
+    oid = getattr(user, 'organization_id', None)
+    if not oid:
+        return AlertThreshold.objects.none()
+    return qs.filter(organization_id=oid)
+
+
 SOC_LOCATION_HUBS = [
     ('Bogota', 4.7110, -74.0721),
     ('Medellin', 6.2442, -75.5812),
@@ -62,7 +73,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_template_names(self):
         user = self.request.user
-        if user.is_administrator:
+        if user.is_superuser:
             return ['dashboard/dashboard_admin.html']
         if user.is_mechanic:
             return ['dashboard/dashboard_mechanic.html']
@@ -71,7 +82,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
-        if user.is_administrator:
+        if user.is_superuser:
             ctx = self._get_admin_context(context)
         elif user.is_mechanic:
             ctx = self._get_mechanic_context(context)
@@ -137,6 +148,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         tasks_qs = MaintenanceTask.objects.filter(
             Q(assignee=user) | Q(assignee__isnull=True)
         ).select_related('vehicle', 'assignee')
+        if user.organization_id and not user.is_superuser:
+            tasks_qs = tasks_qs.filter(vehicle__organization_id=user.organization_id)
         my_assigned = tasks_qs.filter(assignee=user)
         unassigned = tasks_qs.filter(assignee__isnull=True)
         tasks_needing_attention = my_assigned.filter(
@@ -233,6 +246,8 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         if fleet_scope:
             vehicles_qs = visible_vehicle_queryset(user)
             tasks_qs = MaintenanceTask.objects.all()
+            if user.organization_id and not user.is_superuser:
+                tasks_qs = tasks_qs.filter(vehicle__organization_id=user.organization_id)
         else:
             vehicles_qs = visible_vehicle_queryset(user)
             tasks_qs = MaintenanceTask.objects.filter(
@@ -923,7 +938,7 @@ class AlertThresholdListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def get_queryset(self):
-        return AlertThreshold.objects.all().order_by('attribute', 'value_float')
+        return alert_thresholds_queryset_for(self.request.user)
 
 
 class AlertThresholdCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -937,6 +952,13 @@ class AlertThresholdCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateVi
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
     def form_valid(self, form):
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            form.instance.organization_id = u.organization_id
+        elif u.is_superuser and not form.instance.organization_id:
+            from apps.users.models import Organization
+
+            form.instance.organization = Organization.objects.order_by('id').first()
         messages.success(self.request, _('Threshold created.'))
         return super().form_valid(form)
 
@@ -952,6 +974,9 @@ class AlertThresholdUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateVi
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
+    def get_queryset(self):
+        return alert_thresholds_queryset_for(self.request.user)
+
     def form_valid(self, form):
         messages.success(self.request, _('Threshold updated.'))
         return super().form_valid(form)
@@ -965,6 +990,9 @@ class AlertThresholdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteVi
 
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
+
+    def get_queryset(self):
+        return alert_thresholds_queryset_for(self.request.user)
 
     def form_valid(self, form):
         messages.success(self.request, _('Threshold deleted.'))

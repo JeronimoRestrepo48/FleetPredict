@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.users.models import User
+from apps.users.models import Organization, User
 from apps.vehicles.models import Vehicle, VehicleType, GPSReading
 
 
@@ -12,16 +12,24 @@ class VehicleListAccessTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org = Organization.objects.create(name='Vehicle Test Org', slug='vehicle-test-org')
+        self.vt = VehicleType.objects.create(
+            name='Sedan',
+            organization=self.org,
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.driver = User.objects.create_user(
             email='driver@test.local',
             password='TestPass123!',
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.manager = User.objects.create_user(
             email='manager@test.local',
             password='TestPass123!',
             role=User.Role.FLEET_MANAGER,
+            organization=self.org,
         )
         self.v1 = Vehicle.objects.create(
             license_plate='V1',
@@ -29,6 +37,7 @@ class VehicleListAccessTest(TestCase):
             make='A',
             model='B',
             year=2022,
+            organization=self.org,
             vehicle_type=self.vt,
             status='active',
             is_deleted=False,
@@ -40,6 +49,7 @@ class VehicleListAccessTest(TestCase):
             make='C',
             model='D',
             year=2023,
+            organization=self.org,
             vehicle_type=self.vt,
             status='active',
             is_deleted=False,
@@ -76,11 +86,18 @@ class VehicleHistoryAccessTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org = Organization.objects.create(name='Hist Org', slug='hist-org')
+        self.vt = VehicleType.objects.create(
+            name='Sedan',
+            organization=self.org,
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.driver = User.objects.create_user(
             email='driver2@test.local',
             password='TestPass123!',
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.vehicle = Vehicle.objects.create(
             license_plate='VH',
@@ -88,6 +105,7 @@ class VehicleHistoryAccessTest(TestCase):
             make='X',
             model='Y',
             year=2022,
+            organization=self.org,
             vehicle_type=self.vt,
             status='active',
             is_deleted=False,
@@ -106,16 +124,24 @@ class VehicleComplianceAndExportTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org = Organization.objects.create(name='Comp Org', slug='comp-org')
+        self.vt = VehicleType.objects.create(
+            name='Sedan',
+            organization=self.org,
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.driver = User.objects.create_user(
             email='compdriver@test.local',
             password='TestPass123!',
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.manager = User.objects.create_user(
             email='compmanager@test.local',
             password='TestPass123!',
             role=User.Role.FLEET_MANAGER,
+            organization=self.org,
         )
 
     def test_compliance_list_requires_can_manage_vehicles(self):
@@ -144,11 +170,18 @@ class VehicleComplianceAndExportTest(TestCase):
 class VehicleGpsMapViewTest(TestCase):
     def setUp(self):
         self.client = Client()
-        self.vt = VehicleType.objects.create(name='Van', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org = Organization.objects.create(name='GPS Org', slug='gps-org')
+        self.vt = VehicleType.objects.create(
+            name='Van',
+            organization=self.org,
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.manager = User.objects.create_user(
             email='gpsmanager@test.local',
             password='TestPass123!',
             role=User.Role.FLEET_MANAGER,
+            organization=self.org,
         )
         self.vehicle = Vehicle.objects.create(
             license_plate='GPS-201',
@@ -156,6 +189,7 @@ class VehicleGpsMapViewTest(TestCase):
             make='Renault',
             model='Kangoo',
             year=2021,
+            organization=self.org,
             vehicle_type=self.vt,
             status='active',
             is_deleted=False,

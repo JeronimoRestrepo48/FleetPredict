@@ -12,8 +12,16 @@ from django.utils.translation import gettext
 class VehicleType(models.Model):
     """
     Vehicle type/category with specific maintenance intervals.
+    Scoped per organization.
     """
-    name = models.CharField(max_length=100, unique=True)
+    organization = models.ForeignKey(
+        'users.Organization',
+        on_delete=models.CASCADE,
+        related_name='vehicle_types',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     maintenance_interval_days = models.PositiveIntegerField(
         default=90,
@@ -30,6 +38,12 @@ class VehicleType(models.Model):
         verbose_name = 'Vehicle Type'
         verbose_name_plural = 'Vehicle Types'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('organization', 'name'),
+                name='vehicles_vehicletype_org_name_uniq',
+            ),
+        ]
 
     def __str__(self):
         return self.name
@@ -47,11 +61,18 @@ class Vehicle(models.Model):
         UNDER_MAINTENANCE = 'under_maintenance', _('Under Maintenance')
         RETIRED = 'retired', _('Retired')
 
+    organization = models.ForeignKey(
+        'users.Organization',
+        on_delete=models.PROTECT,
+        related_name='vehicles',
+        null=True,
+        blank=True,
+    )
+
     # Identification
-    license_plate = models.CharField(max_length=20, unique=True)
+    license_plate = models.CharField(max_length=20)
     vin = models.CharField(
         max_length=17,
-        unique=True,
         help_text='Vehicle Identification Number'
     )
 
@@ -125,6 +146,16 @@ class Vehicle(models.Model):
         verbose_name = 'Vehicle'
         verbose_name_plural = 'Vehicles'
         ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('organization', 'license_plate'),
+                name='vehicles_vehicle_org_plate_uniq',
+            ),
+            models.UniqueConstraint(
+                fields=('organization', 'vin'),
+                name='vehicles_vehicle_org_vin_uniq',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.make} {self.model} ({self.license_plate})'

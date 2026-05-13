@@ -76,18 +76,23 @@
                         </ul>
                     </li>
                     {% endif %}
-                    {% if user.can_manage_vehicles or user.can_manage_platform %}
+                    {% if user.can_manage_vehicles or user.can_manage_platform or user.can_manage_organization_team %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'alertthreshold_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% trans "Settings" %}</a>
+                        <a class="nav-link dropdown-toggle {% if request.resolver_match.url_name == 'alertrule_list' or request.resolver_match.url_name == 'alertthreshold_list' or request.resolver_match.url_name == 'compliance_list' or request.resolver_match.url_name == 'vehicletype_list' or request.resolver_match.url_name == 'user_list' or request.resolver_match.url_name == 'auditlog_list' or request.resolver_match.url_name == 'org_team_list' or request.resolver_match.url_name == 'org_team_invite' %}active{% endif %}" href="#" id="navSettings" role="button" data-bs-toggle="dropdown" aria-expanded="false">{% trans "Settings" %}</a>
                         <ul class="dropdown-menu" aria-labelledby="navSettings">
+                            {% if user.can_manage_organization_team %}
+                            <li><a class="dropdown-item" href="{% url 'users:org_team_list' %}">{% trans "Team" %}</a></li>
+                            {% endif %}
                             {% if user.can_manage_vehicles %}
                             <li><a class="dropdown-item" href="{% url 'dashboard:alertrule_list' %}">{% trans "Alert rules" %}</a></li>
                             <li><a class="dropdown-item" href="{% url 'dashboard:alertthreshold_list' %}">{% trans "Telemetry thresholds" %}</a></li>
                             <li><a class="dropdown-item" href="{% url 'vehicles:compliance_list' %}">{% trans "Compliance" %}</a></li>
                             {% endif %}
+                            {% if user.is_superuser or user.is_fleet_manager %}
+                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}">{% trans "Vehicle types" %}</a></li>
+                            {% endif %}
                             {% if user.can_manage_platform %}
                             <li><a class="dropdown-item" href="{% url 'users:user_list' %}">{% trans "Users" %}</a></li>
-                            <li><a class="dropdown-item" href="{% url 'vehicles:vehicletype_list' %}">{% trans "Vehicle types" %}</a></li>
                             <li><a class="dropdown-item" href="{% url 'dashboard:auditlog_list' %}">{% trans "Audit log" %}</a></li>
                             {% endif %}
                         </ul>

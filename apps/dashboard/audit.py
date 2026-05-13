@@ -14,8 +14,13 @@ def log_audit(request, action, model_name='', object_id='', message='', old_valu
         raw = request.META.get('HTTP_X_FORWARDED_FOR') or request.META.get('REMOTE_ADDR')
         if raw:
             ip = raw.split(',')[0].strip() if isinstance(raw, str) else str(raw)
+    org_id = None
+    if user and getattr(user, 'is_authenticated', False):
+        org_id = getattr(user, 'organization_id', None)
+
     AuditLog.objects.create(
         user=user,
+        organization_id=org_id,
         action=action,
         model_name=model_name,
         object_id=str(object_id) if object_id else '',

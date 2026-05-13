@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.users.models import User
+from apps.users.models import Organization, User
 from apps.vehicles.models import Vehicle, VehicleType, VehicleAlert, Runbook, GPSReading
 
 
@@ -12,16 +12,24 @@ class DashboardAccessTest(TestCase):
 
     def setUp(self):
         self.client = Client()
-        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org = Organization.objects.create(name='Dash Test Org', slug='dash-test-org')
+        self.vt = VehicleType.objects.create(
+            name='Sedan',
+            organization=self.org,
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.driver = User.objects.create_user(
             email='dashdriver@test.local',
             password='TestPass123!',
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.manager = User.objects.create_user(
             email='dashmanager@test.local',
             password='TestPass123!',
             role=User.Role.FLEET_MANAGER,
+            organization=self.org,
         )
         self.vehicle = Vehicle.objects.create(
             license_plate='DASH-1',
@@ -29,6 +37,7 @@ class DashboardAccessTest(TestCase):
             make='A',
             model='B',
             year=2022,
+            organization=self.org,
             vehicle_type=self.vt,
             status='active',
             is_deleted=False,
@@ -102,11 +111,12 @@ class DashboardAccessTest(TestCase):
         resp = self.client.get(reverse('dashboard:auditlog_list'))
         self.assertEqual(resp.status_code, 403)
 
-    def test_audit_log_ok_for_administrator(self):
-        admin = User.objects.create_user(
+    def test_audit_log_ok_for_superuser(self):
+        admin = User.objects.create_superuser(
             email='admin@test.local',
             password='TestPass123!',
-            role=User.Role.ADMINISTRATOR,
+            first_name='A',
+            last_name='B',
         )
         self.client.force_login(admin)
         resp = self.client.get(reverse('dashboard:auditlog_list'))
@@ -114,10 +124,11 @@ class DashboardAccessTest(TestCase):
         self.assertIn('audit_logs', resp.context)
 
     def test_dashboard_admin_sees_platform_overview(self):
-        admin = User.objects.create_user(
+        admin = User.objects.create_superuser(
             email='admin2@test.local',
             password='TestPass123!',
-            role=User.Role.ADMINISTRATOR,
+            first_name='C',
+            last_name='D',
         )
         self.client.force_login(admin)
         resp = self.client.get(reverse('dashboard:index'))
@@ -131,6 +142,7 @@ class DashboardAccessTest(TestCase):
             email='mechanic@test.local',
             password='TestPass123!',
             role=User.Role.MECHANIC,
+            organization=self.org,
         )
         self.client.force_login(mechanic)
         resp = self.client.get(reverse('dashboard:index'))

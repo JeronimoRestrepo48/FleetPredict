@@ -104,6 +104,13 @@ class AlertThreshold(models.Model):
         help_text='Optional label for this rule (e.g. "Engine overheating warning")',
     )
     enabled = models.BooleanField(default=True)
+    organization = models.ForeignKey(
+        'users.Organization',
+        on_delete=models.CASCADE,
+        related_name='alert_thresholds',
+        null=True,
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -133,6 +140,13 @@ class AuditLog(models.Model):
     ]
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs',
+    )
+    organization = models.ForeignKey(
+        'users.Organization',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

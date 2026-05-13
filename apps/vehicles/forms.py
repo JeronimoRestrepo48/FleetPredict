@@ -38,8 +38,16 @@ class VehicleForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.fleet_user = kwargs.pop('fleet_user', None)
         super().__init__(*args, **kwargs)
-        self.fields['assigned_driver'].queryset = User.objects.filter(role='driver')
+        drivers = User.objects.filter(role='driver')
+        vtypes = VehicleType.objects.all()
+        if self.fleet_user and self.fleet_user.organization_id and not self.fleet_user.is_superuser:
+            oid = self.fleet_user.organization_id
+            drivers = drivers.filter(organization_id=oid)
+            vtypes = vtypes.filter(organization_id=oid)
+        self.fields['assigned_driver'].queryset = drivers.order_by('email')
+        self.fields['vehicle_type'].queryset = vtypes.order_by('name')
         for name, field in self.fields.items():
             if name != 'assigned_driver' and hasattr(field.widget, 'attrs'):
                 field.widget.attrs.update({'class': 'form-control'})
@@ -62,7 +70,11 @@ class ComplianceRequirementForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.fleet_user = kwargs.pop('fleet_user', None)
         super().__init__(*args, **kwargs)
+        if self.fleet_user and self.fleet_user.organization_id and not self.fleet_user.is_superuser:
+            oid = self.fleet_user.organization_id
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(is_deleted=False, organization_id=oid)
         for name, field in self.fields.items():
             if hasattr(field.widget, 'attrs'):
                 field.widget.attrs.setdefault('class', 'form-control')
@@ -83,18 +95,30 @@ class SensorReadingForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.fleet_user = kwargs.pop('fleet_user', None)
         super().__init__(*args, **kwargs)
+        if self.fleet_user and self.fleet_user.organization_id and not self.fleet_user.is_superuser:
+            oid = self.fleet_user.organization_id
+            self.fields['vehicle'].queryset = Vehicle.objects.filter(is_deleted=False, organization_id=oid)
         for field in self.fields.values():
             field.widget.attrs.setdefault('class', 'form-control')
 
 
 class SensorCSVUploadForm(forms.Form):
     """FR18: Upload sensor readings via CSV file."""
+
     vehicle = forms.ModelChoiceField(
-        queryset=Vehicle.objects.filter(is_deleted=False),
+        queryset=Vehicle.objects.none(),
         widget=forms.Select(attrs={'class': 'form-select'}),
     )
     csv_file = forms.FileField(
         widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.csv'}),
         help_text='CSV columns: sensor_type, value, timestamp (ISO format)',
     )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = Vehicle.objects.filter(is_deleted=False)
+        if user and user.organization_id and not user.is_superuser:
+            qs = qs.filter(organization_id=user.organization_id)
+        self.fields['vehicle'].queryset = qs.order_by('license_plate')

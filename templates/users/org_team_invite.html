@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Invite team member" %}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 560px;">
+  <h1 class="h4 mb-3">{% trans "Invite mechanic or driver" %}</h1>
+  <p class="text-muted">{% trans "An email will be sent with a link to set their password." %}</p>
+  <form method="post" class="card card-fp p-4">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.errors %}<div class="invalid-feedback d-block">{{ field.errors }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">{% trans "Send invitation" %}</button>
+    <a href="{% url 'users:org_team_list' %}" class="btn btn-link">{% trans "Cancel" %}</a>
+  </form>
+</div>
+{% endblock %}

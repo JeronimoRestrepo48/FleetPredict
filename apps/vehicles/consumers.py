@@ -1,7 +1,8 @@
 """
 WebSocket consumer for vehicle telemetry.
-Accepts JSON messages with vehicle_id or license_plate and telemetry fields;
+Accepts JSON messages with vehicle_id or (organization_id + license_plate / vin) and telemetry fields;
 saves VehicleTelemetry and updates Vehicle.current_mileage and last_telemetry_at.
+If multiple tenants share identifiers, plate/VIN lookup without organization_id returns no match (ambiguous).
 Optional auth via query string token (TELEMETRY_WS_TOKEN in settings).
 """
 
@@ -15,21 +16,41 @@ from asgiref.sync import sync_to_async
 from django.utils import timezone
 from django.db.models import Avg, Max
 
+from apps.users.tenancy import vehicles_queryset_for_user
+
 from .models import Vehicle, VehicleTelemetry, GPSReading, DrivingPattern
 from .services.telemetry_patterns import evaluate_and_save_alerts
 
 logger = logging.getLogger(__name__)
 
 
-def _get_vehicle(vehicle_id=None, license_plate=None, vin=None):
-    """Resolve vehicle by id, license_plate, or vin. Returns None if not found or deleted."""
+def _get_vehicle(vehicle_id=None, license_plate=None, vin=None, organization_id=None):
+    """
+    Resolve vehicle by id, license_plate, or vin. Returns None if not found or deleted.
+    If organization_id is set, scope plate/VIN lookups to that tenant (recommended for ingest).
+    """
     qs = Vehicle.objects.filter(is_deleted=False)
+    if organization_id is not None:
+        qs = qs.filter(organization_id=organization_id)
     if vehicle_id is not None:
         return qs.filter(pk=vehicle_id).first()
     if license_plate:
-        return qs.filter(license_plate=license_plate).first()
+        matches = list(qs.filter(license_plate=license_plate)[:2])
+        if len(matches) > 1:
+            logger.warning(
+                'telemetry: ambiguous license_plate=%s (count>1); pass organization_id or vehicle_id',
+                license_plate,
+            )
+            return None
+        return matches[0] if matches else None
     if vin:
-        return qs.filter(vin=vin).first()
+        matches = list(qs.filter(vin=vin)[:2])
+        if len(matches) > 1:
+            logger.warning(
+                'telemetry: ambiguous vin (count>1); pass organization_id or vehicle_id',
+            )
+            return None
+        return matches[0] if matches else None
     return None
 
 
@@ -232,10 +253,17 @@ class TelemetryConsumer(AsyncWebsocketConsumer):
         vehicle_id = data.get('vehicle_id')
         license_plate = data.get('license_plate')
         vin = data.get('vin')
+        organization_id = data.get('organization_id')
+        if organization_id is not None:
+            try:
+                organization_id = int(organization_id)
+            except (TypeError, ValueError):
+                organization_id = None
         vehicle = await sync_to_async(_get_vehicle)(
             vehicle_id=vehicle_id,
             license_plate=license_plate,
             vin=vin,
+            organization_id=organization_id,
         )
         if not vehicle:
             await self.send(text_data=json.dumps({
@@ -267,12 +295,7 @@ def _user_can_subscribe_vehicle(user, vehicle_id):
     """Return True if user is authenticated and can access this vehicle (driver sees only assigned)."""
     if not user or not getattr(user, 'is_authenticated', True) or not user.is_authenticated:
         return False
-    vehicle = Vehicle.objects.filter(pk=vehicle_id, is_deleted=False).first()
-    if not vehicle:
-        return False
-    if getattr(user, 'is_driver', False):
-        return vehicle.assigned_driver_id == user.pk
-    return True
+    return vehicles_queryset_for_user(user).filter(pk=vehicle_id).exists()
 
 
 class TelemetrySubscribeConsumer(AsyncWebsocketConsumer):

@@ -54,6 +54,14 @@ class Command(BaseCommand):
             default=5,
             help='Slide step: form next window every N readings (default: 5)',
         )
+        parser.add_argument(
+            '--organization',
+            '--org',
+            dest='org_slug',
+            type=str,
+            default=None,
+            help='Only vehicles in this organization slug.',
+        )
 
     def handle(self, *args, **options):
         output_path = (options['output'] or '').strip() or None
@@ -69,7 +77,11 @@ class Command(BaseCommand):
         elif output_path is None and output_json_path:
             output_path = None  # JSON only
 
-        vehicles = Vehicle.objects.filter(is_deleted=False).values_list('id', flat=True)
+        vqs = Vehicle.objects.filter(is_deleted=False)
+        org_slug = (options.get('org_slug') or '').strip()
+        if org_slug:
+            vqs = vqs.filter(organization__slug=org_slug)
+        vehicles = vqs.values_list('id', flat=True)
         n_features = extract_features([]).size
         rows = []  # list of (features_list, label)
 

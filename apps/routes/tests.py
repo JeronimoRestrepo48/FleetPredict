@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from apps.users.models import User
+from apps.users.models import Organization, User
 from apps.vehicles.models import Vehicle
 from .models import Route, RouteSuggestion
 
@@ -9,12 +9,14 @@ from .models import Route, RouteSuggestion
 class RoutesAuthorizationTests(TestCase):
     def setUp(self):
         self.client = Client()
+        self.org = Organization.objects.create(name="Routes Org", slug="routes-org")
         self.driver_a = User.objects.create_user(
             email="drivera@test.local",
             password="TestPass123!",
             first_name="Driver",
             last_name="A",
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.driver_b = User.objects.create_user(
             email="driverb@test.local",
@@ -22,6 +24,7 @@ class RoutesAuthorizationTests(TestCase):
             first_name="Driver",
             last_name="B",
             role=User.Role.DRIVER,
+            organization=self.org,
         )
         self.vehicle_a = Vehicle.objects.create(
             license_plate="RA-100",
@@ -29,6 +32,7 @@ class RoutesAuthorizationTests(TestCase):
             make="Ford",
             model="Transit",
             year=2021,
+            organization=self.org,
             assigned_driver=self.driver_a,
         )
         self.vehicle_b = Vehicle.objects.create(
@@ -37,6 +41,7 @@ class RoutesAuthorizationTests(TestCase):
             make="Chevrolet",
             model="N400",
             year=2022,
+            organization=self.org,
             assigned_driver=self.driver_b,
         )
         self.route_a = Route.objects.create(

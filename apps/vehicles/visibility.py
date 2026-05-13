@@ -1,14 +1,11 @@
 """Shared vehicle visibility helpers across apps."""
 
-from apps.vehicles.models import Vehicle
+from apps.users.tenancy import vehicles_queryset_for_user
 
 
 def visible_vehicle_queryset(user):
-    """Vehicles visible to a user according to role."""
-    qs = Vehicle.objects.filter(is_deleted=False)
-    if getattr(user, "is_driver", False):
-        qs = qs.filter(assigned_driver=user)
-    return qs
+    """Vehicles visible to a user according to role and organization."""
+    return vehicles_queryset_for_user(user)
 
 
 def visible_vehicle_ids(user):

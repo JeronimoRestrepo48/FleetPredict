@@ -22,8 +22,15 @@ class SparePart(models.Model):
         BODY = 'body', _('Body & Exterior')
         OTHER = 'other', _('Other')
 
+    organization = models.ForeignKey(
+        'users.Organization',
+        on_delete=models.CASCADE,
+        related_name='spare_parts',
+        null=True,
+        blank=True,
+    )
     name = models.CharField(max_length=200)
-    part_number = models.CharField(max_length=100, unique=True)
+    part_number = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
     description = models.TextField(blank=True)
     unit_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -35,6 +42,12 @@ class SparePart(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('organization', 'part_number'),
+                name='inventory_sparepart_org_partnumber_uniq',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.name} ({self.part_number})'
@@ -89,7 +102,14 @@ class PartUsage(models.Model):
 class Supplier(models.Model):
     """FR26: Supplier information."""
 
-    name = models.CharField(max_length=200, unique=True)
+    organization = models.ForeignKey(
+        'users.Organization',
+        on_delete=models.CASCADE,
+        related_name='suppliers',
+        null=True,
+        blank=True,
+    )
+    name = models.CharField(max_length=200)
     contact_name = models.CharField(max_length=200, blank=True)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=30, blank=True)
@@ -101,6 +121,12 @@ class Supplier(models.Model):
 
     class Meta:
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('organization', 'name'),
+                name='inventory_supplier_org_name_uniq',
+            ),
+        ]
 
     def __str__(self):
         return self.name

@@ -17,6 +17,20 @@ from .models import SparePart, StockMovement, PartUsage, Supplier, SupplierPart,
 from .forms import SparePartForm, StockMovementForm, SupplierForm, SupplierPartForm, SupplierReviewForm
 
 
+def _parts_for_user(user):
+    qs = SparePart.objects.all()
+    if getattr(user, 'organization_id', None) and not getattr(user, 'is_superuser', False):
+        return qs.filter(organization_id=user.organization_id)
+    return qs
+
+
+def _suppliers_for_user(user):
+    qs = Supplier.objects.all()
+    if getattr(user, 'organization_id', None) and not getattr(user, 'is_superuser', False):
+        return qs.filter(organization_id=user.organization_id)
+    return qs
+
+
 class CanManageInventoryMixin(UserPassesTestMixin):
     def test_func(self):
         u = self.request.user
@@ -30,7 +44,7 @@ class SparePartListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        qs = SparePart.objects.all()
+        qs = _parts_for_user(self.request.user)
         cat = self.request.GET.get('category')
         if cat:
             qs = qs.filter(category=cat)
@@ -56,6 +70,9 @@ class SparePartDetailView(LoginRequiredMixin, DetailView):
     template_name = 'inventory/sparepart_detail.html'
     context_object_name = 'part'
 
+    def get_queryset(self):
+        return _parts_for_user(self.request.user)
+
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['movements'] = self.object.movements.select_related('created_by')[:20]
@@ -71,6 +88,13 @@ class SparePartCreateView(LoginRequiredMixin, CanManageInventoryMixin, CreateVie
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            form.instance.organization_id = u.organization_id
+        elif u.is_superuser and not form.instance.organization_id:
+            from apps.users.models import Organization
+
+            form.instance.organization = Organization.objects.order_by('id').first()
         messages.success(self.request, _('Spare part created.'))
         return super().form_valid(form)
 
@@ -81,6 +105,9 @@ class SparePartUpdateView(LoginRequiredMixin, CanManageInventoryMixin, UpdateVie
     template_name = 'inventory/sparepart_form.html'
     context_object_name = 'part'
     success_url = reverse_lazy('inventory:sparepart_list')
+
+    def get_queryset(self):
+        return _parts_for_user(self.request.user)
 
     def form_valid(self, form):
         messages.success(self.request, _('Spare part updated.'))
@@ -93,6 +120,9 @@ class SparePartDeleteView(LoginRequiredMixin, CanManageInventoryMixin, DeleteVie
     context_object_name = 'part'
     success_url = reverse_lazy('inventory:sparepart_list')
 
+    def get_queryset(self):
+        return _parts_for_user(self.request.user)
+
 
 class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
     model = StockMovement
@@ -103,7 +133,7 @@ class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
         with transaction.atomic():
             mov = form.save(commit=False)
             mov.created_by = self.request.user
-            part = SparePart.objects.select_for_update().get(pk=mov.spare_part_id)
+            part = get_object_or_404(_parts_for_user(self.request.user), pk=mov.spare_part_id)
             mov.spare_part = part
             mov.save()
             current_stock = part.current_stock
@@ -142,7 +172,7 @@ class StockAdjustView(LoginRequiredMixin, CanManageInventoryMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        ctx['supplier_options'] = Supplier.objects.order_by('name')
+        ctx['supplier_options'] = _suppliers_for_user(self.request.user).order_by('name')
         return ctx
 
 
@@ -152,7 +182,7 @@ class LowStockListView(LoginRequiredMixin, ListView):
     context_object_name = 'parts'
 
     def get_queryset(self):
-        return [p for p in SparePart.objects.all() if p.is_low_stock]
+        return [p for p in _parts_for_user(self.request.user) if p.is_low_stock]
 
 
 class ReorderSuggestionsView(LoginRequiredMixin, ListView):
@@ -161,7 +191,7 @@ class ReorderSuggestionsView(LoginRequiredMixin, ListView):
     context_object_name = 'parts'
 
     def get_queryset(self):
-        return [p for p in SparePart.objects.all() if p.is_low_stock]
+        return [p for p in _parts_for_user(self.request.user) if p.is_low_stock]
 
 
 class InventoryExportCsvView(LoginRequiredMixin, CanManageInventoryMixin, View):
@@ -169,7 +199,7 @@ class InventoryExportCsvView(LoginRequiredMixin, CanManageInventoryMixin, View):
         buf = io.StringIO()
         writer = csv.writer(buf)
         writer.writerow(['Part Number', 'Name', 'Category', 'Unit Cost', 'Stock', 'Reorder Point', 'Low Stock'])
-        for p in SparePart.objects.all():
+        for p in _parts_for_user(request.user):
             writer.writerow([p.part_number, p.name, p.category, p.unit_cost, p.current_stock, p.reorder_point, p.is_low_stock])
         resp = HttpResponse(buf.getvalue(), content_type='text/csv')
         resp['Content-Disposition'] = 'attachment; filename="inventory_export.csv"'
@@ -182,11 +212,17 @@ class SupplierListView(LoginRequiredMixin, ListView):
     context_object_name = 'suppliers'
     paginate_by = 25
 
+    def get_queryset(self):
+        return _suppliers_for_user(self.request.user).order_by('name')
+
 
 class SupplierDetailView(LoginRequiredMixin, DetailView):
     model = Supplier
     template_name = 'inventory/supplier_detail.html'
     context_object_name = 'supplier'
+
+    def get_queryset(self):
+        return _suppliers_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -200,7 +236,7 @@ class SupplierReviewCreateView(LoginRequiredMixin, CanManageInventoryMixin, View
     http_method_names = ['post']
 
     def post(self, request, pk):
-        supplier = get_object_or_404(Supplier, pk=pk)
+        supplier = get_object_or_404(_suppliers_for_user(request.user), pk=pk)
         form = SupplierReviewForm(request.POST)
         if form.is_valid():
             review = form.save(commit=False)
@@ -220,6 +256,13 @@ class SupplierCreateView(LoginRequiredMixin, CanManageInventoryMixin, CreateView
     success_url = reverse_lazy('inventory:supplier_list')
 
     def form_valid(self, form):
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            form.instance.organization_id = u.organization_id
+        elif u.is_superuser and not form.instance.organization_id:
+            from apps.users.models import Organization
+
+            form.instance.organization = Organization.objects.order_by('id').first()
         messages.success(self.request, _('Supplier created.'))
         return super().form_valid(form)
 
@@ -231,6 +274,9 @@ class SupplierUpdateView(LoginRequiredMixin, CanManageInventoryMixin, UpdateView
     context_object_name = 'supplier'
     success_url = reverse_lazy('inventory:supplier_list')
 
+    def get_queryset(self):
+        return _suppliers_for_user(self.request.user)
+
     def form_valid(self, form):
         messages.success(self.request, _('Supplier updated.'))
         return super().form_valid(form)
@@ -241,6 +287,9 @@ class SupplierDeleteView(LoginRequiredMixin, CanManageInventoryMixin, DeleteView
     template_name = 'inventory/supplier_confirm_delete.html'
     context_object_name = 'supplier'
     success_url = reverse_lazy('inventory:supplier_list')
+
+    def get_queryset(self):
+        return _suppliers_for_user(self.request.user)
 
 
 class SupplierComparisonView(LoginRequiredMixin, View):

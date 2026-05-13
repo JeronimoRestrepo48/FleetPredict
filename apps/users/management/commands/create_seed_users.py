@@ -5,6 +5,8 @@ Run: python manage.py create_seed_users
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 
+from apps.users.models import Organization
+
 User = get_user_model()
 
 SEED_USERS = [
@@ -29,7 +31,12 @@ class Command(BaseCommand):
     help = 'Create or update Fleet Manager and Mechanic seed users for testing'
 
     def handle(self, *args, **options):
-        for data in SEED_USERS:
+        org, _ = Organization.objects.get_or_create(
+            slug='fleetpredict-seed',
+            defaults={'name': 'FleetPredict Seed Company'},
+        )
+        for entry in SEED_USERS:
+            data = dict(entry)
             password = data.pop('password')
             user, created = User.objects.update_or_create(
                 email=data['email'],
@@ -38,6 +45,7 @@ class Command(BaseCommand):
                     'last_name': data['last_name'],
                     'role': data['role'],
                     'is_active': True,
+                    'organization': org,
                 },
             )
             user.set_password(password)

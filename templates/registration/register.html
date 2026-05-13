@@ -12,7 +12,7 @@
             <img src="{% static 'img/logo.png' %}" alt="{% trans 'FleetPredict Pro' %}" style="width:64px;height:64px;object-fit:contain">
             <div class="fw-semibold mt-1" style="color:var(--fp-primary)">{% trans "FleetPredict Pro" %}</div>
           </div>
-          <h2 class="card-title mb-4">{% trans "Register" %}</h2>
+          <h2 class="card-title mb-4">{% trans "Create your organization" %}</h2>
                 <form method="post" action="{% url 'users:register' %}" class="fp-validate">
                     {% csrf_token %}
                     {% if form.non_field_errors %}
@@ -39,13 +39,12 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="id_role" class="form-label">{% trans "Role" %}</label>
-                        <select name="role" id="id_role" class="form-select">
-                            {% for value, label in form.role.field.choices %}
-                            <option value="{{ value }}" {% if form.role.value == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                        {% if form.role.errors %}<div class="invalid-feedback d-block">{{ form.role.errors }}</div>{% endif %}
+                        <label for="id_organization_name" class="form-label">{% trans "Company / organization name" %}</label>
+                        <input type="text" name="organization_name" id="id_organization_name" class="form-control"
+                               value="{{ form.organization_name.value|default:'' }}" required maxlength="200"
+                               placeholder="{% trans 'Your company name' %}">
+                        {% if form.organization_name.errors %}<div class="invalid-feedback d-block">{{ form.organization_name.errors }}</div>{% endif %}
+                        <div class="form-text">{% trans "You will be the fleet manager for this organization. Each company can have only one fleet manager account." %}</div>
                     </div>
                     <div class="mb-3">
                         <label for="id_password1" class="form-label">{% trans "Password" %}</label>

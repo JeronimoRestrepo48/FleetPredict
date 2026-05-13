@@ -6,6 +6,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.utils import timezone
 
+from apps.users.models import Organization
 from apps.vehicles.models import Vehicle, VehicleType, VehicleTelemetry
 
 try:
@@ -19,8 +20,16 @@ except ImportError:
 @unittest.skipUnless(CHANNELS_AVAILABLE, 'channels not installed')
 class ConsumerHelpersTest(TestCase):
     def setUp(self):
-        self.vt = VehicleType.objects.create(name='Sedan', maintenance_interval_days=90, maintenance_interval_km=10000)
+        self.org_a = Organization.objects.create(slug='test-cons-a', name='Consumer test A')
+        self.org_b = Organization.objects.create(slug='test-cons-b', name='Consumer test B')
+        self.vt = VehicleType.objects.create(
+            organization=self.org_a,
+            name='Sedan',
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
         self.vehicle = Vehicle.objects.create(
+            organization=self.org_a,
             license_plate='CON-001',
             vin='1HGBH41JXMN300001',
             make='Test',
@@ -37,9 +46,53 @@ class ConsumerHelpersTest(TestCase):
         self.assertEqual(v.pk, self.vehicle.pk)
 
     def test_get_vehicle_by_license_plate(self):
-        v = _get_vehicle(license_plate='CON-001')
+        v = _get_vehicle(license_plate='CON-001', organization_id=self.org_a.pk)
         self.assertIsNotNone(v)
         self.assertEqual(v.license_plate, 'CON-001')
+
+    def test_get_vehicle_ambiguous_plate_without_org_returns_none(self):
+        vt_b = VehicleType.objects.create(
+            organization=self.org_b,
+            name='Sedan',
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
+        Vehicle.objects.create(
+            organization=self.org_b,
+            license_plate='CON-001',
+            vin='2HGBH41JXMN300002',
+            make='Other',
+            model='Car',
+            year=2023,
+            vehicle_type=vt_b,
+            status='active',
+            is_deleted=False,
+        )
+        v = _get_vehicle(license_plate='CON-001')
+        self.assertIsNone(v)
+
+    def test_get_vehicle_plate_scoped_by_organization_id(self):
+        vt_b = VehicleType.objects.create(
+            organization=self.org_b,
+            name='Sedan',
+            maintenance_interval_days=90,
+            maintenance_interval_km=10000,
+        )
+        vb = Vehicle.objects.create(
+            organization=self.org_b,
+            license_plate='CON-001',
+            vin='2HGBH41JXMN300002',
+            make='Other',
+            model='Car',
+            year=2023,
+            vehicle_type=vt_b,
+            status='active',
+            is_deleted=False,
+        )
+        va = _get_vehicle(license_plate='CON-001', organization_id=self.org_a.pk)
+        self.assertEqual(va.pk, self.vehicle.pk)
+        v_b = _get_vehicle(license_plate='CON-001', organization_id=self.org_b.pk)
+        self.assertEqual(v_b.pk, vb.pk)
 
     def test_get_vehicle_returns_none_for_deleted(self):
         self.vehicle.is_deleted = True

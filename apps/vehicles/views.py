@@ -23,6 +23,7 @@ from django.views.generic import (
 from django.db.models import Q
 from django.utils.translation import gettext as _
 
+from apps.users.tenancy import vehicles_queryset_for_user
 from apps.dashboard.audit import log_audit
 from .models import (
     Vehicle, VehicleType, VehicleTelemetry, ComplianceRequirement,
@@ -41,13 +42,12 @@ class CanManageVehiclesMixin(UserPassesTestMixin):
         return self.request.user.is_authenticated and self.request.user.can_manage_vehicles()
 
 
-class AdminRequiredMixin(UserPassesTestMixin):
-    """FR22: Only administrators can manage vehicle types."""
+class CanManageVehicleTypesMixin(UserPassesTestMixin):
+    """Fleet managers manage types for their org; superusers manage globally."""
 
     def test_func(self):
-        return self.request.user.is_authenticated and getattr(
-            self.request.user, 'role', None
-        ) == 'administrator'
+        u = self.request.user
+        return u.is_authenticated and (u.is_superuser or u.is_fleet_manager)
 
 
 # ============== Vehicle Views ==============
@@ -67,10 +67,7 @@ class VehicleListView(LoginRequiredMixin, ListView):
         return 20
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            queryset = queryset.filter(assigned_driver=user)
+        queryset = vehicles_queryset_for_user(self.request.user)
         status_filter = self.request.GET.get('status')
         if status_filter:
             queryset = queryset.filter(status=status_filter)
@@ -106,11 +103,7 @@ class VehicleDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            queryset = queryset.filter(assigned_driver=user)
-        return queryset
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         from django.utils import timezone
@@ -145,8 +138,20 @@ class VehicleCreateView(LoginRequiredMixin, CanManageVehiclesMixin, CreateView):
     template_name = 'vehicles/vehicle_form.html'
     success_url = reverse_lazy('vehicles:vehicle_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['fleet_user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         form.instance.created_by = self.request.user
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            form.instance.organization_id = u.organization_id
+        elif u.is_superuser and not form.instance.organization_id:
+            from apps.users.models import Organization
+
+            form.instance.organization = Organization.objects.order_by('id').first()
         response = super().form_valid(form)
         log_audit(self.request, 'create', 'Vehicle', self.object.pk, f'Vehicle {self.object.license_plate} created')
         messages.success(self.request, _('Vehicle created successfully.'))
@@ -162,7 +167,12 @@ class VehicleUpdateView(LoginRequiredMixin, CanManageVehiclesMixin, UpdateView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        return Vehicle.objects.filter(is_deleted=False)
+        return vehicles_queryset_for_user(self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['fleet_user'] = self.request.user
+        return kwargs
 
     def get_success_url(self):
         return reverse_lazy('vehicles:vehicle_detail', kwargs={'pk': self.object.pk})
@@ -183,7 +193,7 @@ class VehicleDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteView):
     success_url = reverse_lazy('vehicles:vehicle_list')
 
     def get_queryset(self):
-        return Vehicle.objects.filter(is_deleted=False)
+        return vehicles_queryset_for_user(self.request.user)
 
     def form_valid(self, form):
         log_audit(self.request, 'delete', 'Vehicle', self.object.pk, f'Vehicle {self.object.license_plate} deleted')
@@ -200,11 +210,7 @@ class VehicleHistoryView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        user = self.request.user
-        queryset = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            queryset = queryset.filter(assigned_driver=user)
-        return queryset
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -218,10 +224,7 @@ class VehiclesBulkCsvView(LoginRequiredMixin, CanManageVehiclesMixin, View):
     """FR16: Bulk export vehicles as CSV."""
 
     def get(self, request):
-        user = request.user
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            qs = qs.filter(assigned_driver=user)
+        qs = vehicles_queryset_for_user(request.user)
         qs = qs.select_related('vehicle_type', 'assigned_driver').order_by('license_plate')
         buffer = io.StringIO()
         writer = csv.writer(buffer)
@@ -252,9 +255,7 @@ class VehicleHistoryCsvView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         user = request.user
-        queryset = Vehicle.objects.filter(is_deleted=False)
-        if user.is_driver:
-            queryset = queryset.filter(assigned_driver=user)
+        queryset = vehicles_queryset_for_user(user)
         vehicle = get_object_or_404(queryset, pk=pk)
         tasks = vehicle.maintenance_tasks.filter(
             status='completed'
@@ -282,15 +283,22 @@ class VehicleHistoryCsvView(LoginRequiredMixin, View):
 
 # ============== Vehicle Type Views ==============
 
-class VehicleTypeListView(LoginRequiredMixin, AdminRequiredMixin, ListView):
+class VehicleTypeListView(LoginRequiredMixin, CanManageVehicleTypesMixin, ListView):
     """List vehicle types. Admin only."""
 
     model = VehicleType
     template_name = 'vehicles/vehicletype_list.html'
     context_object_name = 'vehicle_types'
 
+    def get_queryset(self):
+        qs = VehicleType.objects.all().order_by('name')
+        u = self.request.user
+        if not u.is_superuser:
+            qs = qs.filter(organization_id=u.organization_id)
+        return qs
 
-class VehicleTypeCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+
+class VehicleTypeCreateView(LoginRequiredMixin, CanManageVehicleTypesMixin, CreateView):
     """Create vehicle type. Admin only."""
 
     model = VehicleType
@@ -299,11 +307,19 @@ class VehicleTypeCreateView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     success_url = reverse_lazy('vehicles:vehicletype_list')
 
     def form_valid(self, form):
+        u = self.request.user
+        if u.is_superuser:
+            if not form.instance.organization_id:
+                from apps.users.models import Organization
+
+                form.instance.organization = Organization.objects.order_by('id').first()
+        else:
+            form.instance.organization_id = u.organization_id
         messages.success(self.request, _('Vehicle type created successfully.'))
         return super().form_valid(form)
 
 
-class VehicleTypeUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
+class VehicleTypeUpdateView(LoginRequiredMixin, CanManageVehicleTypesMixin, UpdateView):
     """Edit vehicle type. Admin only."""
 
     model = VehicleType
@@ -312,18 +328,32 @@ class VehicleTypeUpdateView(LoginRequiredMixin, AdminRequiredMixin, UpdateView):
     context_object_name = 'vehicle_type'
     success_url = reverse_lazy('vehicles:vehicletype_list')
 
+    def get_queryset(self):
+        qs = VehicleType.objects.all()
+        u = self.request.user
+        if not u.is_superuser:
+            qs = qs.filter(organization_id=u.organization_id)
+        return qs
+
     def form_valid(self, form):
         messages.success(self.request, _('Vehicle type updated successfully.'))
         return super().form_valid(form)
 
 
-class VehicleTypeDeleteView(LoginRequiredMixin, AdminRequiredMixin, DeleteView):
+class VehicleTypeDeleteView(LoginRequiredMixin, CanManageVehicleTypesMixin, DeleteView):
     """Delete vehicle type. Admin only. Fails if vehicles use this type."""
 
     model = VehicleType
     template_name = 'vehicles/vehicletype_confirm_delete.html'
     context_object_name = 'vehicle_type'
     success_url = reverse_lazy('vehicles:vehicletype_list')
+
+    def get_queryset(self):
+        qs = VehicleType.objects.all()
+        u = self.request.user
+        if not u.is_superuser:
+            qs = qs.filter(organization_id=u.organization_id)
+        return qs
 
     def form_valid(self, form):
         if self.object.vehicles.exists():
@@ -350,6 +380,9 @@ class ComplianceListView(LoginRequiredMixin, CanManageVehiclesMixin, ListView):
         from datetime import timedelta
         from django.utils import timezone
         qs = ComplianceRequirement.objects.select_related('vehicle').order_by('expiration_date')
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            qs = qs.filter(vehicle__organization_id=u.organization_id)
         req_type = self.request.GET.get('type')
         if req_type:
             qs = qs.filter(requirement_type=req_type)
@@ -380,6 +413,11 @@ class ComplianceCreateView(LoginRequiredMixin, CanManageVehiclesMixin, CreateVie
     template_name = 'vehicles/compliance_form.html'
     success_url = reverse_lazy('vehicles:compliance_list')
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['fleet_user'] = self.request.user
+        return kwargs
+
     def get_initial(self):
         initial = super().get_initial()
         vehicle_id = self.request.GET.get('vehicle')
@@ -401,6 +439,18 @@ class ComplianceUpdateView(LoginRequiredMixin, CanManageVehiclesMixin, UpdateVie
     context_object_name = 'compliance'
     success_url = reverse_lazy('vehicles:compliance_list')
 
+    def get_queryset(self):
+        qs = ComplianceRequirement.objects.select_related('vehicle')
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            qs = qs.filter(vehicle__organization_id=u.organization_id)
+        return qs
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['fleet_user'] = self.request.user
+        return kwargs
+
     def form_valid(self, form):
         messages.success(self.request, _('Compliance requirement updated.'))
         return super().form_valid(form)
@@ -413,6 +463,13 @@ class ComplianceDeleteView(LoginRequiredMixin, CanManageVehiclesMixin, DeleteVie
     template_name = 'vehicles/compliance_confirm_delete.html'
     context_object_name = 'compliance'
     success_url = reverse_lazy('vehicles:compliance_list')
+
+    def get_queryset(self):
+        qs = ComplianceRequirement.objects.select_related('vehicle')
+        u = self.request.user
+        if u.organization_id and not u.is_superuser:
+            qs = qs.filter(vehicle__organization_id=u.organization_id)
+        return qs
 
     def form_valid(self, form):
         messages.success(self.request, _('Compliance requirement removed.'))
@@ -427,10 +484,7 @@ class SensorDashboardView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if self.request.user.is_driver:
-            qs = qs.filter(assigned_driver=self.request.user)
-        return qs
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         from django.utils import timezone
@@ -462,6 +516,11 @@ class SensorManualEntryView(LoginRequiredMixin, CanManageVehiclesMixin, CreateVi
     form_class = SensorReadingForm
     template_name = 'vehicles/sensor_form.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['fleet_user'] = self.request.user
+        return kwargs
+
     def get_initial(self):
         initial = super().get_initial()
         initial['vehicle'] = self.kwargs.get('pk')
@@ -479,13 +538,13 @@ class SensorManualEntryView(LoginRequiredMixin, CanManageVehiclesMixin, CreateVi
 
 class SensorCSVUploadView(LoginRequiredMixin, CanManageVehiclesMixin, View):
     def get(self, request, pk):
-        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
-        form = SensorCSVUploadForm(initial={'vehicle': vehicle.pk})
+        vehicle = get_object_or_404(vehicles_queryset_for_user(request.user), pk=pk)
+        form = SensorCSVUploadForm(initial={'vehicle': vehicle.pk}, user=request.user)
         return self._render(request, form, vehicle)
 
     def post(self, request, pk):
-        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
-        form = SensorCSVUploadForm(request.POST, request.FILES)
+        vehicle = get_object_or_404(vehicles_queryset_for_user(request.user), pk=pk)
+        form = SensorCSVUploadForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             csv_file = form.cleaned_data['csv_file']
             decoded = csv_file.read().decode('utf-8')
@@ -516,7 +575,7 @@ class SensorCSVUploadView(LoginRequiredMixin, CanManageVehiclesMixin, View):
 
 class SensorExportCsvView(LoginRequiredMixin, View):
     def get(self, request, pk):
-        vehicle = get_object_or_404(Vehicle.objects.filter(is_deleted=False), pk=pk)
+        vehicle = get_object_or_404(vehicles_queryset_for_user(request.user), pk=pk)
         readings = vehicle.sensor_readings.order_by('timestamp')
         buffer = io.StringIO()
         writer = csv.writer(buffer)
@@ -536,10 +595,7 @@ class GPSMapView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if self.request.user.is_driver:
-            qs = qs.filter(assigned_driver=self.request.user)
-        return qs
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         from django.utils import timezone
@@ -593,10 +649,7 @@ class DrivingAnalysisView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if self.request.user.is_driver:
-            qs = qs.filter(assigned_driver=self.request.user)
-        return qs
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -622,10 +675,7 @@ class MileageReportView(LoginRequiredMixin, DetailView):
     context_object_name = 'vehicle'
 
     def get_queryset(self):
-        qs = Vehicle.objects.filter(is_deleted=False)
-        if self.request.user.is_driver:
-            qs = qs.filter(assigned_driver=self.request.user)
-        return qs
+        return vehicles_queryset_for_user(self.request.user)
 
     def get_context_data(self, **kwargs):
         import json

@@ -1,7 +1,7 @@
 """
 Create or update a user for E2E tests (Playwright).
 Run: python manage.py create_e2e_user
-Uses email admin@e2e.local and password E2ePass123! (administrator role).
+Uses email admin@e2e.local and password E2ePass123! (superuser for platform access).
 """
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
@@ -18,8 +18,13 @@ class Command(BaseCommand):
         user, created = User.objects.update_or_create(
             email=E2E_EMAIL,
             defaults={
+                'first_name': 'E2E',
+                'last_name': 'Admin',
                 'role': User.Role.ADMINISTRATOR,
                 'is_active': True,
+                'is_staff': True,
+                'is_superuser': True,
+                'organization': None,
             },
         )
         user.set_password(E2E_PASSWORD)
